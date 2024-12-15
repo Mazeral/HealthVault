@@ -1,0 +1,17 @@
+{
+  "name": "healthvault",
+  "version": "1.0.0",
+  "description": "HealthVault is a comprehensive Electronic Health Records (EHRs) system designed to streamline healthcare operations, improve patient care, and enhance the overall efficiency of healthcare providers. ",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "author": "Mohammad Omar Siddiq, Joshua Emmanuela and Mac Millian Zungene",
+  "license": "MIT",
+  "devDependencies": {
+    "prisma": "^6.0.1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
