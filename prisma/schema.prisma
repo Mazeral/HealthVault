@@ -1,14 +1,73 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String   // Encrypted password
+  role        Role
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  patients    Patient[] // Relationship to patients (if required)
+}
+
+model Patient {
+  id            Int             @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  phone         String?         @unique
+  email         String?         @unique
+  address       String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  medicalRecords MedicalRecord[]
+  prescriptions Prescription[]
+  labResults    LabResult[]
+}
+
+model MedicalRecord {
+  id          Int      @id @default(autoincrement())
+  patientId   Int
+  diagnosis   String
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  patient     Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Prescription {
+  id          Int      @id @default(autoincrement())
+  patientId   Int
+  medication  String
+  dosage      String
+  instructions String?
+  prescribedAt DateTime @default(now())
+
+  patient     Patient  @relation(fields: [patientId], references: [id])
+}
+
+model LabResult {
+  id          Int      @id @default(autoincrement())
+  patientId   Int
+  testName    String
+  result      String
+  notes       String?
+  performedAt DateTime
+  createdAt   DateTime @default(now())
+
+  patient     Patient  @relation(fields: [patientId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  NURSE
 }
