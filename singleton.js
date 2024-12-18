@@ -1,10 +1,10 @@
 import { mockDeep, mockReset } from "jest-mock-extended";
 
-import prisma from "./utils/prisma";
+import { prisma }  from './utils/prisma'
 
-jest.mock("./client", () => ({
-	__es6: true,
-  prisma: mockDeep()
+jest.mock('./utils/prisma', () => ({
+  prisma: mockDeep(),
+  __es6: true
 }))
 
 beforeEach(() => {
@@ -13,4 +13,4 @@ beforeEach(() => {
 
 const prismaMock = prisma
 
-export default prismaMock;
+export default prismaMock

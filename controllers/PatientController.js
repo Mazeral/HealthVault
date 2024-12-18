@@ -56,7 +56,7 @@ class PatientController {
 
 	// Updates a patient by id
 	static async updatePatient(req, res) {
-		const id = req.params.id ? req.params.id : null;
+		const id = req.params.id || null;
 
 		try {
 			if (!id) throw Error('No id provided');
@@ -76,14 +76,15 @@ class PatientController {
 				'email',
 				'address',
 			];
+
 			const data = Object.fromEntries(
-				Object.entries(req.body).filter(([key]) =>
-					allowedFields.includes(key),
-				),
+			  Object.entries(req.body)
+				.filter(([key, value]) => allowedFields.includes(key) && value !== undefined),
 			);
 
-			data.dateOfBirth = new Date(data.dateOfBirth);
-			const result = await prisma.yourModel.updateMany({
+			if (data.dateOfBirth)
+				data.dateOfBirth = new Date(data.dateOfBirth);
+			const result = await prisma.patient.updateMany({
 				where: {
 					id: id,
 				},

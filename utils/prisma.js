@@ -4,13 +4,6 @@ const prisma = new PrismaClient({
 	errorFormat: 'pretty',
 });
 
-prisma.$on('beforeExit', async () => {
-	console.log('Exiting prisma...');
-	await prisma.message.create({
-		data: {
-			message: 'Shutting down server',
-		},
-	});
-});
+prisma.$connect().then(() => {console.log("Prisma has started working")}).catch(((error) => console.log(`${error.message}`)))
 
 export default prisma;
