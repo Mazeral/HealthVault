@@ -78,12 +78,13 @@ class PatientController {
 			];
 
 			const data = Object.fromEntries(
-			  Object.entries(req.body)
-				.filter(([key, value]) => allowedFields.includes(key) && value !== undefined),
+				Object.entries(req.body).filter(
+					([key, value]) =>
+						allowedFields.includes(key) && value !== undefined,
+				),
 			);
 
-			if (data.dateOfBirth)
-				data.dateOfBirth = new Date(data.dateOfBirth);
+			if (data.dateOfBirth) data.dateOfBirth = new Date(data.dateOfBirth);
 			const result = await prisma.patient.updateMany({
 				where: {
 					id: id,

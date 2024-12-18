@@ -4,6 +4,11 @@ const prisma = new PrismaClient({
 	errorFormat: 'pretty',
 });
 
-prisma.$connect().then(() => {console.log("Prisma has started working")}).catch(((error) => console.log(`${error.message}`)))
+prisma
+	.$connect()
+	.then(() => {
+		console.log('Prisma has started working');
+	})
+	.catch((error) => console.log(`${error.message}`));
 
 export default prisma;
