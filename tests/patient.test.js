@@ -96,4 +96,23 @@ describe('PatientController.updatePatient', () => {
 		expect(res.status).toHaveBeenCalledWith(500);
 		expect(res.json).toHaveBeenCalledWith({ error: 'Unexpected error' });
 	});
+
+	describe('Testing patientGet errors', () => {
+		it('Should return error with a bad date of birth', async () => {
+			const req = mockReq();
+			req.body.id = 1;
+			req.body.firstName = 'Joe';
+			req.dateOfBirth = 'Bad date';
+			const res = mockRes();
+			prisma.patient.findMany.mockRejectedValue(
+				new Error('Bad date of birth'),
+			);
+
+			await PatientController.getPatients(req, res);
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({
+				error: 'Bad date of birth',
+			});
+		});
+	});
 });

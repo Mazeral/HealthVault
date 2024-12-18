@@ -100,6 +100,40 @@ class PatientController {
 			else res.status(500).json({ error: error.message });
 		}
 	}
+
+	// Search for a patient according to the request
+	static async getPatients(req, res) {
+		try {
+			const allowedFields = [
+				'firstName',
+				'lastName',
+				'dateOfBirth',
+				'phone',
+				'email',
+				'address',
+			];
+
+			const data = Object.fromEntries(
+				Object.entries(req.body).filter(
+					([key, value]) =>
+						allowedFields.includes(key) && value !== undefined,
+				),
+			);
+			data.dateOfBirth = new Date(data.dateOfBirth);
+			if (!data.dateOfBirth) throw Error('Bad date of birth');
+			const patients = await prisma.patient.findMany({
+				where: {
+					data,
+				},
+			});
+			// If no aptients, no error it's doing it's job
+			res.status(200).json({ paitents: patients });
+		} catch (error) {
+			if (error.message === 'Bad date of birth')
+				res.status(400).json({ error: error.message });
+			else res.status(500).json({ error: error.message });
+		}
+	}
 }
 
 export default PatientController;

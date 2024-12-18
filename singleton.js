@@ -1,3 +1,4 @@
+// Creating a prismaMock mock for tests
 import { mockDeep, mockReset } from 'jest-mock-extended';
 
 import { prisma } from './utils/prisma';

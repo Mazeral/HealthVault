@@ -9,5 +9,8 @@ router.post('/patients', PatientController.newPatient);
 // Gets a patient by id
 router.get('/patients/:id', PatientController.getPatient);
 
-// Updates a patient by it
+// Get a list of patients by data
+router.get('/patients', PatientController.getPatients);
+
+// Updates a patient by id
 router.put('/patients/:id', PatientController.updatePatient);
