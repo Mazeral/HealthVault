@@ -4,9 +4,9 @@ class MedRecordController {
 	static async updateMedRecord(req, res) {
 		// Updates a medical record
 		try {
-			const id = req.params.id || null;
+			const patientId = req.params.id || null;
 
-			if (!id) throw Error('No id provided');
+			if (!patientId) throw Error('No id provided');
 
 			const patient = await prisma.patient.findUnique({
 				where: {
@@ -15,7 +15,7 @@ class MedRecordController {
 			});
 			if (!patient) throw Error('No patient found');
 
-			const allowedFields = ['diganosis', 'notes'];
+			const allowedFields = ['diganosis', 'notes', 'patientId'];
 
 			// Creates an object with key names and values
 			const data = Object.fromEntries(
@@ -31,6 +31,17 @@ class MedRecordController {
 				},
 				data: data,
 			});
+			if (data.patientId) {
+				await prisma.medicalrecord.update({
+					where: {
+						id: id,
+					},
+					// Links the id of the record to the id of the patientId
+					connect: {
+						id: data.patientId,
+					},
+				});
+			}
 			res.status(200).json({ updated: updates });
 		} catch (error) {
 			if (error.message === 'No id provided')

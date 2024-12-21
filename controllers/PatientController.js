@@ -139,25 +139,30 @@ class PatientController {
 		// Adds a medical record for the patient.
 		// Prisma handles the relation linking automatically
 		try {
-			const id = req.params.id || null;
+			const patientId = req.params.id || null;
 			const diagnosis = req.body.diagnosis || null;
 			const dateDiagnosed = req.body.dateDiagnosed || null;
 			const notes = req.body.notes || null;
 
-			if (!id) throw Error('No id provided');
+			if (!patientId) throw Error('No id provided');
 			const patient = await prisma.patient.findUnique({
 				where: {
-					id: id,
+					id: patientId,
 				},
 			});
 			if (!patient) throw Error('No patient found');
 
 			const record = await prisma.medicalrecord.create({
 				data: {
-					patientId: id, // links to the patient id
+					patientId: patientId, // links to the patient id
 					notes: notes,
 					diagnosis: diagnosis,
 					dateDiagnosed: new Date(dateDiagnosed),
+				},
+				patient: {
+					connect: {
+						id: patientId,
+					},
 				},
 			});
 			res.status(200).json({ updated: record });
