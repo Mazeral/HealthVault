@@ -1,6 +1,38 @@
 import { prisma } from '../utils/prisma';
 
 class MedRecordController {
+	// Add a medical record for a patient
+	static async addRecord(req, res){
+		try {
+			const patientId = req.body.patientId || null;
+			const medication = req.body.medication || null;
+			const dosage = req.body.dosage || null;
+			const instructions = req.body.instructions || null;
+
+			if(!patientId || !dosage || !medication) throw Error("Missing fields")
+			const medRecord = await prisma.medicalrecord.create({
+				data:{
+					patientId: patientId,
+					medication: medication,
+					dosage: dosage,
+					instructions: instructions,
+					patient:{
+						connect:{
+							id: patientId
+						}
+					}
+				}
+			})
+			res.status(200).json({"success": medRecord})
+			
+		} catch (error) {
+			if(error.message === "Missing fields")
+				res.status(400).json({"error": error.message})
+			else
+				res.status(500).json({"error": error.message})
+		}
+	}
+
 	static async updateMedRecord(req, res) {
 		// Updates a medical record
 		try {

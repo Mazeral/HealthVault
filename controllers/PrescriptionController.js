@@ -3,14 +3,12 @@ import prisma from '../utils/prisma';
 class PrescriptionController {
 	// Create a prescription for a patient
 	static async newPrescription(req, res) {
-		const prescId = req.params.id || null;
 		const patientId = req.body.patientId || null;
 		const medication = req.body.medication || null;
 		const dosage = req.body.dosage || null;
 		const instructions = req.body.instructions || null;
 
 		try {
-			if (!prescId) throw Error('No id provided');
 			if (!patientId) throw Error('No patientId provided');
 			if (!medication) throw Error('No medication provided');
 			if (!dosage) throw Error('No dosage provided');
@@ -21,9 +19,11 @@ class PrescriptionController {
 					medication: medication,
 					dosage: dosage,
 					instructions: instructions,
-					connect: {
-						id: patientId,
-					},
+					patient:{
+						connect: {
+							id: patientId,
+						},
+					}
 				},
 			});
 			res.status(200).json({ prescription: prescription });

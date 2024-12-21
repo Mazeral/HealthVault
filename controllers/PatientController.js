@@ -174,6 +174,29 @@ class PatientController {
 			else res.status(500).json({ error: error.message });
 		}
 	}
+
+	static async getLabResults(req, res){
+		try {
+			const patientId = req.params.id || null;
+
+			if (!patientId) throw Error('No id provided');
+			const patient = await prisma.patient.findUnique({
+				where: {
+					id: patientId,
+				},
+			});
+			if (!patient) throw Error('No patient found');
+
+			const labResults = await prisma.labresult.findMany();
+			res.status(200).json({ "Lab Results": labResults });
+		} catch (error) {
+			if (error.message === 'No id provided')
+				res.status(400).json({ error: error.message });
+			else if (error.message === 'No patient found')
+				res.status(404).json({ error: error.message });
+			else res.status(500).json({ error: error.message });
+		}
+	}
 }
 
 export default PatientController;

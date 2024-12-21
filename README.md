@@ -67,3 +67,28 @@ router.put('/prescription/:id', PrescriptionController.updatePrescription);
 ```js
 router.delete('/prescription/:id', PrescriptionController.deletePrescription);
 ```
+
+**Create a lab result**
+```js
+router.post('/lab-results/:id', LabController.newLabResult);
+```
+
+**Get a lab result**
+```js
+router.get('/lab-result/:id', LabController.getLabResult);
+```
+
+**Get all lab results**
+```js
+router.get('/lab-results', LabController.allLabResults);
+```
+
+**Update a lab result**
+```js
+router.put('/lab-results/:id', LabController.updateLabResult);
+```
+
+**Delete a lab result**
+```js
+router.delete('/lab-results/:id', LabController.deleteLabResult);
+```
