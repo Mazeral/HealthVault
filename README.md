@@ -42,3 +42,28 @@ router.get('/patients/:id/medical-record', MedRecordController.getMedRecord);
 ```js
 router.delete('/medical-record/:id', MedRecordController.deleteRecord);
 ```
+
+**Create a prescription**
+```js
+router.post('/prescription/:id', PrescriptionController.newPrescription);
+```
+
+**Get a prescription**
+```js
+router.get('/prescription/:id', PrescriptionController.getPrescription);
+```
+
+**Get all prescriptions**
+```js
+router.get('/prescription', PrescriptionController.allPrescriptions);
+```
+
+**Update a prescription**
+```js
+router.put('/prescription/:id', PrescriptionController.updatePrescription);
+```
+
+**Delete a prescription**
+```js
+router.delete('/prescription/:id', PrescriptionController.deletePrescription);
+```

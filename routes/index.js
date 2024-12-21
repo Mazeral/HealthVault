@@ -1,6 +1,7 @@
 import express from 'express';
 import PatientController from '../controllers/PatientController';
 import MedRecordController from '../controllers/MedRecordController';
+import PrescriptionController from '../controllers/PrescriptionController';
 
 const router = express.Router();
 
@@ -27,5 +28,20 @@ router.get('/patients/:id/medical-record', MedRecordController.getMedRecord);
 
 // Delete a record
 router.delete('/medical-record/:id', MedRecordController.deleteRecord);
+
+// Create a prescription
+router.post('/prescription/:id', PrescriptionController.newPrescription);
+
+// Get a prescription
+router.get('/prescription/:id', PrescriptionController.getPrescription);
+
+// Get all prescriptions
+router.get('/prescription', PrescriptionController.allPrescriptions);
+
+// Update a prescription
+router.put('/prescription/:id', PrescriptionController.updatePrescription);
+
+// Delete a prescription
+router.delete('/prescription/:id', PrescriptionController.deletePrescription);
 
 export default router;

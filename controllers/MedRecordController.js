@@ -38,7 +38,9 @@ class MedRecordController {
 					},
 					// Links the id of the record to the id of the patientId
 					connect: {
-						id: data.patientId,
+						patient: {
+							id: data.patientId,
+						},
 					},
 				});
 			}
