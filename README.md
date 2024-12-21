@@ -2,6 +2,7 @@
 HealthVault is a comprehensive Electronic Health Records (EHRs) system designed to streamline healthcare operations, improve patient care, and enhance the overall efficiency of healthcare providers. 
 
 # Routes:
+
 **Creates a new patient without any health records**
 ```js
 router.post('/patients', PatientController.newPatient);
@@ -20,4 +21,24 @@ router.get('/patients', PatientController.getPatients);
 **Updates a patient by id**
 ```js
 router.put('/patients/:id', PatientController.updatePatient);
+```
+
+**Add a medical history for the patient**
+```js
+router.post('/patients/:id/medical-record', PatientController.addRecord);
+```
+
+**Update the medical history**
+```js
+router.put('/medical-record/:id', MedRecordController.updateMedRecord);
+```
+
+**Get the medical history**
+```js
+router.get('/patients/:id/medical-record', MedRecordController.getMedRecord);
+```
+
+**Delete a record**
+```js
+router.delete('/medical-record/:id', MedRecordController.deleteRecord);
 ```
