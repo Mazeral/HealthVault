@@ -3,12 +3,12 @@ import { prisma } from '../utils/prisma';
 class PatientController {
 	// creates a patient without health records
 	static async newPatient(req, res) {
-		const firstName = req.body.firstName ? req.body.firstName : null;
-		const lastName = req.body.lastName ? req.body.lastName : null;
-		const dateOfBirth = req.body.dateOfBirth ? req.body.dateOfBirth : null;
-		const phone = req.body.phone ? req.body.phone : null;
-		const email = req.body.email ? req.body.email : null;
-		const address = req.body.phone ? req.body.address : null;
+		const firstName = req.body.firstName || null;
+		const lastName = req.body.lastName || null;
+		const dateOfBirth = req.body.dateOfBirth || null;
+		const phone = req.body.phone || null;
+		const email = req.body.email || null;
+		const address = req.body.phone || null;
 		try {
 			if (!firstName || !lastName) {
 				throw Error(`Missing name field`);
@@ -131,6 +131,69 @@ class PatientController {
 		} catch (error) {
 			if (error.message === 'Bad date of birth')
 				res.status(400).json({ error: error.message });
+			else res.status(500).json({ error: error.message });
+		}
+	}
+
+	static async addRecord(req, res) {
+		// Adds a medical record for the patient.
+		// Prisma handles the relation linking automatically
+		try {
+			const patientId = req.params.id || null;
+			const diagnosis = req.body.diagnosis || null;
+			const dateDiagnosed = req.body.dateDiagnosed || null;
+			const notes = req.body.notes || null;
+
+			if (!patientId) throw Error('No id provided');
+			const patient = await prisma.patient.findUnique({
+				where: {
+					id: patientId,
+				},
+			});
+			if (!patient) throw Error('No patient found');
+
+			const record = await prisma.medicalrecord.create({
+				data: {
+					patientId: patientId, // links to the patient id
+					notes: notes,
+					diagnosis: diagnosis,
+					dateDiagnosed: new Date(dateDiagnosed),
+				},
+				patient: {
+					connect: {
+						id: patientId,
+					},
+				},
+			});
+			res.status(200).json({ updated: record });
+		} catch (error) {
+			if (error.message === 'No id provided')
+				res.status(400).json({ error: error.message });
+			else if (error.message === 'No patient found')
+				res.status(404).json({ error: error.message });
+			else res.status(500).json({ error: error.message });
+		}
+	}
+
+	static async getLabResults(req, res){
+		try {
+			const patientId = req.params.id || null;
+
+			if (!patientId) throw Error('No id provided');
+			const patient = await prisma.patient.findUnique({
+				where: {
+					id: patientId,
+				},
+			});
+			if (!patient) throw Error('No patient found');
+
+			const labResults = await prisma.labresult.findMany();
+			res.status(200).json({ "Lab Results": labResults });
+		} catch (error) {
+			if (error.message === 'No id provided')
+				res.status(400).json({ error: error.message });
+			else if (error.message === 'No patient found')
+				res.status(404).json({ error: error.message });
 			else res.status(500).json({ error: error.message });
 		}
 	}
