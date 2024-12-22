@@ -92,3 +92,33 @@ router.put('/lab-results/:id', LabController.updateLabResult);
 ```js
 router.delete('/lab-results/:id', LabController.deleteLabResult);
 ```
+
+**Get a user**
+```js
+router.get('/user/:id', UserController.getUser);
+```
+
+**Get all users**
+```js
+router.get('/users', UserController.allUsers);
+```
+
+**Create a user**
+```js
+router.post('/users', UserController.newUser)
+```
+
+**Update a user**
+```js
+router.put('/user/:id', UserController.updateUser);
+```
+
+**Add a paitent to te user**
+```js
+router.put('/user/:id', UserController.updateUser);
+```
+
+**Delete a user**
+```js
+router.delete('/user/:id', UserController.deleteUser);
+```

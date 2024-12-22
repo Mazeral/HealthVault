@@ -3,6 +3,7 @@ import PatientController from '../controllers/PatientController';
 import MedRecordController from '../controllers/MedRecordController';
 import PrescriptionController from '../controllers/PrescriptionController';
 import LabController from '../controllers/LabController';
+import UserController from '../controllers/UserController';
 
 const router = express.Router();
 
@@ -65,5 +66,23 @@ router.put('/lab-results/:id', LabController.updateLabResult);
 
 // Delete a lab result
 router.delete('/lab-results/:id', LabController.deleteLabResult);
+
+// Get a user
+router.get('/user/:id', UserController.getUser);
+
+// Get all users
+router.get('/users', UserController.allUsers);
+
+// Create a user
+router.post('/users', UserController.newUser)
+
+// Update a user
+router.put('/user/:id', UserController.updateUser);
+
+// Add a paitent to te user
+router.put('/user/:id', UserController.updateUser);
+
+// Delete a user
+router.delete('/user/:id', UserController.deleteUser);
 
 export default router;

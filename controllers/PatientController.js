@@ -3,12 +3,12 @@ import { prisma } from '../utils/prisma';
 class PatientController {
 	// creates a patient without health records
 	static async newPatient(req, res) {
-		const firstName = req.body.firstName ? req.body.firstName : null;
-		const lastName = req.body.lastName ? req.body.lastName : null;
-		const dateOfBirth = req.body.dateOfBirth ? req.body.dateOfBirth : null;
-		const phone = req.body.phone ? req.body.phone : null;
-		const email = req.body.email ? req.body.email : null;
-		const address = req.body.phone ? req.body.address : null;
+		const firstName = req.body.firstName || null;
+		const lastName = req.body.lastName || null;
+		const dateOfBirth = req.body.dateOfBirth || null;
+		const phone = req.body.phone || null;
+		const email = req.body.email || null;
+		const address = req.body.phone || null;
 		try {
 			if (!firstName || !lastName) {
 				throw Error(`Missing name field`);
