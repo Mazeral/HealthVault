@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
+import createObject from "../utils/utilFunctions";
 
 class PatientController {
   // creates a patient without health records
@@ -69,20 +70,14 @@ class PatientController {
       });
       if (!patient) throw Error("No patient found");
 
-      const allowedFields = [
-        "firstName",
-        "lastName",
-        "dateOfBirth",
-        "phone",
-        "email",
-        "address",
-      ];
-
-      const data = Object.fromEntries(
-        Object.entries(req.body).filter(
-          ([key, value]) => allowedFields.includes(key) && value !== undefined,
-        ),
-      );
+      const data = createObject({
+        firstName: String(req.body.firstName),
+        lastName: String(req.body.lastName),
+        dateOfBirth: Date.parse(String(req.body.dateOfBirth)),
+        phone: String(req.body.phone),
+        email: String(req.body.email),
+        address: String(req.body.address),
+      });
 
       if (data.dateOfBirth)
         data.dateOfBirth = Date.parse(String(data.dateOfBirth));
@@ -105,20 +100,14 @@ class PatientController {
   // Search for a patient according to the request
   static async getPatients(req: Request, res: Response) {
     try {
-      const allowedFields = [
-        "firstName",
-        "lastName",
-        "dateOfBirth",
-        "phone",
-        "email",
-        "address",
-      ];
-
-      const data = Object.fromEntries(
-        Object.entries(req.body).filter(
-          ([key, value]) => allowedFields.includes(key) && value !== undefined,
-        ),
-      );
+      const data = createObject({
+        firstName: String(req.body.firstName),
+        lastName: String(req.body.lastName),
+        dateOfBirth: Date.parse(String(req.body.dateOfBirth)),
+        phone: String(req.body.phone),
+        email: String(req.body.email),
+        address: String(req.body.address),
+      });
       data.dateOfBirth = Date.parse(String(data.dateOfBirth));
       if (!data.dateOfBirth) throw Error("Bad date of birth");
       const patients = await prisma.patient.findMany({

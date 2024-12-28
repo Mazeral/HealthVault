@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import { LabResult } from "@prisma/client";
+import createObject from "../utils/utilFunctions";
 class LabController {
   // Create a lab result for a patient
   static async newLabResult(req: Request, res: Response) {
@@ -62,7 +63,7 @@ class LabController {
   }
 
   // gets all the lab results from the database
-  static async allLabResults(req: null, res: Response) {
+  static async allLabResults(req: Request, res: Response) {
     try {
       const labResults: LabResult[] = await prisma.labResult.findMany();
       res.status(200).json({ "Lab results": labResults });
@@ -77,22 +78,14 @@ class LabController {
       const labResultId = Number(req.params.id);
 
       if (!labResultId) throw Error("Lab test ID not provided");
-      const allowedFields = [
-        "patientId",
-        "testName",
-        "result",
-        "notes",
-        "performedAt",
-      ];
 
-      const data = Object.fromEntries(
-        Object.entries(req.body).filter(
-          ([key, value]) => allowedFields.includes(key) && value !== undefined,
-        ),
-      );
-
-      data.labResultId = Number(data.labResultId);
-      data.patientId = Number(data.patientId);
+      const data = createObject({
+        patientId: Number(req.body.patientId),
+        testName: String(req.body.testName),
+        result: String(req.body.result),
+        notes: String(req.body.notes),
+        performedAt: Date.parse(String(req.body.performedAt)),
+      });
 
       const updates = await prisma.labResult.updateMany({
         where: {

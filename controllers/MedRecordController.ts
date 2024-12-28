@@ -45,14 +45,12 @@ class MedRecordController {
       });
       if (!patient) throw Error("No patient found");
 
-      const allowedFields = ["diganosis", "notes", "patientId"];
-
       // Creates an object with key names and values
-      const data = Object.fromEntries(
-        Object.entries(req.body).filter(
-          ([key, value]) => allowedFields.includes(key) && value !== undefined,
-        ),
-      );
+      const data = createObject({
+        diagnosis: req.body.diagnosis,
+        notes: req.body.notes,
+        patientId: req.body.patientId,
+      });
 
       const updates = await prisma.medicalRecord.updateMany({
         where: {

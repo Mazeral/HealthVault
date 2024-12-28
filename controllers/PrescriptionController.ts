@@ -1,5 +1,6 @@
 import prisma from "../utils/prisma";
 import { Request, Response } from "express";
+import createObject from "../utils/utilFunctions";
 
 class PrescriptionController {
   // Create a prescription for a patient
@@ -77,18 +78,13 @@ class PrescriptionController {
       const prescId = req.params.id;
 
       if (!prescId) throw Error("Prescription ID not provided");
-      const allowedFields = [
-        "patientId",
-        "medication",
-        "dosage",
-        "instructions",
-      ];
 
-      const data = Object.fromEntries(
-        Object.entries(req.body).filter(
-          ([key, value]) => allowedFields.includes(key) && value !== undefined,
-        ),
-      );
+      const data = createObject({
+        patientId: Number(req.body.patientId),
+        medication: String(req.body.medication),
+        dosage: String(req.body.dosage),
+        instructions: String(req.body.instructions),
+      });
 
       const updates = await prisma.prescription.updateMany({
         where: {

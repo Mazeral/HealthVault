@@ -1,6 +1,7 @@
 import prisma from "../utils/prisma";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
+import createObject from "../utils/utilFunctions";
 class UserController {
   // encrypts the password
   private async hashPassword(pwd: string) {
@@ -87,13 +88,12 @@ class UserController {
       });
       if (!user) throw Error("No user found");
 
-      const allowedFields = ["email", "password", "role", "patients"];
-
-      const data = Object.fromEntries(
-        Object.entries(req.body).filter(
-          ([key, value]) => allowedFields.includes(key) && value !== undefined,
-        ),
-      );
+      const data = createObject({
+        email: String(req.body.email),
+        password: String(req.body.password),
+        role: String(req.body.role),
+        patients: req.body.patients,
+      });
 
       const result = await prisma.user.updateMany({
         where: {
