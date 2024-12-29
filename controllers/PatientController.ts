@@ -27,9 +27,11 @@ class PatientController {
       });
       res.status(200).json({ "Patient data:": result });
     } catch (error) {
-      if (error.message === "Missing name field")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "Missing name field")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -48,11 +50,13 @@ class PatientController {
       if (!patient) throw Error("No patient found");
       res.status(200).json({ patient: patient });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No patient found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -73,14 +77,13 @@ class PatientController {
       const data = createObject({
         firstName: String(req.body.firstName),
         lastName: String(req.body.lastName),
-        dateOfBirth: Date.parse(String(req.body.dateOfBirth)),
+        dateOfBirth: new Date(Date.parse(req.body.dateOfBirth)),
         phone: String(req.body.phone),
         email: String(req.body.email),
         address: String(req.body.address),
+		userId: Number(req.body.userId)
       });
 
-      if (data.dateOfBirth)
-        data.dateOfBirth = Date.parse(String(data.dateOfBirth));
       const result = await prisma.patient.updateMany({
         where: {
           id: id,
@@ -89,11 +92,13 @@ class PatientController {
       });
       res.status(200).json({ updated: result });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No patient found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -123,9 +128,11 @@ class PatientController {
       // If no aptients, no error it's doing it's job
       res.status(200).json({ paitents: patients });
     } catch (error) {
-      if (error.message === "Bad date of birth")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "Bad date of birth")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -158,11 +165,13 @@ class PatientController {
       });
       res.status(200).json({ updated: record });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No patient found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -181,11 +190,13 @@ class PatientController {
       const labResults = await prisma.labResult.findMany();
       res.status(200).json({ "Lab Results": labResults });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No patient found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 }

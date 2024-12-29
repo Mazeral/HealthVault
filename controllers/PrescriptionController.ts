@@ -30,14 +30,16 @@ class PrescriptionController {
       });
       res.status(200).json({ prescription: prescription });
     } catch (error) {
-      if (
-        error.message === "No id provided" ||
-        error.message === "No patientId provided" ||
-        error.message === "No medication provided" ||
-        error.message === "No dosage provided"
-      )
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (
+          error.message === "No id provided" ||
+          error.message === "No patientId provided" ||
+          error.message === "No medication provided" ||
+          error.message === "No dosage provided"
+        )
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -56,9 +58,11 @@ class PrescriptionController {
 
       res.status(200).json({ prescription: prescription });
     } catch (error) {
-      if (error.message === "No prescription ID provided")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No prescription ID provided")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -68,7 +72,8 @@ class PrescriptionController {
       const prescriptions = await prisma.prescription.findMany();
       res.status(200).json({ prescriptions: prescriptions });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      if (error instanceof Error)
+        res.status(500).json({ error: error.message });
     }
   }
 
@@ -107,9 +112,11 @@ class PrescriptionController {
         });
       res.status(200).json({ updated: updates });
     } catch (error) {
-      if (error.message === "Prescription ID not provided")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "Prescription ID not provided")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -125,7 +132,8 @@ class PrescriptionController {
       });
       res.status(200).json({ result: result });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      if (error instanceof Error)
+        res.status(500).json({ error: error.message });
     }
   }
 }

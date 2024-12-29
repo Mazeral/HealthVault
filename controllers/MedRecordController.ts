@@ -25,9 +25,11 @@ class MedRecordController {
       });
       res.status(200).json({ success: medRecord });
     } catch (error) {
-      if (error.message === "Missing fields")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "Missing fields")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -75,11 +77,13 @@ class MedRecordController {
       }
       res.status(200).json({ updated: updates });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No patient found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -98,11 +102,13 @@ class MedRecordController {
       if (!medRecord) throw Error("Medical record not found");
       else res.status(200).json({ "Medical Record": medRecord });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "Medical record not found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "Medical record not found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -119,9 +125,11 @@ class MedRecordController {
       });
       res.status(200).json({ message: deleteRecord });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -140,15 +148,17 @@ class MedRecordController {
         where: data,
       })
       .catch((error) => {
-        res.status(500).json({ error: error.message });
+        if (error instanceof Error)
+          res.status(500).json({ error: error.message });
       });
     res.status(200).json({ "Lab Results": labResults });
   }
 
   static async allLabResults(req: Request, res: Response) {
-    const data = await prisma.labResult
-      .findMany()
-      .catch((error) => res.status(500).json({ error: error.message }));
+    const data = await prisma.labResult.findMany().catch((error) => {
+      if (error instanceof Error)
+        res.status(500).json({ error: error.message });
+    });
     res.status(200).json({ "Lab Results": data });
   }
 }

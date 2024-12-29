@@ -6,15 +6,15 @@ class UserController {
   // encrypts the password
   private async hashPassword(pwd: string) {
     try {
-      const salt = await bcrypt.genSalt(process.env.SALT);
+      const salt = await bcrypt.genSalt(Number(process.env.SALT));
       const hash = await bcrypt.hash(pwd, salt);
       return hash;
     } catch (error) {
-      throw error;
+      if (error instanceof Error) throw error;
     }
   }
   // creates a new user
-  static async newUser(req, res) {
+  static async newUser(req: Request, res: Response) {
     try {
       const email = req.body.email || null;
       let password = req.body.password || null;
@@ -31,17 +31,17 @@ class UserController {
           password: password,
           role: role,
           patients: {
-            connect: {
-              patients,
-            },
+            connect: patients.map((id: number) => ({ id })),
           },
         },
       });
       res.status(200).json({ "new user:": result });
     } catch (error) {
-      if (error.message === "Missing field")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "Missing field")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -60,11 +60,13 @@ class UserController {
       if (!user) throw Error("No user found");
       res.status(200).json({ user: user });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No user found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No user found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -103,11 +105,13 @@ class UserController {
       });
       res.status(200).json({ updated: result });
     } catch (error) {
-      if (error.message === "No id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No user found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No user found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -140,11 +144,13 @@ class UserController {
       });
       res.status(200).json({ updated: record });
     } catch (error) {
-      if (error.message === "No patient id provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "No user found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No patient id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No user found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -161,9 +167,11 @@ class UserController {
       });
       res.status(200).json({ result: result });
     } catch (error) {
-      if (error.message === "No user ID")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No user ID")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 }

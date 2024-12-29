@@ -30,14 +30,16 @@ class LabController {
       });
       res.status(200).json({ "Lab result": labResult });
     } catch (error) {
-      if (
-        error.message === "No test name provided" ||
-        error.message === "No patient ID provided" ||
-        error.message === "No result provided" ||
-        error.message === "No performed At provided"
-      )
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (
+          error.message === "No test name provided" ||
+          error.message === "No patient ID provided" ||
+          error.message === "No result provided" ||
+          error.message === "No performed At provided"
+        )
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -56,9 +58,11 @@ class LabController {
 
       res.status(200).json({ "Lab result": labResult });
     } catch (error) {
-      if (error.message === "No prescription ID provided")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No prescription ID provided")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -68,7 +72,8 @@ class LabController {
       const labResults: LabResult[] = await prisma.labResult.findMany();
       res.status(200).json({ "Lab results": labResults });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      if (error instanceof Error)
+        res.status(500).json({ error: error.message });
     }
   }
 
@@ -108,9 +113,11 @@ class LabController {
         });
       res.status(200).json({ updated: updates });
     } catch (error) {
-      if (error.message === "Lab test ID not provided")
-        res.status(400).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "Lab test ID not provided")
+          res.status(400).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -126,7 +133,8 @@ class LabController {
       });
       res.status(200).json({ result: result });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      if (error instanceof Error)
+        res.status(500).json({ error: error.message });
     }
   }
 }
