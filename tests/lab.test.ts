@@ -28,8 +28,8 @@ const clientData = {
   testName: "testName",
   result: "resultName",
   notes: "testNote",
-  performedAt: new Date(Date.parse("2000-1-1")),
-  createdAt: new Date(Date.parse("2000-1-1")),
+  performedAt: new Date(Date.parse("2000-1-1")).toISOString(),
+  createdAt: new Date(Date.parse("2000-1-1")).toISOString(),
 };
 
 const serverData = {
@@ -58,7 +58,7 @@ describe("LabController", () => {
           testName: clientData.testName,
           result: clientData.result,
           notes: clientData.notes,
-          performedAt: clientData.performedAt.toISOString(),
+          performedAt: clientData.performedAt,
           patient: {
             connect: { id: Number(clientData.patientId) },
           },
@@ -97,7 +97,7 @@ describe("LabController", () => {
     it("should fetch a lab result by id and return 200", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = clientData.id;
+      req.params = { id: clientData.id };
 
       prisma.labResult.findUnique.mockResolvedValue(serverData);
 
@@ -113,7 +113,7 @@ describe("LabController", () => {
     it("should return 400 if lab result ID is missing", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = ""; // Missing ID
+      req.params = { id: "" };
 
       await LabController.getLabResult(req as Request, res as Response);
 
@@ -126,7 +126,7 @@ describe("LabController", () => {
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = clientData.id;
+      req.params = { id: clientData.id };
 
       prisma.labResult.findUnique.mockRejectedValue(
         new Error("Unexpected error"),
@@ -172,7 +172,7 @@ describe("LabController", () => {
     it("should update a lab result and return 200", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = clientData.id;
+      req.params = { id: clientData.id };
       req.body = { testName: "updatedTestName", result: "updatedResult" };
 
       prisma.labResult.updateMany.mockResolvedValue({ count: 1 });
@@ -190,7 +190,7 @@ describe("LabController", () => {
     it("should return 400 if lab result ID is missing", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = ""; // Missing ID
+      req.params = { id: "" };
 
       await LabController.updateLabResult(req as Request, res as Response);
 
@@ -203,7 +203,7 @@ describe("LabController", () => {
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = clientData.id;
+      req.params = { id: clientData.id };
       req.body = { testName: "updatedTestName", result: "updatedResult" };
 
       prisma.labResult.updateMany.mockRejectedValue(
@@ -221,7 +221,7 @@ describe("LabController", () => {
     it("should delete a lab result and return 200", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = clientData.id;
+      req.params = { id: clientData.id };
 
       prisma.labResult.delete.mockResolvedValue(serverData);
 
@@ -237,7 +237,7 @@ describe("LabController", () => {
     it("should return 400 if lab result ID is missing", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = ""; // Missing ID
+      req.params = { id: "" };
 
       await LabController.deleteLabResult(req as Request, res as Response);
 
@@ -248,7 +248,7 @@ describe("LabController", () => {
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
       const res = mockRes();
-      req.params.id = clientData.id;
+      req.params = { id: clientData.id };
 
       prisma.labResult.delete.mockRejectedValue(new Error("Unexpected error"));
 

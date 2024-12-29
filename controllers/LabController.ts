@@ -46,20 +46,35 @@ class LabController {
   // Fetch a lab result by id
   static async getLabResult(req: Request, res: Response) {
     try {
-      const labResultId = Number(req.params.id);
+      const labResultId = req.params.id; // Get the raw string value
 
-      if (!labResultId) throw Error("No lab result ID provided");
+      // Check if the ID is an empty string or missing
+      if (!labResultId || labResultId.trim() === "") {
+        throw new Error("No lab result ID provided");
+      }
+
+      // Convert the ID to a number
+      const id = Number(labResultId);
+
+      // Check if the ID is a valid number
+      if (isNaN(id)) {
+        throw new Error("Invalid lab result ID");
+      }
 
       const labResult = await prisma.labResult.findUnique({
         where: {
-          id: labResultId,
+          id: id,
         },
       });
 
       res.status(200).json({ "Lab result": labResult });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No prescription ID provided")
+        if (
+          error.message === "No lab result ID provided" ||
+          error.message === "Invalid lab result ID" ||
+          error.message === "Lab result not found"
+        )
           res.status(400).json({ error: error.message });
         else res.status(500).json({ error: error.message });
       }
@@ -86,9 +101,9 @@ class LabController {
 
       const data = createObject({
         patientId: Number(req.body.patientId),
-        testName: String(req.body.testName),
-        result: String(req.body.result),
-        notes: String(req.body.notes),
+        testName: req.body.testName,
+        result: req.body.result,
+        notes: req.body.notes,
         performedAt: Date.parse(String(req.body.performedAt)),
       });
 
