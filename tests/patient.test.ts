@@ -53,42 +53,10 @@ describe("PatientController.updatePatient", () => {
     expect(res.json).toHaveBeenCalledWith({ error: "No patient found" });
   });
 
-it("should update patient with valid fields", async () => {
-  const req = mockReq();
-  req.params = { id: "1" };
-  req.body = {
-    firstName: "John",
-    lastName: "Doe",
-    phone: "123",
-    email: "test@email.com",
-    address: "42 street",
-    dateOfBirth: new Date("2000-01-01"), // Use a valid date format
-    userId: 1,
-  };
-
-  const res = mockRes();
-  prisma.patient.findUnique.mockResolvedValue({
-    id: 1,
-    firstName: "john",
-    lastName: "doe",
-    dateOfBirth: new Date(Date.now()),
-    phone: "321",
-    email: null,
-    address: null,
-    createdAt: new Date(Date.now()),
-    updatedAt: new Date(Date.now()),
-    userId: null,
-  });
-  prisma.patient.updateMany.mockResolvedValue({ count: 1 });
-
-  await PatientController.updatePatient(req as Request, res as Response);
-
-  expect(prisma.patient.findUnique).toHaveBeenCalledWith({
-    where: { id: 1 },
-  });
-  expect(prisma.patient.updateMany).toHaveBeenCalledWith({
-    where: { id: 1 },
-    data: {
+  it("should update patient with valid fields", async () => {
+    const req = mockReq();
+    req.params = { id: "1" };
+    req.body = {
       firstName: "John",
       lastName: "Doe",
       phone: "123",
@@ -96,11 +64,43 @@ it("should update patient with valid fields", async () => {
       address: "42 street",
       dateOfBirth: new Date("2000-01-01"), // Use a valid date format
       userId: 1,
-    },
+    };
+
+    const res = mockRes();
+    prisma.patient.findUnique.mockResolvedValue({
+      id: 1,
+      firstName: "john",
+      lastName: "doe",
+      dateOfBirth: new Date(Date.now()),
+      phone: "321",
+      email: null,
+      address: null,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+      userId: null,
+    });
+    prisma.patient.updateMany.mockResolvedValue({ count: 1 });
+
+    await PatientController.updatePatient(req as Request, res as Response);
+
+    expect(prisma.patient.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+    expect(prisma.patient.updateMany).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: {
+        firstName: "John",
+        lastName: "Doe",
+        phone: "123",
+        email: "test@email.com",
+        address: "42 street",
+        dateOfBirth: new Date("2000-01-01"), // Use a valid date format
+        userId: 1,
+      },
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ updated: { count: 1 } });
   });
-  expect(res.status).toHaveBeenCalledWith(200);
-  expect(res.json).toHaveBeenCalledWith({ updated: { count: 1 } });
-});
 
   it("should return 500 if prisma throws an unexpected error", async () => {
     const req = mockReq();

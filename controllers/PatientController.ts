@@ -81,7 +81,7 @@ class PatientController {
         phone: String(req.body.phone),
         email: String(req.body.email),
         address: String(req.body.address),
-		userId: Number(req.body.userId)
+        userId: Number(req.body.userId),
       });
 
       const result = await prisma.patient.updateMany({
