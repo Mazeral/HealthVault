@@ -23,17 +23,17 @@ router.get('/patients', PatientController.getPatients);
 router.put('/patients/:id', PatientController.updatePatient);
 ```
 
-**Add a medical history for the patient**
+**Add a medical record for the patient**
 ```js
 router.post('/patients/:id/medical-record', PatientController.addRecord);
 ```
 
-**Update the medical history**
+**Update the medical record**
 ```js
 router.put('/medical-record/:id', MedRecordController.updateMedRecord);
 ```
 
-**Get the medical history**
+**Get the medical record**
 ```js
 router.get('/patients/:id/medical-record', MedRecordController.getMedRecord);
 ```

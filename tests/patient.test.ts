@@ -30,6 +30,14 @@ describe("PatientController.updatePatient", () => {
     const req = mockReq();
     const res = mockRes();
 
+    // res as Response (Type Assertion)
+    //
+    //     What It Does: It tells TypeScript to treat res as if it is of type Response, even if TypeScript cannot infer this type automatically.
+    //
+    //     Why It's Used: In your test, mockRes() returns a Partial<Response> object, which is a subset of the full Response type. However, the updatePatient method expects a full Response object. By using as Response, you're asserting that the Partial<Response> object is compatible with the full Response type.
+    //
+    //     When to Use It: Use type assertions when you're confident that the object satisfies the expected type, even if TypeScript cannot verify it.
+    //
     await PatientController.updatePatient(req as Request, res as Response);
 
     expect(res.status).toHaveBeenCalledWith(400);
