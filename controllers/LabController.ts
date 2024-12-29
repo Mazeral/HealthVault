@@ -125,6 +125,9 @@ class LabController {
   static async deleteLabResult(req: Request, res: Response) {
     try {
       const labResultId = Number(req.params.id) || undefined;
+      if (!labResultId) {
+        throw Error("Bad request");
+      }
 
       const result = await prisma.labResult.delete({
         where: {
@@ -134,7 +137,9 @@ class LabController {
       res.status(200).json({ result: result });
     } catch (error) {
       if (error instanceof Error)
-        res.status(500).json({ error: error.message });
+        if (error.message === "Bad request")
+          res.status(400).json({ error: error.message });
+      res.status(500).json({ error: error.message });
     }
   }
 }
