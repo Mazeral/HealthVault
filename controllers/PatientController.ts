@@ -5,27 +5,33 @@ import createObject from "../utils/utilFunctions";
 class PatientController {
   // creates a patient without health records
   static async newPatient(req: Request, res: Response) {
-    const firstName = String(req.body.firstName) || null;
-    const lastName = String(req.body.lastName) || null;
+    const firstName = req.body.firstName || null;
+    const lastName = req.body.lastName || null;
     const dateOfBirth = new Date(req.body.dateOfBirth) || null;
     const phone = String(req.body.phone) || null;
     const email = String(req.body.email) || null;
     const address = String(req.body.phone) || null;
     try {
-      if (!firstName || !lastName) {
-        throw Error(`Missing name field`);
+      if (
+        !firstName ||
+        !lastName ||
+        firstName.trim() === "" ||
+        lastName.trim() === ""
+      ) {
+        throw new Error("Missing name field");
+      } else {
+        const result = await prisma.patient.create({
+          data: {
+            firstName: firstName,
+            lastName: lastName,
+            dateOfBirth: new Date(dateOfBirth),
+            phone: phone,
+            email: email,
+            address: address,
+          },
+        });
+        res.status(200).json({ "Patient data:": result });
       }
-      const result = await prisma.patient.create({
-        data: {
-          firstName: firstName,
-          lastName: lastName,
-          dateOfBirth: new Date(dateOfBirth),
-          phone: phone,
-          email: email,
-          address: address,
-        },
-      });
-      res.status(200).json({ "Patient data:": result });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "Missing name field")
@@ -106,23 +112,25 @@ class PatientController {
   static async getPatients(req: Request, res: Response) {
     try {
       const data = createObject({
-        firstName: String(req.body.firstName),
-        lastName: String(req.body.lastName),
-        dateOfBirth: Date.parse(String(req.body.dateOfBirth)),
-        phone: String(req.body.phone),
-        email: String(req.body.email),
-        address: String(req.body.address),
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        dateOfBirth: new Date(Date.parse(String(req.body.dateOfBirth))),
+        phone: req.body.phone,
+        email: req.body.email,
+        address: req.body.address,
       });
-      data.dateOfBirth = Date.parse(String(data.dateOfBirth));
-      if (!data.dateOfBirth) throw Error("Bad date of birth");
+      // Check if dateOfBirth is a valid date
+      if (data.dateOfBirth && isNaN(data.dateOfBirth.getTime())) {
+        throw new Error("Bad date of birth");
+      }
       const patients = await prisma.patient.findMany({
         where: {
-          firstName: String(data.firstName),
-          lastName: String(data.lastName),
-          dateOfBirth: String(data.dateOfBirth),
-          phone: String(data.phone),
-          email: String(data.email),
-          address: String(data.address),
+          firstName: data.firstName,
+          lastName: data.lastName,
+          dateOfBirth: data.dateOfBirth,
+          phone: data.phone,
+          email: data.email,
+          address: data.address,
         },
       });
       // If no aptients, no error it's doing it's job

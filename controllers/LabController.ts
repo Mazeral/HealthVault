@@ -136,10 +136,11 @@ class LabController {
       });
       res.status(200).json({ result: result });
     } catch (error) {
-      if (error instanceof Error)
+      if (error instanceof Error) {
         if (error.message === "Bad request")
           res.status(400).json({ error: error.message });
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
+      }
     }
   }
 }

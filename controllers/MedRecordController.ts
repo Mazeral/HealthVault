@@ -6,21 +6,17 @@ class MedRecordController {
   // Add a medical record for a patient
   static async addRecord(req: Request, res: Response) {
     try {
-      const patientId = req.body.patientId || null;
-      const diagnosis = req.body.diganosis || null;
-      const notes = req.body.notes || null;
+      const patientId = Number(req.body.patientId) || null;
+      const diagnosis = req.body.diagnosis;
+      const notes = req.body.notes;
 
-      if (!patientId || !diagnosis || !notes) throw Error("Missing fields");
+      if (!patientId || !diagnosis || diagnosis === "")
+        throw Error("Missing fields");
       const medRecord = await prisma.medicalRecord.create({
         data: {
           patientId: patientId,
           diagnosis: diagnosis,
           notes: notes,
-          patient: {
-            connect: {
-              id: patientId,
-            },
-          },
         },
       });
       res.status(200).json({ success: medRecord });
