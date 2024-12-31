@@ -1,9 +1,9 @@
 import express from "express";
-import userRouter from './src/routes/userRouter'
-import medRecordRouter from './src/routes/medRecordRouter'
-import labRouter from './src/routes/labRouter'
-import prescriptionRouter from './src/routes/prescriptionRouter'
-import patientRouter from './src/routes/patientRouter'
+import userRouter from "./src/routes/userRouter";
+import medRecordRouter from "./src/routes/medRecordRouter";
+import labRouter from "./src/routes/labRouter";
+import prescriptionRouter from "./src/routes/prescriptionRouter";
+import patientRouter from "./src/routes/patientRouter";
 
 const app = express();
 const port: string = process.env.PORT || "5000";

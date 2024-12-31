@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from './singleton'
+import prisma from "./singleton";
 import MedRecordController from "../src/controllers/MedRecordController";
 
 // Mock the Prisma client

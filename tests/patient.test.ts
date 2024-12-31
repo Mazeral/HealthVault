@@ -1,7 +1,7 @@
 import { mockDeep, mockReset } from "jest-mock-extended";
 import { Request, Response } from "express";
 import PatientController from "../src/controllers/PatientController";
-import prisma from './singleton'
+import prisma from "./singleton";
 
 // Mocking the req object
 const mockReq = (): Partial<Request> => ({

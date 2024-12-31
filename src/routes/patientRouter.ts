@@ -20,9 +20,15 @@ patientRouter.put("/patients/:id", PatientController.updatePatient);
 patientRouter.post("/patients/:id/medical-record", PatientController.addRecord);
 
 // Get the medical history
-patientRouter.get("/patients/:id/medical-record", MedRecordController.getMedRecord);
+patientRouter.get(
+  "/patients/:id/medical-record",
+  MedRecordController.getMedRecord,
+);
 
 // Get the lab results
-patientRouter.get("/patients/:id/lab-results", MedRecordController.getLabResults);
+patientRouter.get(
+  "/patients/:id/lab-results",
+  MedRecordController.getLabResults,
+);
 
 export default patientRouter;

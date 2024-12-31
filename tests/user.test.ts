@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from './singleton'
+import prisma from "./singleton";
 import UserController from "../src/controllers/UserController";
 import bcrypt from "bcrypt";
 
