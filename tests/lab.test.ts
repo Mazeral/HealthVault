@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import prisma from "../singleton";
+import prisma from "./singleton";
 import { mockReset } from "jest-mock-extended";
-import LabController from "../controllers/LabController";
+import LabController from "../src/controllers/LabController";
 
 // Mocking the req object
 const mockReq = (): Partial<Request> => ({

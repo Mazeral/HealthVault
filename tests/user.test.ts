@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import prisma from "../utils/prisma";
-import UserController from "../controllers/UserController";
+import prisma from './singleton'
+import UserController from "../src/controllers/UserController";
 import bcrypt from "bcrypt";
 
 // Mock the Prisma client
-jest.mock("../utils/prisma");
+jest.mock("../src/utils/prisma");
 
 // Mock bcrypt
 jest.mock("bcrypt");

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import prisma from "../utils/prisma";
-import PrescriptionController from "../controllers/PrescriptionController";
+import prisma from './singleton'
+import PrescriptionController from "../src/controllers/PrescriptionController";
 
 // Mock the Prisma client
-jest.mock("../utils/prisma");
+jest.mock("../src/utils/prisma");
 
 // Mock the request and response objects
 const mockReq = (): Partial<Request> => ({
