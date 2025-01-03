@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,jsx,,json,css,ts}\"",
-    "dev": "nodemon --exec ts-node --exitcrash app.ts"
+    "dev": "nodemon --exec ts-node --exitcrash ./src/app.ts"
   },
   "author": "Mohammad Omar Siddiq, Joshua Emmanuela and Mac Millian Zungene",
   "license": "MIT",
