@@ -1,5 +1,5 @@
-import React from 'react';
-import { Toaster } from 'react-hot-toast';
+import React from "react";
+import { Toaster } from "react-hot-toast";
 
 function Toast() {
   return (
@@ -10,8 +10,8 @@ function Toast() {
       toastOptions={{
         duration: 2000,
         style: {
-          background: '#fff',
-          color: '#000',
+          background: "#fff",
+          color: "#000",
         },
       }}
     />

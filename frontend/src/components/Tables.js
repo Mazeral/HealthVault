@@ -1,35 +1,35 @@
-import React from 'react';
-import { MenuSelect } from './Form';
-import { BiDotsHorizontalRounded } from 'react-icons/bi';
-import { FiEdit, FiEye } from 'react-icons/fi';
-import { RiDeleteBin6Line, RiDeleteBinLine } from 'react-icons/ri';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { MenuSelect } from "./Form";
+import { BiDotsHorizontalRounded } from "react-icons/bi";
+import { FiEdit, FiEye } from "react-icons/fi";
+import { RiDeleteBin6Line, RiDeleteBinLine } from "react-icons/ri";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const thclass = 'text-start text-sm font-medium py-3 px-2 whitespace-nowrap';
-const tdclass = 'text-start text-sm py-4 px-2 whitespace-nowrap';
+const thclass = "text-start text-sm font-medium py-3 px-2 whitespace-nowrap";
+const tdclass = "text-start text-sm py-4 px-2 whitespace-nowrap";
 
 export function Transactiontable({ data, action, functions }) {
   const DropDown1 = [
     {
-      title: 'Edit',
+      title: "Edit",
       icon: FiEdit,
       onClick: (data) => {
         functions.edit(data.id);
       },
     },
     {
-      title: 'View',
+      title: "View",
       icon: FiEye,
       onClick: (data) => {
         functions.preview(data.id);
       },
     },
     {
-      title: 'Delete',
+      title: "Delete",
       icon: RiDeleteBin6Line,
       onClick: () => {
-        toast.error('This feature is not available yet');
+        toast.error("This feature is not available yet");
       },
     },
   ];
@@ -77,11 +77,11 @@ export function Transactiontable({ data, action, functions }) {
             <td className={tdclass}>
               <span
                 className={`py-1 px-4 ${
-                  item.status === 'Paid'
-                    ? 'bg-subMain text-subMain'
-                    : item.status === 'Pending'
-                    ? 'bg-orange-500 text-orange-500'
-                    : item.status === 'Cancel' && 'bg-red-600 text-red-600'
+                  item.status === "Paid"
+                    ? "bg-subMain text-subMain"
+                    : item.status === "Pending"
+                      ? "bg-orange-500 text-orange-500"
+                      : item.status === "Cancel" && "bg-red-600 text-red-600"
                 } bg-opacity-10 text-xs rounded-xl`}
               >
                 {item.status}
@@ -110,24 +110,24 @@ export function InvoiceTable({ data }) {
   const navigate = useNavigate();
   const DropDown1 = [
     {
-      title: 'Edit',
+      title: "Edit",
       icon: FiEdit,
       onClick: (item) => {
         navigate(`/invoices/edit/${item.id}`);
       },
     },
     {
-      title: 'View',
+      title: "View",
       icon: FiEye,
       onClick: (item) => {
         navigate(`/invoices/preview/${item.id}`);
       },
     },
     {
-      title: 'Delete',
+      title: "Delete",
       icon: RiDeleteBin6Line,
       onClick: () => {
-        toast.error('This feature is not available yet');
+        toast.error("This feature is not available yet");
       },
     },
   ];
@@ -190,17 +190,17 @@ export function InvoiceTable({ data }) {
 export function MedicineTable({ data, onEdit }) {
   const DropDown1 = [
     {
-      title: 'Edit',
+      title: "Edit",
       icon: FiEdit,
       onClick: (item) => {
         onEdit(item);
       },
     },
     {
-      title: 'Delete',
+      title: "Delete",
       icon: RiDeleteBin6Line,
       onClick: () => {
-        toast.error('This feature is not available yet');
+        toast.error("This feature is not available yet");
       },
     },
   ];
@@ -231,9 +231,9 @@ export function MedicineTable({ data, onEdit }) {
             <td className={tdclass}>
               <span
                 className={`text-xs font-medium ${
-                  item?.status === 'Out of stock'
-                    ? 'text-red-600'
-                    : 'text-green-600'
+                  item?.status === "Out of stock"
+                    ? "text-red-600"
+                    : "text-green-600"
                 }`}
               >
                 {item?.status}
@@ -259,17 +259,17 @@ export function MedicineTable({ data, onEdit }) {
 export function ServiceTable({ data, onEdit }) {
   const DropDown1 = [
     {
-      title: 'Edit',
+      title: "Edit",
       icon: FiEdit,
       onClick: (item) => {
         onEdit(item);
       },
     },
     {
-      title: 'Delete',
+      title: "Delete",
       icon: RiDeleteBin6Line,
       onClick: () => {
-        toast.error('This feature is not available yet');
+        toast.error("This feature is not available yet");
       },
     },
   ];
@@ -300,10 +300,10 @@ export function ServiceTable({ data, onEdit }) {
             <td className={tdclass}>
               <span
                 className={`text-xs font-medium ${
-                  !item?.status ? 'text-red-600' : 'text-green-600'
+                  !item?.status ? "text-red-600" : "text-green-600"
                 }`}
               >
-                {!item?.status ? 'Disabled' : 'Enabled'}
+                {!item?.status ? "Disabled" : "Enabled"}
               </span>
             </td>
             <td className={tdclass}>
@@ -325,31 +325,31 @@ export function PatientTable({ data, functions, used }) {
   const DropDown1 = !used
     ? [
         {
-          title: 'View',
+          title: "View",
           icon: FiEye,
           onClick: (data) => {
             functions.preview(data.id);
           },
         },
         {
-          title: 'Delete',
+          title: "Delete",
           icon: RiDeleteBin6Line,
           onClick: () => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
           },
         },
       ]
     : [
         {
-          title: 'View',
+          title: "View",
           icon: FiEye,
           onClick: (data) => {
             functions.preview(data.id);
           },
         },
       ];
-  const thclasse = 'text-start text-sm font-medium py-3 px-2 whitespace-nowrap';
-  const tdclasse = 'text-start text-xs py-4 px-2 whitespace-nowrap';
+  const thclasse = "text-start text-sm font-medium py-3 px-2 whitespace-nowrap";
+  const tdclasse = "text-start text-xs py-4 px-2 whitespace-nowrap";
   return (
     <table className="table-auto w-full">
       <thead className="bg-dry rounded-md overflow-hidden">
@@ -398,9 +398,9 @@ export function PatientTable({ data, functions, used }) {
             <td className={tdclasse}>
               <span
                 className={`py-1 px-4 ${
-                  item.gender === 'Male'
-                    ? 'bg-subMain text-subMain'
-                    : 'bg-orange-500 text-orange-500'
+                  item.gender === "Male"
+                    ? "bg-subMain text-subMain"
+                    : "bg-orange-500 text-orange-500"
                 } bg-opacity-10 text-xs rounded-xl`}
               >
                 {item.gender}
@@ -431,17 +431,17 @@ export function PatientTable({ data, functions, used }) {
 export function DoctorsTable({ data, functions, doctor }) {
   const DropDown1 = [
     {
-      title: 'View',
+      title: "View",
       icon: FiEye,
       onClick: (data) => {
         functions.preview(data);
       },
     },
     {
-      title: 'Delete',
+      title: "Delete",
       icon: RiDeleteBin6Line,
       onClick: () => {
-        toast.error('This feature is not available yet');
+        toast.error("This feature is not available yet");
       },
     },
   ];
@@ -450,7 +450,7 @@ export function DoctorsTable({ data, functions, doctor }) {
       <thead className="bg-dry rounded-md overflow-hidden">
         <tr>
           <th className={thclass}>#</th>
-          <th className={thclass}>{doctor ? 'Doctor' : 'Receptionist'}</th>
+          <th className={thclass}>{doctor ? "Doctor" : "Receptionist"}</th>
           <th className={thclass}>Created At</th>
           <th className={thclass}>Phone</th>
           <th className={thclass}>Title</th>
@@ -505,7 +505,7 @@ export function AppointmentTable({ data, functions, doctor }) {
       <thead className="bg-dry rounded-md overflow-hidden">
         <tr>
           <th className={thclass}>Date</th>
-          <th className={thclass}>{doctor ? 'Patient' : 'Doctor'}</th>
+          <th className={thclass}>{doctor ? "Patient" : "Doctor"}</th>
           <th className={thclass}>Status</th>
           <th className={thclass}>Time</th>
           <th className={thclass}>Action</th>
@@ -531,11 +531,11 @@ export function AppointmentTable({ data, functions, doctor }) {
             <td className={tdclass}>
               <span
                 className={`py-1  px-4 ${
-                  item.status === 'Approved'
-                    ? 'bg-subMain text-subMain'
-                    : item.status === 'Pending'
-                    ? 'bg-orange-500 text-orange-500'
-                    : item.status === 'Cancel' && 'bg-red-600 text-red-600'
+                  item.status === "Approved"
+                    ? "bg-subMain text-subMain"
+                    : item.status === "Pending"
+                      ? "bg-orange-500 text-orange-500"
+                      : item.status === "Cancel" && "bg-red-600 text-red-600"
                 } bg-opacity-10 text-xs rounded-xl`}
               >
                 {item.status}
@@ -567,7 +567,7 @@ export function PaymentTable({ data, functions, doctor }) {
       <thead className="bg-dry rounded-md overflow-hidden">
         <tr>
           <th className={thclass}>Date</th>
-          <th className={thclass}>{doctor ? 'Patient' : 'Doctor'}</th>
+          <th className={thclass}>{doctor ? "Patient" : "Doctor"}</th>
           <th className={thclass}>Status</th>
           <th className={thclass}>Amount</th>
           <th className={thclass}>Method</th>
@@ -594,11 +594,11 @@ export function PaymentTable({ data, functions, doctor }) {
             <td className={tdclass}>
               <span
                 className={`py-1  px-4 ${
-                  item.status === 'Paid'
-                    ? 'bg-subMain text-subMain'
-                    : item.status === 'Pending'
-                    ? 'bg-orange-500 text-orange-500'
-                    : item.status === 'Cancel' && 'bg-red-600 text-red-600'
+                  item.status === "Paid"
+                    ? "bg-subMain text-subMain"
+                    : item.status === "Pending"
+                      ? "bg-orange-500 text-orange-500"
+                      : item.status === "Cancel" && "bg-red-600 text-red-600"
                 } bg-opacity-10 text-xs rounded-xl`}
               >
                 {item.status}
@@ -723,8 +723,8 @@ export function InvoiceProductsTable({ data, functions, button }) {
 // medicine Dosage table
 
 export function MedicineDosageTable({ data, functions, button }) {
-  const thclasse = 'text-start text-xs font-medium py-3 px-2 whitespace-nowrap';
-  const tdclasse = 'text-start text-xs py-4 px-2 whitespace-nowrap';
+  const thclasse = "text-start text-xs font-medium py-3 px-2 whitespace-nowrap";
+  const tdclasse = "text-start text-xs py-4 px-2 whitespace-nowrap";
   return (
     <table className="table-auto w-full">
       <thead className="bg-dry rounded-md overflow-hidden">

@@ -1,14 +1,14 @@
-import React from 'react';
-import Layout from '../Layout';
-import { Button, MenuSelect } from '../components/Form';
-import { BiDotsVerticalRounded, BiPlus } from 'react-icons/bi';
-import { HiOutlineMail } from 'react-icons/hi';
-import { RiDeleteBinLine } from 'react-icons/ri';
-import { toast } from 'react-hot-toast';
-import { campaignData } from '../components/Datas';
-import { TbBrandWhatsapp, TbMessage } from 'react-icons/tb';
-import CampaignModal from '../components/Modals/AddCampagnModal';
-import { FiEye } from 'react-icons/fi';
+import React from "react";
+import Layout from "../Layout";
+import { Button, MenuSelect } from "../components/Form";
+import { BiDotsVerticalRounded, BiPlus } from "react-icons/bi";
+import { HiOutlineMail } from "react-icons/hi";
+import { RiDeleteBinLine } from "react-icons/ri";
+import { toast } from "react-hot-toast";
+import { campaignData } from "../components/Datas";
+import { TbBrandWhatsapp, TbMessage } from "react-icons/tb";
+import CampaignModal from "../components/Modals/AddCampagnModal";
+import { FiEye } from "react-icons/fi";
 
 function Campaings() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -21,7 +21,7 @@ function Campaings() {
 
   const actions = [
     {
-      title: 'View',
+      title: "View",
       icon: FiEye,
       onClick: (data) => {
         setIsOpen(true);
@@ -29,10 +29,10 @@ function Campaings() {
       },
     },
     {
-      title: 'Delete',
+      title: "Delete",
       icon: RiDeleteBinLine,
       onClick: () => {
-        toast.error('This feature is not available yet');
+        toast.error("This feature is not available yet");
       },
     },
   ];
@@ -71,14 +71,14 @@ function Campaings() {
               <div className="col-span-2">
                 <div
                   className={`
-                  ${item.type === 'sms' && 'bg-blue-500 text-blue-500'}
-                  ${item.type === 'email' && 'bg-orange-500 text-orange-500'}
-                  ${item.type === 'whatsapp' && 'bg-green-500 text-green-500'}
+                  ${item.type === "sms" && "bg-blue-500 text-blue-500"}
+                  ${item.type === "email" && "bg-orange-500 text-orange-500"}
+                  ${item.type === "whatsapp" && "bg-green-500 text-green-500"}
                   w-full h-12 text-lg rounded flex-colo bg-opacity-10`}
                 >
-                  {item.type === 'email' && <HiOutlineMail />}
-                  {item.type === 'sms' && <TbMessage />}
-                  {item.type === 'whatsapp' && <TbBrandWhatsapp />}
+                  {item.type === "email" && <HiOutlineMail />}
+                  {item.type === "sms" && <TbMessage />}
+                  {item.type === "whatsapp" && <TbBrandWhatsapp />}
                 </div>
               </div>
               <div className="col-span-8">

@@ -1,52 +1,52 @@
-import React from 'react';
-import Layout from '../Layout';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import { BiChevronLeft, BiChevronRight, BiPlus, BiTime } from 'react-icons/bi';
-import { HiOutlineViewGrid } from 'react-icons/hi';
-import { HiOutlineCalendarDays } from 'react-icons/hi2';
-import AddAppointmentModal from '../components/Modals/AddApointmentModal';
-import { servicesData } from '../components/Datas';
+import React from "react";
+import Layout from "../Layout";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import { BiChevronLeft, BiChevronRight, BiPlus, BiTime } from "react-icons/bi";
+import { HiOutlineViewGrid } from "react-icons/hi";
+import { HiOutlineCalendarDays } from "react-icons/hi2";
+import AddAppointmentModal from "../components/Modals/AddApointmentModal";
+import { servicesData } from "../components/Datas";
 
 // custom toolbar
 const CustomToolbar = (toolbar) => {
   // today button handler
   const goToBack = () => {
     toolbar.date.setMonth(toolbar.date.getMonth() - 1);
-    toolbar.onNavigate('prev');
+    toolbar.onNavigate("prev");
   };
 
   // next button handler
   const goToNext = () => {
     toolbar.date.setMonth(toolbar.date.getMonth() + 1);
-    toolbar.onNavigate('next');
+    toolbar.onNavigate("next");
   };
 
   // today button handler
   const goToCurrent = () => {
-    toolbar.onNavigate('TODAY');
+    toolbar.onNavigate("TODAY");
   };
 
   // month button handler
   const goToMonth = () => {
-    toolbar.onView('month');
+    toolbar.onView("month");
   };
 
   // week button handler
   const goToWeek = () => {
-    toolbar.onView('week');
+    toolbar.onView("week");
   };
 
   // day button handler
   const goToDay = () => {
-    toolbar.onView('day');
+    toolbar.onView("day");
   };
 
   // view button group
   const viewNamesGroup = [
-    { view: 'month', label: 'Month' },
-    { view: 'week', label: 'Week' },
-    { view: 'day', label: 'Day' },
+    { view: "month", label: "Month" },
+    { view: "week", label: "Week" },
+    { view: "day", label: "Day" },
   ];
 
   return (
@@ -67,7 +67,7 @@ const CustomToolbar = (toolbar) => {
             <BiChevronLeft />
           </button>
           <span className="text-xl font-semibold">
-            {moment(toolbar.date).format('MMMM YYYY')}
+            {moment(toolbar.date).format("MMMM YYYY")}
           </span>
           <button onClick={goToNext} className="text-2xl text-subMain">
             <BiChevronRight />
@@ -79,21 +79,21 @@ const CustomToolbar = (toolbar) => {
             <button
               key={index}
               onClick={
-                item.view === 'month'
+                item.view === "month"
                   ? goToMonth
-                  : item.view === 'week'
-                  ? goToWeek
-                  : goToDay
+                  : item.view === "week"
+                    ? goToWeek
+                    : goToDay
               }
               className={`border-l text-xl py-2 flex-colo border-subMain ${
                 toolbar.view === item.view
-                  ? 'bg-subMain text-white'
-                  : 'text-subMain'
+                  ? "bg-subMain text-white"
+                  : "text-subMain"
               }`}
             >
-              {item.view === 'month' ? (
+              {item.view === "month" ? (
                 <HiOutlineViewGrid />
-              ) : item.view === 'week' ? (
+              ) : item.view === "week" ? (
                 <HiOutlineCalendarDays />
               ) : (
                 <BiTime />
@@ -122,9 +122,9 @@ function Appointments() {
       id: 0,
       start: moment({ hours: 7 }).toDate(),
       end: moment({ hours: 9 }).toDate(),
-      color: '#FB923C',
-      title: 'John Doe',
-      message: 'He is not sure about the time',
+      color: "#FB923C",
+      title: "John Doe",
+      message: "He is not sure about the time",
       service: servicesData[1],
       shareData: {
         email: true,
@@ -136,9 +136,9 @@ function Appointments() {
       id: 1,
       start: moment({ hours: 12 }).toDate(),
       end: moment({ hours: 13 }).toDate(),
-      color: '#FC8181',
-      title: 'Minah Mmassy',
-      message: 'She is coming for checkup',
+      color: "#FC8181",
+      title: "Minah Mmassy",
+      message: "She is coming for checkup",
       service: servicesData[2],
       shareData: {
         email: false,
@@ -151,9 +151,9 @@ function Appointments() {
       id: 2,
       start: moment({ hours: 14 }).toDate(),
       end: moment({ hours: 17 }).toDate(),
-      color: '#FFC107',
-      title: 'Irene P. Smith',
-      message: 'She is coming for checkup. but she is not sure about the time',
+      color: "#FFC107",
+      title: "Irene P. Smith",
+      message: "She is coming for checkup. but she is not sure about the time",
       service: servicesData[3],
       shareData: {
         email: true,
@@ -207,14 +207,14 @@ function Appointments() {
         // custom event style
         eventPropGetter={(event) => {
           const style = {
-            backgroundColor: '#66B5A3',
+            backgroundColor: "#66B5A3",
 
-            borderRadius: '10px',
-            color: 'white',
-            border: '1px',
-            borderColor: '#F2FAF8',
-            fontSize: '12px',
-            padding: '5px 5px',
+            borderRadius: "10px",
+            color: "white",
+            border: "1px",
+            borderColor: "#F2FAF8",
+            fontSize: "12px",
+            padding: "5px 5px",
           };
           return {
             style,
@@ -222,7 +222,7 @@ function Appointments() {
         }}
         // custom date style
         dayPropGetter={(date) => {
-          const backgroundColor = 'white';
+          const backgroundColor = "white";
           const style = {
             backgroundColor,
           };
@@ -231,7 +231,7 @@ function Appointments() {
           };
         }}
         // remove agenda view
-        views={['month', 'day', 'week']}
+        views={["month", "day", "week"]}
         // toolbar={false}
         components={{ toolbar: CustomToolbar }}
       />

@@ -1,12 +1,12 @@
-import React from 'react';
-import Layout from '../../Layout';
-import { Button } from '../../components/Form';
-import { MdOutlineCloudDownload } from 'react-icons/md';
-import { toast } from 'react-hot-toast';
-import { InvoiceTable } from '../../components/Tables';
-import { invoicesData } from '../../components/Datas';
-import { BiPlus } from 'react-icons/bi';
-import { Link } from 'react-router-dom';
+import React from "react";
+import Layout from "../../Layout";
+import { Button } from "../../components/Form";
+import { MdOutlineCloudDownload } from "react-icons/md";
+import { toast } from "react-hot-toast";
+import { InvoiceTable } from "../../components/Tables";
+import { invoicesData } from "../../components/Datas";
+import { BiPlus } from "react-icons/bi";
+import { Link } from "react-router-dom";
 
 function Invoices() {
   return (
@@ -43,7 +43,7 @@ function Invoices() {
             label="Export"
             Icon={MdOutlineCloudDownload}
             onClick={() => {
-              toast.error('Exporting is not available yet');
+              toast.error("Exporting is not available yet");
             }}
           />
         </div>

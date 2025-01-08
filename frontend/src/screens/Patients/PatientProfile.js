@@ -1,16 +1,16 @@
-import React from 'react';
-import Layout from '../../Layout';
-import { patientTab } from '../../components/Datas';
-import { Link } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import MedicalRecord from './MedicalRecord';
-import AppointmentsUsed from '../../components/UsedComp/AppointmentsUsed';
-import InvoiceUsed from '../../components/UsedComp/InvoiceUsed';
-import PaymentsUsed from '../../components/UsedComp/PaymentUsed';
-import PersonalInfo from '../../components/UsedComp/PersonalInfo';
-import PatientImages from './PatientImages';
-import HealthInfomation from './HealthInfomation';
-import DentalChart from './DentalChart';
+import React from "react";
+import Layout from "../../Layout";
+import { patientTab } from "../../components/Datas";
+import { Link } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import MedicalRecord from "./MedicalRecord";
+import AppointmentsUsed from "../../components/UsedComp/AppointmentsUsed";
+import InvoiceUsed from "../../components/UsedComp/InvoiceUsed";
+import PaymentsUsed from "../../components/UsedComp/PaymentUsed";
+import PersonalInfo from "../../components/UsedComp/PersonalInfo";
+import PatientImages from "./PatientImages";
+import HealthInfomation from "./HealthInfomation";
+import DentalChart from "./DentalChart";
 
 function PatientProfile() {
   const [activeTab, setActiveTab] = React.useState(1);
@@ -76,8 +76,8 @@ function PatientProfile() {
                 className={`
                 ${
                   activeTab === tab.id
-                    ? 'bg-text text-subMain'
-                    : 'bg-dry text-main hover:bg-text hover:text-subMain'
+                    ? "bg-text text-subMain"
+                    : "bg-dry text-main hover:bg-text hover:text-subMain"
                 }
                 text-xs gap-4 flex items-center w-full p-4 rounded`}
               >

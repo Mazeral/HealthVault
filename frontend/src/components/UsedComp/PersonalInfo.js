@@ -1,11 +1,11 @@
-import React from 'react';
-import Uploder from '../Uploader';
-import { sortsDatas } from '../Datas';
-import { Button, DatePickerComp, Input, Select } from '../Form';
-import { BiChevronDown } from 'react-icons/bi';
-import { toast } from 'react-hot-toast';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { RiDeleteBin5Line } from 'react-icons/ri';
+import React from "react";
+import Uploder from "../Uploader";
+import { sortsDatas } from "../Datas";
+import { Button, DatePickerComp, Input, Select } from "../Form";
+import { BiChevronDown } from "react-icons/bi";
+import { toast } from "react-hot-toast";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { RiDeleteBin5Line } from "react-icons/ri";
 
 function PersonalInfo({ titles }) {
   const [title, setTitle] = React.useState(sortsDatas.title[0]);
@@ -70,17 +70,17 @@ function PersonalInfo({ titles }) {
       {/* submit */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         <Button
-          label={'Delete Account'}
+          label={"Delete Account"}
           Icon={RiDeleteBin5Line}
           onClick={() => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
           }}
         />
         <Button
-          label={'Save Changes'}
+          label={"Save Changes"}
           Icon={HiOutlineCheckCircle}
           onClick={() => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
           }}
         />
       </div>

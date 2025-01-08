@@ -1,10 +1,10 @@
-import React from 'react';
-import Modal from './Modal';
-import { Button } from '../Form';
-import { FiEye } from 'react-icons/fi';
-import { MedicineDosageTable } from '../Tables';
-import { medicineData } from '../Datas';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import Modal from "./Modal";
+import { Button } from "../Form";
+import { FiEye } from "react-icons/fi";
+import { MedicineDosageTable } from "../Tables";
+import { medicineData } from "../Datas";
+import { useNavigate } from "react-router-dom";
 
 function MedicalRecodModal({ closeModal, isOpen, datas }) {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ function MedicalRecodModal({ closeModal, isOpen, datas }) {
       closeModal={closeModal}
       isOpen={isOpen}
       title="12 May 2021"
-      width={'max-w-4xl'}
+      width={"max-w-4xl"}
     >
       <div className="flex-colo gap-6">
         {datas?.data?.slice(0, 3).map((data) => (

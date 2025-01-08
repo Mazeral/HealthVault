@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import Layout from '../../Layout';
-import { toast } from 'react-hot-toast';
-import { Link, useParams } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import { invoicesData, transactionData } from '../../components/Datas';
-import ShareModal from '../../components/Modals/ShareModal';
-import { RiShareBoxLine } from 'react-icons/ri';
-import { MdOutlineCloudDownload } from 'react-icons/md';
-import { AiOutlinePrinter } from 'react-icons/ai';
-import { FiEdit } from 'react-icons/fi';
-import { InvoiceProductsTable } from '../../components/Tables';
-import SenderReceverComp from '../../components/SenderReceverComp';
+import React, { useState } from "react";
+import Layout from "../../Layout";
+import { toast } from "react-hot-toast";
+import { Link, useParams } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { invoicesData, transactionData } from "../../components/Datas";
+import ShareModal from "../../components/Modals/ShareModal";
+import { RiShareBoxLine } from "react-icons/ri";
+import { MdOutlineCloudDownload } from "react-icons/md";
+import { AiOutlinePrinter } from "react-icons/ai";
+import { FiEdit } from "react-icons/fi";
+import { InvoiceProductsTable } from "../../components/Tables";
+import SenderReceverComp from "../../components/SenderReceverComp";
 
 function PreviewPayment() {
   const { id } = useParams();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const payment = transactionData.find((item) => item.id.toString() === id);
   const buttonClass =
-    'bg-subMain flex-rows gap-3 bg-opacity-5 text-subMain rounded-lg border border-subMain border-dashed px-4 py-3 text-sm';
+    "bg-subMain flex-rows gap-3 bg-opacity-5 text-subMain rounded-lg border border-subMain border-dashed px-4 py-3 text-sm";
 
   return (
     <Layout>
@@ -51,7 +51,7 @@ function PreviewPayment() {
           </button>
           <button
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
             className={buttonClass}
           >
@@ -59,7 +59,7 @@ function PreviewPayment() {
           </button>
           <button
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
             className={buttonClass}
           >
@@ -88,12 +88,12 @@ function PreviewPayment() {
             <span
               className={`text-xs px-4
               ${
-                payment.status === 'Paid'
-                  ? 'bg-subMain text-subMain border-subMain'
-                  : payment.status === 'Pending'
-                  ? 'bg-orange-500 text-orange-500 border-orange-500'
-                  : payment.status === 'Cancel' &&
-                    'bg-red-600 text-red-600 border-red-600'
+                payment.status === "Paid"
+                  ? "bg-subMain text-subMain border-subMain"
+                  : payment.status === "Pending"
+                    ? "bg-orange-500 text-orange-500 border-orange-500"
+                    : payment.status === "Cancel" &&
+                      "bg-red-600 text-red-600 border-red-600"
               }
                py-1 border bg-opacity-10 border-opacity-40 rounded-full`}
             >

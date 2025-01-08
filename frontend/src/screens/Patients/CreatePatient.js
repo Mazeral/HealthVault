@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import Layout from '../../Layout';
-import PersonalInfo from '../../components/UsedComp/PersonalInfo';
+import React from "react";
+import { Link } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import Layout from "../../Layout";
+import PersonalInfo from "../../components/UsedComp/PersonalInfo";
 
 function CreatePatient() {
   return (

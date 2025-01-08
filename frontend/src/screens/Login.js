@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button, Input } from '../components/Form';
-import { BiLogInCircle } from 'react-icons/bi';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Button, Input } from "../components/Form";
+import { BiLogInCircle } from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const navigate = useNavigate();
@@ -19,19 +19,19 @@ function Login() {
             label="Email"
             type="email"
             color={true}
-            placeholder={'admin@gmail.com'}
+            placeholder={"admin@gmail.com"}
           />
           <Input
             label="Password"
             type="password"
             color={true}
-            placeholder={'*********'}
+            placeholder={"*********"}
           />
         </div>
         <Button
           label="Login"
           Icon={BiLogInCircle}
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
         />
       </form>
     </div>

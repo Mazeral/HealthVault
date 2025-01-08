@@ -1,12 +1,12 @@
-import React from 'react';
-import { MdOutlineCloudDownload } from 'react-icons/md';
-import { toast } from 'react-hot-toast';
-import { BiChevronDown, BiPlus } from 'react-icons/bi';
-import Layout from '../Layout';
-import { Button, Select } from '../components/Form';
-import { ServiceTable } from '../components/Tables';
-import { servicesData, sortsDatas } from '../components/Datas';
-import AddEditServiceModal from '../components/Modals/AddEditServiceModal';
+import React from "react";
+import { MdOutlineCloudDownload } from "react-icons/md";
+import { toast } from "react-hot-toast";
+import { BiChevronDown, BiPlus } from "react-icons/bi";
+import Layout from "../Layout";
+import { Button, Select } from "../components/Form";
+import { ServiceTable } from "../components/Tables";
+import { servicesData, sortsDatas } from "../components/Datas";
+import AddEditServiceModal from "../components/Modals/AddEditServiceModal";
 
 function Services() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -73,7 +73,7 @@ function Services() {
             label="Export"
             Icon={MdOutlineCloudDownload}
             onClick={() => {
-              toast.error('Exporting is not available yet');
+              toast.error("Exporting is not available yet");
             }}
           />
         </div>

@@ -1,10 +1,10 @@
-import React from 'react';
-import Chart from 'react-apexcharts';
+import React from "react";
+import Chart from "react-apexcharts";
 
 export function DashboardSmallChart({ data, colors }) {
   const options = {
     chart: {
-      id: 'basic-bar',
+      id: "basic-bar",
       sparkline: {
         enabled: true,
       },
@@ -13,7 +13,7 @@ export function DashboardSmallChart({ data, colors }) {
       },
       animations: {
         enabled: true,
-        easing: 'easeinout',
+        easing: "easeinout",
         speed: 400,
         animateGradually: {
           enabled: true,
@@ -27,18 +27,18 @@ export function DashboardSmallChart({ data, colors }) {
     },
     xaxis: {
       categories: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ],
       labels: {
         show: false,
@@ -58,12 +58,12 @@ export function DashboardSmallChart({ data, colors }) {
       custom: function ({ series, seriesIndex, dataPointIndex, w }) {
         return (
           '<div className="bg-white py-2 px-2 text-xs border-[.5px] border-border">' +
-          'Total:' +
-          ' ' +
+          "Total:" +
+          " " +
           '<span className="font-semibold">' +
           series[seriesIndex][dataPointIndex] +
-          '</span>' +
-          '</div>'
+          "</span>" +
+          "</div>"
         );
       },
     },
@@ -72,7 +72,7 @@ export function DashboardSmallChart({ data, colors }) {
     },
     plotOptions: {
       bar: {
-        columnWidth: '75%',
+        columnWidth: "75%",
         distributed: false,
         borderRadius: 2,
       },
@@ -81,7 +81,7 @@ export function DashboardSmallChart({ data, colors }) {
   };
   const series = [
     {
-      name: 'series-1',
+      name: "series-1",
       data: data,
     },
   ];
@@ -100,13 +100,13 @@ export function DashboardSmallChart({ data, colors }) {
 export function DashboardBigChart() {
   const options = {
     chart: {
-      id: 'area-datetime',
+      id: "area-datetime",
       toolbar: {
         show: false,
       },
       animations: {
         enabled: true,
-        easing: 'easeinout',
+        easing: "easeinout",
         speed: 1000,
         animateGradually: {
           enabled: true,
@@ -120,24 +120,24 @@ export function DashboardBigChart() {
     },
     xaxis: {
       categories: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ],
       labels: {
         show: true,
         style: {
-          colors: '#A0A0A0',
-          fontSize: '12px',
+          colors: "#A0A0A0",
+          fontSize: "12px",
           fontWeight: 400,
         },
       },
@@ -151,12 +151,12 @@ export function DashboardBigChart() {
       labels: {
         show: true,
         style: {
-          colors: '#A0A0A0',
-          fontSize: '10px',
+          colors: "#A0A0A0",
+          fontSize: "10px",
           fontWeight: 400,
         },
         formatter: function (value) {
-          return value + 'k';
+          return value + "k";
         },
       },
     },
@@ -167,31 +167,31 @@ export function DashboardBigChart() {
       custom: function ({ series, seriesIndex, dataPointIndex, w }) {
         return (
           '<div className="bg-white py-2 px-2 text-xs border-[.5px] border-border">' +
-          'Total:' +
-          ' ' +
+          "Total:" +
+          " " +
           '<span className="font-semibold">' +
           series[seriesIndex][dataPointIndex] +
-          '</span>' +
-          '</div>'
+          "</span>" +
+          "</div>"
         );
       },
     },
     grid: {
       show: true,
-      borderColor: '#E8EBEE',
+      borderColor: "#E8EBEE",
       strokeDashArray: 4,
-      position: 'back',
+      position: "back",
     },
     stroke: {
-      curve: 'smooth',
+      curve: "smooth",
       width: 1,
     },
 
     fill: {
-      type: 'gradient',
+      type: "gradient",
       gradient: {
-        shade: 'light',
-        type: 'vertical',
+        shade: "light",
+        type: "vertical",
         shadeIntensity: 0.5,
         inverseColors: true,
         opacityFrom: 0.5,
@@ -199,11 +199,11 @@ export function DashboardBigChart() {
         stops: [0, 100],
       },
     },
-    colors: ['#66B5A3'],
+    colors: ["#66B5A3"],
   };
   const series = [
     {
-      name: 'Total',
+      name: "Total",
       data: [30, 40, 25, 50, 49, 21, 70, 51, 42, 60, 40, 20],
     },
   ];

@@ -1,13 +1,13 @@
-import React from 'react';
-import { MdOutlineCloudDownload } from 'react-icons/md';
-import { toast } from 'react-hot-toast';
-import { BiPlus } from 'react-icons/bi';
-import Layout from '../../Layout';
-import { Button } from '../../components/Form';
-import { DoctorsTable } from '../../components/Tables';
-import { doctorsData } from '../../components/Datas';
-import { useNavigate } from 'react-router-dom';
-import AddDoctorModal from '../../components/Modals/AddDoctorModal';
+import React from "react";
+import { MdOutlineCloudDownload } from "react-icons/md";
+import { toast } from "react-hot-toast";
+import { BiPlus } from "react-icons/bi";
+import Layout from "../../Layout";
+import { Button } from "../../components/Form";
+import { DoctorsTable } from "../../components/Tables";
+import { doctorsData } from "../../components/Datas";
+import { useNavigate } from "react-router-dom";
+import AddDoctorModal from "../../components/Modals/AddDoctorModal";
 
 function Doctors() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -66,7 +66,7 @@ function Doctors() {
             label="Export"
             Icon={MdOutlineCloudDownload}
             onClick={() => {
-              toast.error('Exporting is not available yet');
+              toast.error("Exporting is not available yet");
             }}
           />
         </div>

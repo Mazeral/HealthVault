@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import Layout from '../../Layout';
-import { Button, FromToDate, Select } from '../../components/Form';
-import { Transactiontable } from '../../components/Tables';
-import { sortsDatas, transactionData } from '../../components/Datas';
-import { BiChevronDown, BiTime } from 'react-icons/bi';
+import React, { useState } from "react";
+import Layout from "../../Layout";
+import { Button, FromToDate, Select } from "../../components/Form";
+import { Transactiontable } from "../../components/Tables";
+import { sortsDatas, transactionData } from "../../components/Datas";
+import { BiChevronDown, BiTime } from "react-icons/bi";
 import {
   MdFilterList,
   MdOutlineCalendarMonth,
   MdOutlineCloudDownload,
-} from 'react-icons/md';
-import { toast } from 'react-hot-toast';
-import { BsCalendarMonth } from 'react-icons/bs';
-import { useNavigate } from 'react-router-dom';
+} from "react-icons/md";
+import { toast } from "react-hot-toast";
+import { BsCalendarMonth } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
 function Payments() {
   const [status, setStatus] = useState(sortsDatas.status[0]);
@@ -38,23 +38,23 @@ function Payments() {
   const boxes = [
     {
       id: 1,
-      title: 'Today Payments',
-      value: '4,42,236',
-      color: ['bg-subMain', 'text-subMain'],
+      title: "Today Payments",
+      value: "4,42,236",
+      color: ["bg-subMain", "text-subMain"],
       icon: BiTime,
     },
     {
       id: 2,
-      title: 'Monthly Payments',
-      value: '12,42,500',
-      color: ['bg-orange-500', 'text-orange-500'],
+      title: "Monthly Payments",
+      value: "12,42,500",
+      color: ["bg-orange-500", "text-orange-500"],
       icon: BsCalendarMonth,
     },
     {
       id: 3,
-      title: 'Yearly Payments',
-      value: '345,70,000',
-      color: ['bg-green-500', 'text-green-500'],
+      title: "Yearly Payments",
+      value: "345,70,000",
+      color: ["bg-green-500", "text-green-500"],
       icon: MdOutlineCalendarMonth,
     },
   ];
@@ -72,7 +72,7 @@ function Payments() {
       {/* add button */}
       <button
         onClick={() => {
-          toast.error('Exporting is not available yet');
+          toast.error("Exporting is not available yet");
         }}
         className="w-16 hover:w-44 group transitions hover:h-14 h-16 border border-border z-50 bg-subMain text-white rounded-full flex-rows gap-4 fixed bottom-8 right-12 button-fb"
       >
@@ -91,13 +91,13 @@ function Payments() {
               <h2 className="text-sm font-medium">{box.title}</h2>
               <h2 className="text-xl my-6 font-medium">{box.value}</h2>
               <p className="text-xs text-textGray">
-                You made <span className={box.color[1]}>{box.value}</span>{' '}
-                transactions{' '}
-                {box.title === 'Today Payments'
-                  ? 'today'
-                  : box.title === 'Monthly Payments'
-                  ? 'this month'
-                  : 'this year'}
+                You made <span className={box.color[1]}>{box.value}</span>{" "}
+                transactions{" "}
+                {box.title === "Today Payments"
+                  ? "today"
+                  : box.title === "Monthly Payments"
+                    ? "this month"
+                    : "this year"}
               </p>
             </div>
             <div
@@ -148,7 +148,7 @@ function Payments() {
             label="Filter"
             Icon={MdFilterList}
             onClick={() => {
-              toast.error('Filter data is not available yet');
+              toast.error("Filter data is not available yet");
             }}
           />
         </div>

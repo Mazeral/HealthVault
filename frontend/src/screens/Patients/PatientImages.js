@@ -1,8 +1,8 @@
-import React from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
-import Uploader from '../../components/Uploader';
-import { Button } from '../../components/Form';
+import React from "react";
+import { FaTimes } from "react-icons/fa";
+import { toast } from "react-hot-toast";
+import Uploader from "../../components/Uploader";
+import { Button } from "../../components/Form";
 
 function PatientImages() {
   const [image, setImage] = React.useState(null);
@@ -17,7 +17,7 @@ function PatientImages() {
               className="w-full h-72 rounded-lg object-cover"
             />
             <button
-              onClick={() => toast.error('This feature is not available yet.')}
+              onClick={() => toast.error("This feature is not available yet.")}
               className="bg-white rounded-full w-8 h-8 flex-colo absolute -top-1 -right-1"
             >
               <FaTimes className="text-red-500" />
@@ -27,7 +27,7 @@ function PatientImages() {
       </div>
       <Uploader setImage={setImage} />
       <Button
-        onClick={() => toast.error('This feature is not available yet.')}
+        onClick={() => toast.error("This feature is not available yet.")}
         label="Save Changes"
         Icon={null}
       />

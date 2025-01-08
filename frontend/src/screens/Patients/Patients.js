@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import Layout from '../../Layout';
-import { memberData, sortsDatas } from '../../components/Datas';
-import { Link, useNavigate } from 'react-router-dom';
-import { BiChevronDown, BiPlus, BiTime } from 'react-icons/bi';
-import { BsCalendarMonth } from 'react-icons/bs';
-import { MdFilterList, MdOutlineCalendarMonth } from 'react-icons/md';
-import { toast } from 'react-hot-toast';
-import { Button, FromToDate, Select } from '../../components/Form';
-import { PatientTable } from '../../components/Tables';
+import React, { useState } from "react";
+import Layout from "../../Layout";
+import { memberData, sortsDatas } from "../../components/Datas";
+import { Link, useNavigate } from "react-router-dom";
+import { BiChevronDown, BiPlus, BiTime } from "react-icons/bi";
+import { BsCalendarMonth } from "react-icons/bs";
+import { MdFilterList, MdOutlineCalendarMonth } from "react-icons/md";
+import { toast } from "react-hot-toast";
+import { Button, FromToDate, Select } from "../../components/Form";
+import { PatientTable } from "../../components/Tables";
 
 function Patients() {
   const [status, setStatus] = useState(sortsDatas.filterPatient[0]);
@@ -34,23 +34,23 @@ function Patients() {
   const boxes = [
     {
       id: 1,
-      title: 'Today Patients',
-      value: '10',
-      color: ['bg-subMain', 'text-subMain'],
+      title: "Today Patients",
+      value: "10",
+      color: ["bg-subMain", "text-subMain"],
       icon: BiTime,
     },
     {
       id: 2,
-      title: 'Monthly Patients',
-      value: '230',
-      color: ['bg-orange-500', 'text-orange-500'],
+      title: "Monthly Patients",
+      value: "230",
+      color: ["bg-orange-500", "text-orange-500"],
       icon: BsCalendarMonth,
     },
     {
       id: 3,
-      title: 'Yearly Patients',
-      value: '1,500',
-      color: ['bg-green-500', 'text-green-500'],
+      title: "Yearly Patients",
+      value: "1,500",
+      color: ["bg-green-500", "text-green-500"],
       icon: MdOutlineCalendarMonth,
     },
   ];
@@ -81,12 +81,12 @@ function Patients() {
               <h2 className="text-sm font-medium">{box.title}</h2>
               <h2 className="text-xl my-6 font-medium">{box.value}</h2>
               <p className="text-xs text-textGray">
-                Total Patients <span className={box.color[1]}>{box.value}</span>{' '}
-                {box.title === 'Today Patients'
-                  ? 'today'
-                  : box.title === 'Monthly Patients'
-                  ? 'this month'
-                  : 'this year'}
+                Total Patients <span className={box.color[1]}>{box.value}</span>{" "}
+                {box.title === "Today Patients"
+                  ? "today"
+                  : box.title === "Monthly Patients"
+                    ? "this month"
+                    : "this year"}
               </p>
             </div>
             <div
@@ -137,7 +137,7 @@ function Patients() {
             label="Filter"
             Icon={MdFilterList}
             onClick={() => {
-              toast.error('Filter data is not available yet');
+              toast.error("Filter data is not available yet");
             }}
           />
         </div>

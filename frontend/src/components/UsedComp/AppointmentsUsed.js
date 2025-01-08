@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { appointmentsData } from '../Datas';
-import AddAppointmentModal from '../Modals/AddApointmentModal';
-import { AppointmentTable } from '../Tables';
+import { useState } from "react";
+import { appointmentsData } from "../Datas";
+import AddAppointmentModal from "../Modals/AddApointmentModal";
+import { AppointmentTable } from "../Tables";
 
 function AppointmentsUsed({ doctor }) {
   const [open, setOpen] = useState(false);

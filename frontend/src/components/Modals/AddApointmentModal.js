@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import Modal from './Modal';
+import React, { useEffect, useState } from "react";
+import Modal from "./Modal";
 import {
   Button,
   Checkbox,
@@ -8,12 +8,12 @@ import {
   Select,
   Textarea,
   TimePickerComp,
-} from '../Form';
-import { BiChevronDown, BiPlus } from 'react-icons/bi';
-import { memberData, servicesData, sortsDatas } from '../Datas';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { toast } from 'react-hot-toast';
-import PatientMedicineServiceModal from './PatientMedicineServiceModal';
+} from "../Form";
+import { BiChevronDown, BiPlus } from "react-icons/bi";
+import { memberData, servicesData, sortsDatas } from "../Datas";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { toast } from "react-hot-toast";
+import PatientMedicineServiceModal from "./PatientMedicineServiceModal";
 
 // edit member data
 const doctorsData = memberData.map((item) => {
@@ -56,8 +56,8 @@ function AddAppointmentModal({ closeModal, isOpen, datas }) {
     <Modal
       closeModal={closeModal}
       isOpen={isOpen}
-      title={datas?.title ? 'Edit Appointment' : 'New Appointment'}
-      width={'max-w-3xl'}
+      title={datas?.title ? "Edit Appointment" : "New Appointment"}
+      width={"max-w-3xl"}
     >
       {open && (
         <PatientMedicineServiceModal
@@ -75,7 +75,7 @@ function AddAppointmentModal({ closeModal, isOpen, datas }) {
               placeholder={
                 datas?.title
                   ? datas.title
-                  : 'Select Patient and patient name will appear here'
+                  : "Select Patient and patient name will appear here"
               }
             />
           </div>
@@ -155,7 +155,7 @@ function AddAppointmentModal({ closeModal, isOpen, datas }) {
           placeholder={
             datas?.message
               ? datas.message
-              : 'She will be coming for a checkup.....'
+              : "She will be coming for a checkup....."
           }
           color={true}
           rows={5}
@@ -191,13 +191,13 @@ function AddAppointmentModal({ closeModal, isOpen, datas }) {
             onClick={closeModal}
             className="bg-red-600 bg-opacity-5 text-red-600 text-sm p-4 rounded-lg font-light"
           >
-            {datas?.title ? 'Discard' : 'Cancel'}
+            {datas?.title ? "Discard" : "Cancel"}
           </button>
           <Button
             label="Save"
             Icon={HiOutlineCheckCircle}
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
           />
         </div>

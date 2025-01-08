@@ -1,12 +1,12 @@
-import React from 'react';
-import { MdOutlineCloudDownload } from 'react-icons/md';
-import { toast } from 'react-hot-toast';
-import { BiPlus } from 'react-icons/bi';
-import Layout from '../Layout';
-import { Button } from '../components/Form';
-import { DoctorsTable } from '../components/Tables';
-import AddDoctorModal from '../components/Modals/AddDoctorModal';
-import { receptionsData } from '../components/Datas';
+import React from "react";
+import { MdOutlineCloudDownload } from "react-icons/md";
+import { toast } from "react-hot-toast";
+import { BiPlus } from "react-icons/bi";
+import Layout from "../Layout";
+import { Button } from "../components/Form";
+import { DoctorsTable } from "../components/Tables";
+import AddDoctorModal from "../components/Modals/AddDoctorModal";
+import { receptionsData } from "../components/Datas";
 
 function Receptions() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -67,7 +67,7 @@ function Receptions() {
             label="Export"
             Icon={MdOutlineCloudDownload}
             onClick={() => {
-              toast.error('Exporting is not available yet');
+              toast.error("Exporting is not available yet");
             }}
           />
         </div>

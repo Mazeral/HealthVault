@@ -1,12 +1,12 @@
-import React from 'react';
-import { MenuDatas } from '../components/Datas';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { MenuDatas } from "../components/Datas";
+import { Link } from "react-router-dom";
 
 function Sidebar() {
   // active link
   const currentPath = (path) => {
     const currentPath =
-      window.location.pathname.split('/')[1] === path.split('/')[1];
+      window.location.pathname.split("/")[1] === path.split("/")[1];
     if (currentPath) {
       return path;
     }
@@ -28,7 +28,7 @@ function Sidebar() {
             to={item.path}
             key={index}
             className={`
-            ${currentPath(item.path) === item.path ? 'bg-text' : ''}
+            ${currentPath(item.path) === item.path ? "bg-text" : ""}
             flex gap-4 transitions group items-center w-full p-4 rounded-lg hover:bg-text`}
           >
             <item.icon
@@ -38,8 +38,8 @@ function Sidebar() {
             <p
               className={`text-sm font-medium group-hover:text-subMain ${
                 currentPath(item.path) === item.path
-                  ? 'text-subMain'
-                  : 'text-gray-500'
+                  ? "text-subMain"
+                  : "text-gray-500"
               }`}
             >
               {item.title}
