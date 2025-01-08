@@ -8,6 +8,7 @@ datasource db {
 }
 
 model User {
+  name	    String	  @unique
   id        Int       @id @default(autoincrement())
   email     String    @unique
   password  String // Encrypted password
