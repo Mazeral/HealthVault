@@ -6,11 +6,20 @@ import labRouter from "./routes/labRouter";
 import prescriptionRouter from "./routes/prescriptionRouter";
 import patientRouter from "./routes/patientRouter";
 import authRouter from "./routes/AuthRouter";
+import cors from "cors";
 import { createClient } from "redis";
 const { RedisStore } = require("connect-redis");
 
 const app = express();
 const port: string = process.env.PORT || "5000";
+
+// Enable CORS for all routes
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+  credentials: true // Allow credentials (cookies, authorization headers, etc.)
+}));
 
 // Routes for the application
 app.use(userRouter);
