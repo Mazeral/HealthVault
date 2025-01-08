@@ -20,9 +20,10 @@ class AuthController {
   static async login(req: Request, res: Response) {
     try {
       const name: string = req.body.user;
-      const pwd: string = req.body.user;
+      const pwd: string = req.body.password;
 
       if (!name || !pwd) throw Error("Username and password required");
+
       const auth = new AuthController();
       const hashed: string | undefined = await auth.hashPassword(pwd);
       const user = await prisma.user.findFirst({
@@ -35,11 +36,20 @@ class AuthController {
           role: true,
         },
       });
+
       if (!user) throw Error("Invalid credentials");
-      req.session.userId = String(user.id);
-      req.session.role = user.role;
-      res.status(200).json({ loign: "success" });
-      if (!user) throw Error("Bad request");
+      if (!req.session) throw Error("Invalid credentials");
+
+      // Initialize `req.session.user` if it doesn't exist
+      if (!req.session.user) {
+        req.session.user = { id: "", role: "" };
+      }
+
+      // Set session properties
+      req.session.user.id = String(user.id); // Set `userId`
+      req.session.user.role = user.role; // Set `role`
+
+      res.status(200).json({ login: "success" });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "Username and password required")
@@ -56,14 +66,18 @@ class AuthController {
    * @res: The response request from express
    */
   static logout(req: Request, res: Response): void {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: "Could not log out" });
-      } else {
+    try {
+      const session = req.session;
+      session.destroy(function (err: Error | undefined) {
+        if (err) {
+          res.status(500).json({ error: "Could not log out" });
+          return; // Exit early if there's an error
+        }
         res.status(200).json({ logout: "success" });
-      }
-    });
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Could not log out" });
+    }
   }
 
   /**
@@ -72,15 +86,16 @@ class AuthController {
    * @res: The response request from express
    */
   static checkAuth(req: Request, res: Response): void {
-    if (!req.session.userId) {
+    if (!req.session.user?.id) {
+      // Check for `req.session.user.id`
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
     // If authenticated, send user details
     res.status(200).json({
-      userId: req.session.userId,
-      role: req.session.role,
+      userId: req.session.user.id,
+      role: req.session.user.role,
     });
   }
 }

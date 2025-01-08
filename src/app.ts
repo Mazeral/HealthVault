@@ -6,13 +6,11 @@ import labRouter from "./routes/labRouter";
 import prescriptionRouter from "./routes/prescriptionRouter";
 import patientRouter from "./routes/patientRouter";
 import authRouter from "./routes/AuthRouter";
-import connectRedis from "connect-redis";
-import Redis from "ioredis";
+import { createClient } from "redis";
+const { RedisStore } = require("connect-redis");
 
 const app = express();
 const port: string = process.env.PORT || "5000";
-
-app.use(express.json());
 
 // Routes for the application
 app.use(userRouter);
@@ -20,15 +18,28 @@ app.use(medRecordRouter);
 app.use(labRouter);
 app.use(patientRouter);
 app.use(prescriptionRouter);
-app.use("auth", authRouter);
+app.use("/auth", authRouter);
 
-// Session middleware
-//
-const RedisStore = connectRedis(session);
-const redisClient = new Redis();
+// Initialize client.
+let redisClient = createClient();
+redisClient.connect().catch(console.error);
+
+// Initialize store.
+let redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "myapp:",
+});
+redisClient.on("connect", () => {
+  console.log("Connected to Redis");
+});
+
+redisClient.on("error", (err: Error | undefined) => {
+  console.error("Redis error:", err);
+});
+
 app.use(
   session({
-    store: new RedisStore({ client: redisClient }),
+    store: redisStore,
     secret: "your-secret-key", // Replace with a strong secret
     resave: false,
     saveUninitialized: false,
@@ -40,6 +51,7 @@ app.use(
   }),
 );
 
+app.use(express.json());
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
 });

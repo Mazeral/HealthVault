@@ -3,9 +3,6 @@ import prisma from "./singleton";
 import UserController from "../src/controllers/UserController";
 import bcrypt from "bcrypt";
 
-// Mock the Prisma client
-jest.mock("../src/utils/prisma");
-
 // Mock bcrypt
 jest.mock("bcrypt");
 
@@ -31,6 +28,7 @@ describe("UserController", () => {
     it("should create a new user and return 200", async () => {
       const req = mockReq();
       req.body = {
+        name: "Foo",
         email: "test@example.com",
         password: "password123",
         role: "admin",
@@ -43,6 +41,7 @@ describe("UserController", () => {
       (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
       (prisma.user.create as jest.Mock).mockResolvedValue({
         id: 1,
+        name: "Foo",
         email: "test@example.com",
         password: hashedPassword,
         role: "admin",
@@ -54,6 +53,7 @@ describe("UserController", () => {
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
           email: "test@example.com",
+          name: "Foo",
           password: hashedPassword,
           role: "admin",
           patients: {
@@ -65,6 +65,7 @@ describe("UserController", () => {
       expect(res.json).toHaveBeenCalledWith({
         "new user:": {
           id: 1,
+          name: "Foo",
           email: "test@example.com",
           password: hashedPassword,
           role: "admin",
@@ -77,7 +78,7 @@ describe("UserController", () => {
       req.body = {
         email: "test@example.com",
         password: "password123",
-      }; // Missing role
+      }; // Missing role and name
 
       const res = mockRes();
 
@@ -97,6 +98,7 @@ describe("UserController", () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 1,
         email: "test@example.com",
+        name: "Joe",
       });
 
       await UserController.getUser(req as Request, res as Response);
@@ -106,7 +108,7 @@ describe("UserController", () => {
       });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        user: { id: 1, email: "test@example.com" },
+        user: { id: 1, name: "Joe", email: "test@example.com" },
       });
     });
 
@@ -139,7 +141,7 @@ describe("UserController", () => {
       const req = mockReq();
       const res = mockRes();
       (prisma.user.findMany as jest.Mock).mockResolvedValue([
-        { id: 1, email: "test@example.com" },
+        { id: 1, name: "Joe", email: "test@example.com" },
       ]);
 
       await UserController.allUsers(req as Request, res as Response);
@@ -147,7 +149,7 @@ describe("UserController", () => {
       expect(prisma.user.findMany).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        users: [{ id: 1, email: "test@example.com" }],
+        users: [{ id: 1, name: "Joe", email: "test@example.com" }],
       });
     });
   });
@@ -157,6 +159,7 @@ describe("UserController", () => {
       const req = mockReq();
       req.params = { id: "1" };
       req.body = {
+        name: "Joe",
         email: "updated@example.com",
         password: "newPassword123",
         role: "user",
@@ -171,6 +174,7 @@ describe("UserController", () => {
       expect(prisma.user.updateMany).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
+          name: "Joe",
           email: "updated@example.com",
           password: "newPassword123",
           role: "user",
@@ -282,4 +286,4 @@ describe("UserController", () => {
       expect(res.json).toHaveBeenCalledWith({ error: "No user ID" });
     });
   });
-});
+}); // <-- Missing bracket added here
