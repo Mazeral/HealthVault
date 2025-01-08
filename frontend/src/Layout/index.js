@@ -1,6 +1,6 @@
-import React from 'react';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import React from "react";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 function index({ children, title }) {
   return (

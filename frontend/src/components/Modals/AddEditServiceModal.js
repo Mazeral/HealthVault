@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import Modal from './Modal';
-import { Button, Input, Switchi, Textarea } from '../Form';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { toast } from 'react-hot-toast';
+import React, { useEffect, useState } from "react";
+import Modal from "./Modal";
+import { Button, Input, Switchi, Textarea } from "../Form";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { toast } from "react-hot-toast";
 
 function AddEditServiceModal({ closeModal, isOpen, datas }) {
   const [check, setCheck] = useState(false);
@@ -17,8 +17,8 @@ function AddEditServiceModal({ closeModal, isOpen, datas }) {
     <Modal
       closeModal={closeModal}
       isOpen={isOpen}
-      title={datas?.name ? 'Edit Service' : 'New Service'}
-      width={'max-w-3xl'}
+      title={datas?.name ? "Edit Service" : "New Service"}
+      width={"max-w-3xl"}
     >
       <div className="flex-colo gap-6">
         <Input
@@ -48,8 +48,8 @@ function AddEditServiceModal({ closeModal, isOpen, datas }) {
             checked={check}
             onChange={() => setCheck(!check)}
           />
-          <p className={`text-sm ${check ? 'text-subMain' : 'text-textGray'}`}>
-            {check ? 'Enabled' : 'Disabled'}
+          <p className={`text-sm ${check ? "text-subMain" : "text-textGray"}`}>
+            {check ? "Enabled" : "Disabled"}
           </p>
         </div>
         {/* buttones */}
@@ -58,13 +58,13 @@ function AddEditServiceModal({ closeModal, isOpen, datas }) {
             onClick={closeModal}
             className="bg-red-600 bg-opacity-5 text-red-600 text-sm p-4 rounded-lg font-light"
           >
-            {datas?.name ? 'Discard' : 'Cancel'}
+            {datas?.name ? "Discard" : "Cancel"}
           </button>
           <Button
             label="Save"
             Icon={HiOutlineCheckCircle}
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
           />
         </div>

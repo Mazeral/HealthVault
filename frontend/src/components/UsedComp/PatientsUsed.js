@@ -1,7 +1,7 @@
-import React from 'react';
-import { PatientTable } from '../Tables';
-import { useNavigate } from 'react-router-dom';
-import { memberData } from '../Datas';
+import React from "react";
+import { PatientTable } from "../Tables";
+import { useNavigate } from "react-router-dom";
+import { memberData } from "../Datas";
 
 function PatientsUsed() {
   const navigate = useNavigate();

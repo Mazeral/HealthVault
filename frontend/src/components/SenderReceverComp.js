@@ -1,5 +1,5 @@
-import React from 'react';
-import { BiPlus } from 'react-icons/bi';
+import React from "react";
+import { BiPlus } from "react-icons/bi";
 
 function SenderReceverComp({ item, functions, button }) {
   return (

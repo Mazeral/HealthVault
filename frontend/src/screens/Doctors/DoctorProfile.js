@@ -1,15 +1,15 @@
-import React from 'react';
-import Layout from '../../Layout';
-import PersonalInfo from '../../components/UsedComp/PersonalInfo';
-import ChangePassword from '../../components/UsedComp/ChangePassword';
-import { Link } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import PatientsUsed from '../../components/UsedComp/PatientsUsed';
-import AppointmentsUsed from '../../components/UsedComp/AppointmentsUsed';
-import { doctorTab } from '../../components/Datas';
-import PaymentsUsed from '../../components/UsedComp/PaymentUsed';
-import InvoiceUsed from '../../components/UsedComp/InvoiceUsed';
-import Access from '../../components/Access';
+import React from "react";
+import Layout from "../../Layout";
+import PersonalInfo from "../../components/UsedComp/PersonalInfo";
+import ChangePassword from "../../components/UsedComp/ChangePassword";
+import { Link } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import PatientsUsed from "../../components/UsedComp/PatientsUsed";
+import AppointmentsUsed from "../../components/UsedComp/AppointmentsUsed";
+import { doctorTab } from "../../components/Datas";
+import PaymentsUsed from "../../components/UsedComp/PaymentUsed";
+import InvoiceUsed from "../../components/UsedComp/InvoiceUsed";
+import Access from "../../components/Access";
 
 function DoctorProfile() {
   const [activeTab, setActiveTab] = React.useState(1);
@@ -74,8 +74,8 @@ function DoctorProfile() {
                 className={`
                 ${
                   activeTab === tab.id
-                    ? 'bg-text text-subMain'
-                    : 'bg-dry text-main hover:bg-text hover:text-subMain'
+                    ? "bg-text text-subMain"
+                    : "bg-dry text-main hover:bg-text hover:text-subMain"
                 }
                 text-xs gap-4 flex items-center w-full p-4 rounded`}
               >

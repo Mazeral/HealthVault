@@ -1,8 +1,8 @@
-import { Menu } from '@headlessui/react';
-import React from 'react';
-import { FaBirthdayCake } from 'react-icons/fa';
-import { notificationsData } from './Datas';
-import { BiCalendar } from 'react-icons/bi';
+import { Menu } from "@headlessui/react";
+import React from "react";
+import { FaBirthdayCake } from "react-icons/fa";
+import { notificationsData } from "./Datas";
+import { BiCalendar } from "react-icons/bi";
 
 function NotificationComp({ children }) {
   return (
@@ -27,8 +27,8 @@ function NotificationComp({ children }) {
                   <div
                     className={`${
                       item.action === 1
-                        ? 'bg-subMain text-white'
-                        : 'bg-text text-subMain'
+                        ? "bg-subMain text-white"
+                        : "bg-text text-subMain"
                     }
                   w-12 h-12 rounded-full text-md flex-colo border-[.5px] border-subMain`}
                   >
@@ -38,18 +38,18 @@ function NotificationComp({ children }) {
                 <div className="xs:col-span-10 ">
                   {item.action === 1 ? (
                     <p className="text-sm text-textGray">
-                      Its{' '}
+                      Its{" "}
                       <span className="text-main font-medium">
                         {item.user.title}
-                      </span>{' '}
+                      </span>{" "}
                       birthday today
                     </p>
                   ) : (
                     <p className="text-sm text-textGray">
-                      Recent appointment with{' '}
+                      Recent appointment with{" "}
                       <span className="text-main font-medium">
                         {item.user.title}
-                      </span>{' '}
+                      </span>{" "}
                       at 2:00 PM
                     </p>
                   )}

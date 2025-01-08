@@ -3,51 +3,53 @@ import prisma from "../utils/prisma";
 import bcrypt from "bcrypt";
 
 class AuthController {
-	  private async hashPassword(pwd: string) {
-		try {
-		  const salt = await bcrypt.genSalt(Number(process.env.SALT));
-		  const hash = await bcrypt.hash(pwd, salt);
-		  return hash;
-		} catch (error) {
-		  if (error instanceof Error) throw error;
-		}
-	  }
-	/**
-	 * login
-	 * @req: A request object from express, contains the request
-	 * @res: The response request from express
-	 */
-	static async login(req: Request, res: Response) {
-		try {
-			const name: string = req.body.user;	
-			const pwd: string = req.body.user;
+  private async hashPassword(pwd: string) {
+    try {
+      const salt = await bcrypt.genSalt(Number(process.env.SALT));
+      const hash = await bcrypt.hash(pwd, salt);
+      return hash;
+    } catch (error) {
+      if (error instanceof Error) throw error;
+    }
+  }
+  /**
+   * login
+   * @req: A request object from express, contains the request
+   * @res: The response request from express
+   */
+  static async login(req: Request, res: Response) {
+    try {
+      const name: string = req.body.user;
+      const pwd: string = req.body.user;
 
-			if (!name || !pwd) throw Error("Username and password required")
-			const auth = new AuthController()
-			const hashed: string | undefined = await auth.hashPassword(pwd)
-			const user = await prisma.user.findFirst({
-				where:{
-					name: name,
-					password: hashed
-				},
-				select:{
-					id: true,
-					role: true,
-				}
-			})
-			if (!user) throw Error("Invalid credentials")
-			req.session.userId = String(user.id);
-			req.session.role = user.role;
-			res.status(200).json({loign: "success"})
-			if (!user) throw Error("Bad request")
-		} catch (error) {
-			if (error instanceof Error){
-				if (error.message === "Username and password required") res.status(400).json({error: error.message})	
-				else  if (error.message === "Invalid credentials") res.status(401).json({error: error.message})	
-				else res.status(500).json({error: error.message})
-			}
-		}
-	}
+      if (!name || !pwd) throw Error("Username and password required");
+      const auth = new AuthController();
+      const hashed: string | undefined = await auth.hashPassword(pwd);
+      const user = await prisma.user.findFirst({
+        where: {
+          name: name,
+          password: hashed,
+        },
+        select: {
+          id: true,
+          role: true,
+        },
+      });
+      if (!user) throw Error("Invalid credentials");
+      req.session.userId = String(user.id);
+      req.session.role = user.role;
+      res.status(200).json({ loign: "success" });
+      if (!user) throw Error("Bad request");
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Username and password required")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "Invalid credentials")
+          res.status(401).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
+    }
+  }
   /**
    * Logout
    * @req: A request object from express, contains the request
@@ -83,4 +85,4 @@ class AuthController {
   }
 }
 
-export default AuthController
+export default AuthController;

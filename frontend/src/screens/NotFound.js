@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '../components/Form';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Button } from "../components/Form";
+import { useNavigate } from "react-router-dom";
 
 function NotFound() {
   const navigate = useNavigate();
@@ -17,9 +17,9 @@ function NotFound() {
       </p>
       <div className="w-48">
         <Button
-          label={'Back to Home'}
+          label={"Back to Home"}
           Icon={null}
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
         />
       </div>
     </div>

@@ -1,6 +1,6 @@
-import { BsClipboardData } from 'react-icons/bs';
-import { Link } from 'react-router-dom';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { BsClipboardData } from "react-icons/bs";
+import { Link } from "react-router-dom";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 export const InlineError = ({ text }) => {
   return (

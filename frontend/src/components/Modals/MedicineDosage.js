@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
-import { BiChevronDown, BiPlus } from 'react-icons/bi';
-import PatientMedicineServiceModal from './PatientMedicineServiceModal';
-import { Button, Checkbox, Input, Select } from '../Form';
-import { sortsDatas } from '../Datas';
+import React, { useState } from "react";
+import Modal from "./Modal";
+import { BiChevronDown, BiPlus } from "react-icons/bi";
+import PatientMedicineServiceModal from "./PatientMedicineServiceModal";
+import { Button, Checkbox, Input, Select } from "../Form";
+import { sortsDatas } from "../Datas";
 
 function MedicineDosageModal({ closeModal, isOpen }) {
   const [open, setOpen] = useState(false);
@@ -14,7 +14,7 @@ function MedicineDosageModal({ closeModal, isOpen }) {
         name: item.value,
         checked: false,
       };
-    })
+    }),
   );
   // on change dosage
   const onChangeDosage = (e) => {
@@ -33,22 +33,22 @@ function MedicineDosageModal({ closeModal, isOpen }) {
 
   const summery = [
     {
-      title: 'Service Name',
-      value: 'Paracetamol',
+      title: "Service Name",
+      value: "Paracetamol",
       color: false,
     },
     {
-      title: 'Item Price',
+      title: "Item Price",
       value: `$5500`,
       color: false,
     },
     {
-      title: 'Quantity',
+      title: "Quantity",
       value: 6,
       color: false,
     },
     {
-      title: 'Total',
+      title: "Total",
       value: `$ 33000`,
       color: true,
     },
@@ -67,7 +67,7 @@ function MedicineDosageModal({ closeModal, isOpen }) {
         closeModal={closeModal}
         isOpen={isOpen}
         title="Add Item"
-        width={'max-w-xl'}
+        width={"max-w-xl"}
       >
         <div className="flex-colo gap-6">
           {/* title */}
@@ -93,9 +93,9 @@ function MedicineDosageModal({ closeModal, isOpen }) {
               </div>
             </Select>
           </div>
-          <Input label="Quantity" color={true} type={'number'} />
+          <Input label="Quantity" color={true} type={"number"} />
           {/* dosage */}
-          <Input label="Dosage Quantity" color={true} type={'number'} />
+          <Input label="Dosage Quantity" color={true} type={"number"} />
           <div className="flex w-full flex-col gap-4">
             <p className="text-black text-sm">Dosage</p>
             <div className="grid xs:grid-cols-3 gap-6 pb-6">
@@ -124,8 +124,8 @@ function MedicineDosageModal({ closeModal, isOpen }) {
                   <p
                     className={
                       item.color
-                        ? 'text-xs text-subMain bg-subMain bg-opacity-10 font-semibold py-1 px-4 rounded-full'
-                        : 'text-sm font-medium text-textGray'
+                        ? "text-xs text-subMain bg-subMain bg-opacity-10 font-semibold py-1 px-4 rounded-full"
+                        : "text-sm font-medium text-textGray"
                     }
                   >
                     {item.value}

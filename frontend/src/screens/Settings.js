@@ -1,21 +1,21 @@
-import React from 'react';
-import Layout from '../Layout';
-import { BiUserPlus } from 'react-icons/bi';
-import { RiLockPasswordLine } from 'react-icons/ri';
-import PersonalInfo from '../components/UsedComp/PersonalInfo';
-import ChangePassword from '../components/UsedComp/ChangePassword';
+import React from "react";
+import Layout from "../Layout";
+import { BiUserPlus } from "react-icons/bi";
+import { RiLockPasswordLine } from "react-icons/ri";
+import PersonalInfo from "../components/UsedComp/PersonalInfo";
+import ChangePassword from "../components/UsedComp/ChangePassword";
 
 function Settings() {
   const [activeTab, setActiveTab] = React.useState(1);
   const tabs = [
     {
       id: 1,
-      name: 'Personal Information',
+      name: "Personal Information",
       icon: BiUserPlus,
     },
     {
       id: 2,
-      name: 'Change Password',
+      name: "Change Password",
       icon: RiLockPasswordLine,
     },
   ];
@@ -61,8 +61,8 @@ function Settings() {
                 className={`
                 ${
                   activeTab === tab.id
-                    ? 'bg-text text-subMain'
-                    : 'bg-dry text-main hover:bg-text hover:text-subMain'
+                    ? "bg-text text-subMain"
+                    : "bg-dry text-main hover:bg-text hover:text-subMain"
                 }
                 text-xs gap-4 flex items-center w-full p-4 rounded`}
               >

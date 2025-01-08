@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import Layout from '../../Layout';
+import React, { useState } from "react";
+import Layout from "../../Layout";
 import {
   Button,
   FromToDate,
   Input,
   Select,
   Textarea,
-} from '../../components/Form';
-import { BiChevronDown, BiPlus } from 'react-icons/bi';
-import PatientMedicineServiceModal from '../../components/Modals/PatientMedicineServiceModal';
-import AddItemModal from '../../components/Modals/AddItemInvoiceModal';
-import { invoicesData, sortsDatas } from '../../components/Datas';
-import { toast } from 'react-hot-toast';
-import { BsSend } from 'react-icons/bs';
-import { Link, useParams } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import { InvoiceProductsTable } from '../../components/Tables';
-import SenderReceverComp from '../../components/SenderReceverComp';
+} from "../../components/Form";
+import { BiChevronDown, BiPlus } from "react-icons/bi";
+import PatientMedicineServiceModal from "../../components/Modals/PatientMedicineServiceModal";
+import AddItemModal from "../../components/Modals/AddItemInvoiceModal";
+import { invoicesData, sortsDatas } from "../../components/Datas";
+import { toast } from "react-hot-toast";
+import { BsSend } from "react-icons/bs";
+import { Link, useParams } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { InvoiceProductsTable } from "../../components/Tables";
+import SenderReceverComp from "../../components/SenderReceverComp";
 function EditInvoice() {
   const { id } = useParams();
   const [dateRange, setDateRange] = useState([
@@ -102,7 +102,7 @@ function EditInvoice() {
               data={invoice?.items}
               functions={{
                 deleteItem: (id) => {
-                  toast.error('This feature is not available yet');
+                  toast.error("This feature is not available yet");
                 },
               }}
               button={true}
@@ -131,13 +131,13 @@ function EditInvoice() {
                 label="Discount"
                 color={true}
                 type="number"
-                placeholder={'3000'}
+                placeholder={"3000"}
               />
               <Input
                 label="Tax(%)"
                 color={true}
                 type="number"
-                placeholder={'3'}
+                placeholder={"3"}
               />
             </div>
             <div className="flex-btn gap-4">
@@ -167,7 +167,7 @@ function EditInvoice() {
             <Button
               label="Update"
               onClick={() => {
-                toast.error('This feature is not available yet');
+                toast.error("This feature is not available yet");
               }}
               Icon={BsSend}
             />

@@ -1,9 +1,9 @@
-import React from 'react';
-import { sortsDatas } from '../../components/Datas';
-import { Button, Input, Select, Textarea } from '../../components/Form';
-import { BiChevronDown } from 'react-icons/bi';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { toast } from 'react-hot-toast';
+import React from "react";
+import { sortsDatas } from "../../components/Datas";
+import { Button, Input, Select, Textarea } from "../../components/Form";
+import { BiChevronDown } from "react-icons/bi";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { toast } from "react-hot-toast";
 
 // Health Information
 // allergies
@@ -12,7 +12,7 @@ import { toast } from 'react-hot-toast';
 
 function HealthInfomation() {
   const [bloodType, setBloodType] = React.useState(
-    sortsDatas.bloodTypeFilter[0]
+    sortsDatas.bloodTypeFilter[0],
   );
   return (
     <div className="flex-colo gap-4">
@@ -33,37 +33,37 @@ function HealthInfomation() {
         </div>
 
         {/* weight */}
-        <Input label="Weight" color={true} type="text" placeholder={'60kg'} />
+        <Input label="Weight" color={true} type="text" placeholder={"60kg"} />
         {/* height */}
-        <Input label="Height" color={true} type="text" placeholder={'5.5ft'} />
+        <Input label="Height" color={true} type="text" placeholder={"5.5ft"} />
         {/* allergies */}
         <Textarea
           label="Allergies"
           color={true}
           rows={3}
-          placeholder={'beans, nuts, etc'}
+          placeholder={"beans, nuts, etc"}
         />
         {/* habits */}
         <Textarea
           label="Habits"
           color={true}
           rows={3}
-          placeholder={'smoking, drinking, etc'}
+          placeholder={"smoking, drinking, etc"}
         />
         {/* Medical History */}
         <Textarea
           label="Medical History"
           color={true}
           rows={3}
-          placeholder={'diabetes,  malaria, glaucoma, etc'}
+          placeholder={"diabetes,  malaria, glaucoma, etc"}
         />
 
         {/* submit */}
         <Button
-          label={'Save Changes'}
+          label={"Save Changes"}
           Icon={HiOutlineCheckCircle}
           onClick={() => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
           }}
         />
       </div>

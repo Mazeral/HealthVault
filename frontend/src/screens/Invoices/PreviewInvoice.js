@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import Layout from '../../Layout';
-import { invoicesData } from '../../components/Datas';
-import { toast } from 'react-hot-toast';
-import { Link, useParams } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import { FiEdit } from 'react-icons/fi';
-import { MdOutlineCloudDownload } from 'react-icons/md';
-import { AiOutlinePrinter } from 'react-icons/ai';
-import PaymentModal from '../../components/Modals/PaymentModal';
-import { RiShareBoxLine } from 'react-icons/ri';
-import ShareModal from '../../components/Modals/ShareModal';
-import SenderReceverComp from '../../components/SenderReceverComp';
-import { InvoiceProductsTable } from '../../components/Tables';
+import React, { useState } from "react";
+import Layout from "../../Layout";
+import { invoicesData } from "../../components/Datas";
+import { toast } from "react-hot-toast";
+import { Link, useParams } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { FiEdit } from "react-icons/fi";
+import { MdOutlineCloudDownload } from "react-icons/md";
+import { AiOutlinePrinter } from "react-icons/ai";
+import PaymentModal from "../../components/Modals/PaymentModal";
+import { RiShareBoxLine } from "react-icons/ri";
+import ShareModal from "../../components/Modals/ShareModal";
+import SenderReceverComp from "../../components/SenderReceverComp";
+import { InvoiceProductsTable } from "../../components/Tables";
 
 function PreviewInvoice() {
   const { id } = useParams();
@@ -19,7 +19,7 @@ function PreviewInvoice() {
   const [isShareOpen, setIsShareOpen] = useState(false);
 
   const buttonClass =
-    'bg-subMain flex-rows gap-3 bg-opacity-5 text-subMain rounded-lg border border-subMain border-dashed px-4 py-3 text-sm';
+    "bg-subMain flex-rows gap-3 bg-opacity-5 text-subMain rounded-lg border border-subMain border-dashed px-4 py-3 text-sm";
 
   const invoice = invoicesData.find((invoice) => invoice.id.toString() === id);
 
@@ -63,7 +63,7 @@ function PreviewInvoice() {
           </button>
           <button
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
             className={buttonClass}
           >
@@ -71,7 +71,7 @@ function PreviewInvoice() {
           </button>
           <button
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
             className={buttonClass}
           >

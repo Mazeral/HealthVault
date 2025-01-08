@@ -20,7 +20,7 @@ app.use(medRecordRouter);
 app.use(labRouter);
 app.use(patientRouter);
 app.use(prescriptionRouter);
-app.use('auth', authRouter);
+app.use("auth", authRouter);
 
 // Session middleware
 //
@@ -37,7 +37,7 @@ app.use(
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
-  })
+  }),
 );
 
 app.listen(port, () => {

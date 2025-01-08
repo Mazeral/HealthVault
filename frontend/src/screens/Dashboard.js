@@ -1,5 +1,5 @@
-import React from 'react';
-import Layout from '../Layout';
+import React from "react";
+import Layout from "../Layout";
 import {
   BsArrowDownLeft,
   BsArrowDownRight,
@@ -7,16 +7,16 @@ import {
   BsCheckCircleFill,
   BsClockFill,
   BsXCircleFill,
-} from 'react-icons/bs';
-import { DashboardBigChart, DashboardSmallChart } from '../components/Charts';
+} from "react-icons/bs";
+import { DashboardBigChart, DashboardSmallChart } from "../components/Charts";
 import {
   appointmentsData,
   dashboardCards,
   memberData,
   transactionData,
-} from '../components/Datas';
-import { Transactiontable } from '../components/Tables';
-import { Link } from 'react-router-dom';
+} from "../components/Datas";
+import { Transactiontable } from "../components/Tables";
+import { Link } from "react-router-dom";
 
 function Dashboard() {
   return (
@@ -46,7 +46,7 @@ function Dashboard() {
                   {card.value}
                   {
                     // if the id === 4 then add the $ sign
-                    card.id === 4 ? '$' : '+'
+                    card.id === 4 ? "$" : "+"
                   }
                 </h4>
                 <p className={`text-sm flex gap-2 ${card.color[1]}`}>
@@ -68,7 +68,7 @@ function Dashboard() {
             <div className="flex-btn gap-2">
               <h2 className="text-sm font-medium">Earning Reports</h2>
               <p className="flex gap-4 text-sm items-center">
-                5.44%{' '}
+                5.44%{" "}
                 <span className="py-1 px-2 bg-subMain text-white text-xs rounded-xl">
                   +2.4%
                 </span>
@@ -84,7 +84,7 @@ function Dashboard() {
             <div className="flex-btn gap-2">
               <h2 className="text-sm font-medium">Recent Transaction</h2>
               <p className="flex gap-4 text-sm items-center">
-                Today{' '}
+                Today{" "}
                 <span className="py-1 px-2 bg-subMain text-white text-xs rounded-xl">
                   27000$
                 </span>
@@ -147,21 +147,21 @@ function Dashboard() {
                   <div
                     className={`w-7 h-7 flex-colo text-sm bg-opacity-10
                    ${
-                     appointment.status === 'Pending' &&
-                     'bg-orange-500 text-orange-500'
+                     appointment.status === "Pending" &&
+                     "bg-orange-500 text-orange-500"
                    }
                   ${
-                    appointment.status === 'Cancel' && 'bg-red-500 text-red-500'
+                    appointment.status === "Cancel" && "bg-red-500 text-red-500"
                   }
                   ${
-                    appointment.status === 'Approved' &&
-                    'bg-green-500 text-green-500'
+                    appointment.status === "Approved" &&
+                    "bg-green-500 text-green-500"
                   }
                    rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`}
                   >
-                    {appointment.status === 'Pending' && <BsClockFill />}
-                    {appointment.status === 'Cancel' && <BsXCircleFill />}
-                    {appointment.status === 'Approved' && <BsCheckCircleFill />}
+                    {appointment.status === "Pending" && <BsClockFill />}
+                    {appointment.status === "Cancel" && <BsXCircleFill />}
+                    {appointment.status === "Approved" && <BsCheckCircleFill />}
                   </div>
                 </div>
                 <Link

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button, Input } from '../Form';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { toast } from 'react-hot-toast';
+import React from "react";
+import { Button, Input } from "../Form";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { toast } from "react-hot-toast";
 
 function ChangePassword() {
   return (
@@ -14,10 +14,10 @@ function ChangePassword() {
       <Input label="Confirm Password" color={true} type="password" />
       {/* submit */}
       <Button
-        label={'Save Changes'}
+        label={"Save Changes"}
         Icon={HiOutlineCheckCircle}
         onClick={() => {
-          toast.error('This feature is not available yet');
+          toast.error("This feature is not available yet");
         }}
       />
     </div>

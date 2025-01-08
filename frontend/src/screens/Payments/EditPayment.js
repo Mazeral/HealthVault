@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import Layout from '../../Layout';
-import { toast } from 'react-hot-toast';
-import { Link, useParams } from 'react-router-dom';
-import { IoArrowBackOutline } from 'react-icons/io5';
-import { Button, Select, Textarea } from '../../components/Form';
-import { BsSend } from 'react-icons/bs';
+import React, { useState } from "react";
+import Layout from "../../Layout";
+import { toast } from "react-hot-toast";
+import { Link, useParams } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { Button, Select, Textarea } from "../../components/Form";
+import { BsSend } from "react-icons/bs";
 import {
   invoicesData,
   sortsDatas,
   transactionData,
-} from '../../components/Datas';
-import { BiChevronDown } from 'react-icons/bi';
-import SenderReceverComp from '../../components/SenderReceverComp';
-import { InvoiceProductsTable } from '../../components/Tables';
+} from "../../components/Datas";
+import { BiChevronDown } from "react-icons/bi";
+import SenderReceverComp from "../../components/SenderReceverComp";
+import { InvoiceProductsTable } from "../../components/Tables";
 
 function EditPayment() {
   const { id } = useParams();
@@ -48,12 +48,12 @@ function EditPayment() {
             <span
               className={`text-xs px-4
               ${
-                payment.status === 'Paid'
-                  ? 'bg-subMain text-subMain border-subMain'
-                  : payment.status === 'Pending'
-                  ? 'bg-orange-500 text-orange-500 border-orange-500'
-                  : payment.status === 'Cancel' &&
-                    'bg-red-600 text-red-600 border-red-600'
+                payment.status === "Paid"
+                  ? "bg-subMain text-subMain border-subMain"
+                  : payment.status === "Pending"
+                    ? "bg-orange-500 text-orange-500 border-orange-500"
+                    : payment.status === "Cancel" &&
+                      "bg-red-600 text-red-600 border-red-600"
               }
                py-1 border bg-opacity-10 border-opacity-40 rounded-full`}
             >
@@ -135,7 +135,7 @@ function EditPayment() {
             <Button
               label="Update"
               onClick={() => {
-                toast.error('This feature is not available yet');
+                toast.error("This feature is not available yet");
               }}
               Icon={BsSend}
             />

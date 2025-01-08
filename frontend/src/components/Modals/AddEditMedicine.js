@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import Modal from './Modal';
-import { Button, Input, Select, Textarea } from '../Form';
-import { BiChevronDown } from 'react-icons/bi';
-import { sortsDatas } from '../Datas';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { toast } from 'react-hot-toast';
+import React, { useEffect, useState } from "react";
+import Modal from "./Modal";
+import { Button, Input, Select, Textarea } from "../Form";
+import { BiChevronDown } from "react-icons/bi";
+import { sortsDatas } from "../Datas";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { toast } from "react-hot-toast";
 
 function AddEditMedicineModal({ closeModal, isOpen, datas }) {
   const [measures, setMeasures] = useState(sortsDatas.measure[0]);
@@ -22,8 +22,8 @@ function AddEditMedicineModal({ closeModal, isOpen, datas }) {
     <Modal
       closeModal={closeModal}
       isOpen={isOpen}
-      title={datas?.name ? 'Edit Medicine' : 'New Medicine'}
-      width={'max-w-3xl'}
+      title={datas?.name ? "Edit Medicine" : "New Medicine"}
+      width={"max-w-3xl"}
     >
       <div className="flex-colo gap-6">
         <div className="grid sm:grid-cols-2 gap-4 w-full">
@@ -74,13 +74,13 @@ function AddEditMedicineModal({ closeModal, isOpen, datas }) {
             onClick={closeModal}
             className="bg-red-600 bg-opacity-5 text-red-600 text-sm p-4 rounded-lg font-light"
           >
-            {datas?.name ? 'Discard' : 'Cancel'}
+            {datas?.name ? "Discard" : "Cancel"}
           </button>
           <Button
             label="Save"
             Icon={HiOutlineCheckCircle}
             onClick={() => {
-              toast.error('This feature is not available yet');
+              toast.error("This feature is not available yet");
             }}
           />
         </div>

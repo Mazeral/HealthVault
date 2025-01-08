@@ -1,23 +1,23 @@
-import React from 'react';
-import { Button, Input, Select, Textarea } from '../Form';
-import { BiChevronDown } from 'react-icons/bi';
-import { toast } from 'react-hot-toast';
+import React from "react";
+import { Button, Input, Select, Textarea } from "../Form";
+import { BiChevronDown } from "react-icons/bi";
+import { toast } from "react-hot-toast";
 
 const sendToData = [
   {
     id: 1,
-    name: 'All Patients',
-    value: 'all',
+    name: "All Patients",
+    value: "all",
   },
   {
     id: 2,
-    name: 'NHCF Patients',
-    value: 'nhcf',
+    name: "NHCF Patients",
+    value: "nhcf",
   },
   {
     id: 3,
-    name: 'Britam Patients',
-    value: 'britam',
+    name: "Britam Patients",
+    value: "britam",
   },
 ];
 
@@ -57,7 +57,7 @@ function WhatsappComp({ data }) {
       <Textarea
         label="Message"
         placeholder={
-          data?.id ? data?.action?.message : 'Dear Delight patient ....'
+          data?.id ? data?.action?.message : "Dear Delight patient ...."
         }
         color={true}
         rows={5}
@@ -65,9 +65,9 @@ function WhatsappComp({ data }) {
       {/* button */}
       {!data?.id && (
         <Button
-          label={'Send Campaign'}
+          label={"Send Campaign"}
           onClick={() => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
           }}
         />
       )}

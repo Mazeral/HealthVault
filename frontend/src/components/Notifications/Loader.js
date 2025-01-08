@@ -1,4 +1,4 @@
-import { ScaleLoader } from 'react-spinners';
+import { ScaleLoader } from "react-spinners";
 
 function Loader() {
   return (

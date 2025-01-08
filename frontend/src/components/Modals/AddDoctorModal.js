@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
-import { Button, Input, Select } from '../Form';
-import { BiChevronDown } from 'react-icons/bi';
-import { sortsDatas } from '../Datas';
-import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { toast } from 'react-hot-toast';
-import Access from '../Access';
-import Uploader from '../Uploader';
+import React, { useState } from "react";
+import Modal from "./Modal";
+import { Button, Input, Select } from "../Form";
+import { BiChevronDown } from "react-icons/bi";
+import { sortsDatas } from "../Datas";
+import { HiOutlineCheckCircle } from "react-icons/hi";
+import { toast } from "react-hot-toast";
+import Access from "../Access";
+import Uploader from "../Uploader";
 
 function AddDoctorModal({ closeModal, isOpen, doctor, datas }) {
   const [instraction, setInstraction] = useState(sortsDatas.title[0]);
   const [access, setAccess] = useState({});
 
   const onSubmit = () => {
-    toast.error('This feature is not available yet');
+    toast.error("This feature is not available yet");
   };
 
   return (
     <Modal
       closeModal={closeModal}
       isOpen={isOpen}
-      title={doctor ? 'Add Doctor' : datas?.id ? 'Edit Stuff' : 'Add Stuff'}
-      width={'max-w-3xl'}
+      title={doctor ? "Add Doctor" : datas?.id ? "Edit Stuff" : "Add Stuff"}
+      width={"max-w-3xl"}
     >
       <div className="flex gap-3 flex-col col-span-6 mb-6">
         <p className="text-sm">Profile Image</p>

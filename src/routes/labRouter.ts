@@ -1,20 +1,26 @@
 import express from "express";
 import LabController from "../controllers/LabController";
+import { authMiddleware } from "../middlewares/AuthMiddleware";
+authMiddleware;
 
 const labRouter = express.Router();
-// Create a lab result
-labRouter.post("/lab-results/:id", LabController.newLabResult);
 
-// Get a lab result
-labRouter.get("/lab-result/:id", LabController.getLabResult);
-
-// Get all lab results
-labRouter.get("/lab-results", LabController.allLabResults);
-
-// Update a lab result
-labRouter.put("/lab-results/:id", LabController.updateLabResult);
-
-// Delete a lab result
-labRouter.delete("/lab-results/:id", LabController.deleteLabResult);
+// Apply authMiddleware to specific routes
+labRouter.post(
+  "/lab-results/:id",
+  authMiddleware as express.RequestHandler,
+  LabController.newLabResult,
+); // Protected
+labRouter.get(
+  "/lab-result/:id",
+  authMiddleware as express.RequestHandler,
+  LabController.getLabResult,
+); // Protected
+labRouter.get("/lab-results", LabController.allLabResults); // Public
+labRouter.delete(
+  "/lab-results/:id",
+  authMiddleware as express.RequestHandler,
+  LabController.deleteLabResult,
+); // Protected
 
 export default labRouter;

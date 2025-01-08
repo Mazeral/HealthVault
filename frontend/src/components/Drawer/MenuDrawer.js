@@ -1,6 +1,6 @@
-import React from 'react';
-import MainDrawer from './MainDrawer';
-import Sidebar from '../../Layout/Sidebar';
+import React from "react";
+import MainDrawer from "./MainDrawer";
+import Sidebar from "../../Layout/Sidebar";
 
 function MenuDrawer({ isOpen, toggleDrawer }) {
   return (

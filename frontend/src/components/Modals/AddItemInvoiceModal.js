@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
-import { BiPlus } from 'react-icons/bi';
-import PatientMedicineServiceModal from './PatientMedicineServiceModal';
-import { Button, Input } from '../Form';
+import React, { useState } from "react";
+import Modal from "./Modal";
+import { BiPlus } from "react-icons/bi";
+import PatientMedicineServiceModal from "./PatientMedicineServiceModal";
+import { Button, Input } from "../Form";
 
 function AddItemModal({ closeModal, isOpen }) {
   const [open, setOpen] = useState(false);
 
   const summery = [
     {
-      title: 'Service Name',
-      value: 'Paracetamol',
+      title: "Service Name",
+      value: "Paracetamol",
       color: false,
     },
     {
-      title: 'Item Price',
+      title: "Item Price",
       value: `$ 5500`,
       color: false,
     },
     {
-      title: 'Quantity',
+      title: "Quantity",
       value: 6,
       color: false,
     },
     {
-      title: 'Total',
+      title: "Total",
       value: `$ 33000`,
       color: true,
     },
@@ -43,7 +43,7 @@ function AddItemModal({ closeModal, isOpen }) {
         closeModal={closeModal}
         isOpen={isOpen}
         title="Add Item"
-        width={'max-w-xl'}
+        width={"max-w-xl"}
       >
         <div className="flex-colo gap-6">
           {/* title */}
@@ -57,7 +57,7 @@ function AddItemModal({ closeModal, isOpen }) {
             </button>
           </div>
           {/* quantity */}
-          <Input label="Quantity" color={true} type={'number'} />
+          <Input label="Quantity" color={true} type={"number"} />
           {/* summery */}
           <div className="flex flex-col gap-4 w-full">
             <p className="text-black text-sm">Summary</p>
@@ -71,8 +71,8 @@ function AddItemModal({ closeModal, isOpen }) {
                   <p
                     className={
                       item.color
-                        ? 'text-xs text-subMain bg-subMain bg-opacity-10 font-semibold py-1 px-4 rounded-full'
-                        : 'text-sm font-medium text-textGray'
+                        ? "text-xs text-subMain bg-subMain bg-opacity-10 font-semibold py-1 px-4 rounded-full"
+                        : "text-sm font-medium text-textGray"
                     }
                   >
                     {item.value}

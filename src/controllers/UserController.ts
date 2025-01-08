@@ -16,7 +16,7 @@ class UserController {
   // creates a new user
   static async newUser(req: Request, res: Response) {
     try {
-	const name = req.body.name || null;
+      const name = req.body.name || null;
       const email = req.body.email || null;
       let password = req.body.password || null;
       const role = req.body.role || null;
@@ -28,7 +28,7 @@ class UserController {
       password = await hash.hashPassword(password);
       const result = await prisma.user.create({
         data: {
-		name: name,
+          name: name,
           email: email,
           password: password,
           role: role,
@@ -93,7 +93,7 @@ class UserController {
       if (!user) throw Error("No user found");
 
       const data = createObject({
-		name: String(req.body.name),
+        name: String(req.body.name),
         email: String(req.body.email),
         password: String(req.body.password),
         role: String(req.body.role),

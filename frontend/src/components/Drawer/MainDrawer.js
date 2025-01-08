@@ -1,5 +1,5 @@
-import React from 'react';
-import Drawer from 'react-modern-drawer';
+import React from "react";
+import Drawer from "react-modern-drawer";
 
 function MainDrawer({ isOpen, toggleDrawer, children }) {
   return (

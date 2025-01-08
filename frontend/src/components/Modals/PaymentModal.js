@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
-import { Button, Select } from '../Form';
-import { sortsDatas } from '../Datas';
-import { BiChevronDown } from 'react-icons/bi';
-import { CgSpinnerTwoAlt } from 'react-icons/cg';
-import { toast } from 'react-hot-toast';
+import React, { useState } from "react";
+import Modal from "./Modal";
+import { Button, Select } from "../Form";
+import { sortsDatas } from "../Datas";
+import { BiChevronDown } from "react-icons/bi";
+import { CgSpinnerTwoAlt } from "react-icons/cg";
+import { toast } from "react-hot-toast";
 
 function PaymentModal({ closeModal, isOpen, slug }) {
   const [currency, setCurrency] = useState(sortsDatas.status[0]);
@@ -14,7 +14,7 @@ function PaymentModal({ closeModal, isOpen, slug }) {
       closeModal={closeModal}
       isOpen={isOpen}
       title="Generate Payment"
-      width={'max-w-xl'}
+      width={"max-w-xl"}
     >
       <div className="flex-colo gap-6 pb-8 ">
         <div className="w-full">
@@ -49,7 +49,7 @@ function PaymentModal({ closeModal, isOpen, slug }) {
           label="Generate"
           Icon={CgSpinnerTwoAlt}
           onClick={() => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
           }}
         />
       </div>

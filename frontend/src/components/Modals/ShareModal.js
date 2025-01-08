@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
-import { shareData } from '../Datas';
-import { RadioGroup } from '@headlessui/react';
-import { Button } from '../Form';
-import { toast } from 'react-hot-toast';
+import React, { useState } from "react";
+import Modal from "./Modal";
+import { shareData } from "../Datas";
+import { RadioGroup } from "@headlessui/react";
+import { Button } from "../Form";
+import { toast } from "react-hot-toast";
 
 function ShareModal({ closeModal, isOpen }) {
   const [selected, setSelected] = useState();
@@ -12,7 +12,7 @@ function ShareModal({ closeModal, isOpen }) {
       closeModal={closeModal}
       isOpen={isOpen}
       title="Share with patient via"
-      width={'max-w-xl'}
+      width={"max-w-xl"}
     >
       <div className="flex-colo gap-6">
         {/* data */}
@@ -25,7 +25,7 @@ function ShareModal({ closeModal, isOpen }) {
                   value={user}
                   className={({ active, checked }) =>
                     `
-                    ${active ? 'border-subMain bg-subMain text-white' : ''}
+                    ${active ? "border-subMain bg-subMain text-white" : ""}
                     rounded-xl border-[1px] border-border p-4 group hover:bg-subMain hover:text-white`
                   }
                 >
@@ -38,7 +38,7 @@ function ShareModal({ closeModal, isOpen }) {
                         <h6 className="text-sm">{user.title}</h6>
                         <p
                           className={`${
-                            active && 'text-white'
+                            active && "text-white"
                           } text-xs group-hover:text-white text-textGray mt-1`}
                         >
                           {user.description}
@@ -55,7 +55,7 @@ function ShareModal({ closeModal, isOpen }) {
 
         <Button
           onClick={() => {
-            toast.error('This feature is not available yet');
+            toast.error("This feature is not available yet");
             closeModal();
           }}
           label="Send"

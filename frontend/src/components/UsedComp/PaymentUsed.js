@@ -1,6 +1,6 @@
-import { transactionData } from '../Datas';
-import { PaymentTable } from '../Tables';
-import { useNavigate } from 'react-router-dom';
+import { transactionData } from "../Datas";
+import { PaymentTable } from "../Tables";
+import { useNavigate } from "react-router-dom";
 
 function PaymentsUsed({ doctor }) {
   const navigate = useNavigate();
