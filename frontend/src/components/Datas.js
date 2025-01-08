@@ -1,9 +1,9 @@
 import { HiOutlineHome, HiOutlineMail, HiOutlineUsers } from 'react-icons/hi';
 import {
-  TbCalendar,
+  TbUserPin,
   TbChartHistogram,
   TbFile,
-  TbFileInvoice,
+  TbMedicineSyrup,
   TbLockAccess,
   TbUsers,
 } from 'react-icons/tb';
@@ -20,8 +20,6 @@ import {
   RiUserLine,
 } from 'react-icons/ri';
 import {
-  MdListAlt,
-  MdOutlineAttachMoney,
   MdOutlineCampaign,
   MdOutlineInventory2,
   MdOutlineTextsms,
@@ -883,8 +881,8 @@ export const dashboardCards = [
   },
   {
     id: 2,
-    title: 'Appointments',
-    icon: TbCalendar,
+    title: 'Doctors',
+    icon: TbUserPin,
     value: 130,
     percent: 25.06,
     color: ['bg-yellow-500', 'text-yellow-500', '#F9C851'],
@@ -892,7 +890,7 @@ export const dashboardCards = [
   },
   {
     id: 3,
-    title: 'Prescriptions',
+    title: 'Services',
     icon: TbFile,
     value: 4160,
     percent: 65.06,
@@ -901,8 +899,8 @@ export const dashboardCards = [
   },
   {
     id: 4,
-    title: 'Total Earnings',
-    icon: MdOutlineAttachMoney,
+    title: 'Total Medicines',
+    icon: TbMedicineSyrup,
     value: 4590,
     percent: 45.06,
     color: ['bg-red-500', 'text-red-500', '#FF3B30'],

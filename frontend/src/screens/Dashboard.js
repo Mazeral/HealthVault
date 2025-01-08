@@ -44,10 +44,6 @@ function Dashboard() {
               <div className="flex flex-col gap-4 col-span-3">
                 <h4 className="text-md font-medium">
                   {card.value}
-                  {
-                    // if the id === 4 then add the $ sign
-                    card.id === 4 ? '$' : '+'
-                  }
                 </h4>
                 <p className={`text-sm flex gap-2 ${card.color[1]}`}>
                   {card.percent > 50 && <BsArrowUpRight />}
