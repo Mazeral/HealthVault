@@ -1,6 +1,12 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterLink, RouterView } from 'vue-router';
+import { useAuthStore } from './stores/auth'; // Import the auth store
+import { computed } from 'vue'; // Import computed for reactive properties
+
+const authStore = useAuthStore();
+
+// Computed property to check if the user is authenticated
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 </script>
 
 <template>
@@ -8,11 +14,13 @@ import HelloWorld from './components/HelloWorld.vue'
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/register">Register</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/dashboard">Dashboard</RouterLink>
+        <button v-if="isAuthenticated" @click="authStore.logout">Logout</button>
       </nav>
     </div>
   </header>
@@ -54,6 +62,19 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
+}
+
+button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0 1rem;
+}
+
+button:hover {
+  text-decoration: underline;
 }
 
 @media (min-width: 1024px) {
