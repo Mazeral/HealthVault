@@ -1,24 +1,32 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+// =========================================================
+// * Vuetify Material Dashboard - v2.1.0
+// =========================================================
+//
+// * Product Page: https://www.creative-tim.com/product/vuetify-material-dashboard
+// * Copyright 2019 Creative Tim (https://www.creative-tim.com)
+//
+// * Coded by Creative Tim
+//
+// =========================================================
+//
+// * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
+import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
+import store from './store'
+import './plugins/base'
+import './plugins/chartist'
+import './plugins/vee-validate'
+import vuetify from './plugins/vuetify'
+import i18n from './i18n'
 
-import CoreuiVue from '@coreui/vue'
-import CIcon from '@coreui/icons-vue'
-import { iconsSet as icons } from '@/assets/icons'
-import DocsComponents from '@/components/DocsComponents'
-import DocsExample from '@/components/DocsExample'
-import DocsIcons from '@/components/DocsIcons'
+Vue.config.productionTip = false
 
-const app = createApp(App)
-app.use(createPinia())
-app.use(router)
-app.use(CoreuiVue)
-app.provide('icons', icons)
-app.component('CIcon', CIcon)
-app.component('DocsComponents', DocsComponents)
-app.component('DocsExample', DocsExample)
-app.component('DocsIcons', DocsIcons)
-
-app.mount('#app')
+new Vue({
+  router,
+  store,
+  vuetify,
+  i18n,
+  render: h => h(App),
+}).$mount('#app')
