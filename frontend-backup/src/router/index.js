@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
-import PatientView from "../views/PaitentView.vue";
+import PatientView from "../views/PatientView.vue"
 import RegisterView from "../views/RegisterView.vue"
 import LabView from "../views/LabView.vue";
 import RecordView from "../views/RecordView.vue";
 import PrescriptionView from "../views/PrescriptionView.vue"
+import DashboardView from "../views/DashboardView.vue"
 import { useAuthStore } from '../stores/auth';
 
 const router = createRouter({
@@ -53,6 +54,11 @@ const router = createRouter({
 		path: '/prescription',
 		name: 'prescription',
 		component: PrescriptionView,
+	},
+	{
+		path: '/dashboard',
+		name: 'dashboard',
+		component: DashboardView,
 	},
   ],
 })

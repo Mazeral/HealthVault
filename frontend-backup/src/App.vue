@@ -20,6 +20,18 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
         <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
         <RouterLink v-if="!isAuthenticated" to="/register">Register</RouterLink>
         <RouterLink v-if="isAuthenticated" to="/dashboard">Dashboard</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/patients">Patients</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/lab">Lab</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/record">Records</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/prescription">Prescriptions</RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/dashboard">Dashboard</RouterLink>
+
+		 <!-- Routes for dev purposed -->
+        <RouterLink  to="/patients">Patients</RouterLink>
+        <RouterLink  to="/lab">Lab</RouterLink>
+        <RouterLink  to="/record">Records</RouterLink>
+        <RouterLink  to="/prescription">Prescriptions</RouterLink>
+        <RouterLink  to="/dashboard">Dashboard</RouterLink>
         <button v-if="isAuthenticated" @click="authStore.logout">Logout</button>
       </nav>
     </div>
