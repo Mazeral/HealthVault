@@ -44,12 +44,6 @@ const logout = () => {
           <v-list-item to="/prescription" prepend-icon="mdi-pill" title="Prescriptions" />
         </template>
 
-        <!-- For dev purposes -->
-        <v-list-item to="/dashboard" prepend-icon="mdi-view-dashboard" title="Dashboard" />
-        <v-list-item to="/patients" prepend-icon="mdi-account-group" title="Patients" />
-        <v-list-item to="/lab" prepend-icon="mdi-flask" title="Lab" />
-        <v-list-item to="/record" prepend-icon="mdi-file-document" title="Records" />
-        <v-list-item to="/prescription" prepend-icon="mdi-pill" title="Prescriptions" />
       </v-list>
 
       <!-- Logout Button -->

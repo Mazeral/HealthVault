@@ -70,21 +70,21 @@ const router = createRouter({
   ],
 });
 
-// router.beforeEach((to, from, next) => {
-//   const authStore = useAuthStore();
-//
-//   // Define routes that do not require authentication
-//   const publicRoutes = ['login', 'register'];
-//
-//   // Check if the route requires authentication
-//   const isAuthRequired = !publicRoutes.includes(to.name);
-//
-//   // Redirect to login if authentication is required and the user is not authenticated
-//   if (isAuthRequired && !authStore.isAuthenticated) {
-//     next({ name: 'login' });
-//   } else {
-//     next();
-//   }
-// });
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+
+  // Define routes that do not require authentication
+  const publicRoutes = ['login', 'register'];
+
+  // Check if the route requires authentication
+  const isAuthRequired = !publicRoutes.includes(to.name);
+
+  // Redirect to login if authentication is required and the user is not authenticated
+  if (isAuthRequired && !authStore.isAuthenticated) {
+    next({ name: 'login' });
+  } else {
+    next();
+  }
+});
 
 export default router;

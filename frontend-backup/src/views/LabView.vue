@@ -128,7 +128,13 @@ const editLabResult = (labResult) => {
 // Update a lab result
 const updateLabResult = async () => {
   try {
-    const response = await api.put(`/lab-results/${editLabResultData.value.id}`, editLabResultData.value);
+    // Format performedAt as an ISO string
+    const payload = {
+      ...editLabResultData.value,
+      performedAt: new Date(editLabResultData.value.performedAt).toISOString(),
+    };
+
+    const response = await api.put(`/lab-results/${editLabResultData.value.id}`, payload);
     const updatedResult = response.data.updated;
     const index = labResults.value.findIndex((result) => result.id === updatedResult.id);
     if (index !== -1) {

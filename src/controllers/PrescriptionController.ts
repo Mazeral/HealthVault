@@ -48,7 +48,10 @@ class PrescriptionController {
       res.status(200).json({ prescription });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided" || error.message === "Prescription not found") {
+        if (
+          error.message === "No ID provided" ||
+          error.message === "Prescription not found"
+        ) {
           res.status(404).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
@@ -60,8 +63,22 @@ class PrescriptionController {
   // Get all prescriptions
   static async allPrescriptions(req: Request, res: Response) {
     try {
-      const prescriptions = await prisma.prescription.findMany();
-      res.status(200).json({ prescriptions });
+      const prescriptions = await prisma.prescription.findMany({
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include only the fullName of the patient
+            },
+          },
+        },
+      });
+
+      // Transform the response to include patient fullName directly in each prescription
+      const transformedPrescriptions = prescriptions.map((prescription) => ({
+        ...prescription,
+      }));
+
+      res.status(200).json({ prescriptions: transformedPrescriptions });
     } catch (error) {
       if (error instanceof Error) {
         res.status(500).json({ error: error.message });

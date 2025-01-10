@@ -5,7 +5,7 @@
       <v-card-text>
         <!-- Form to create a new prescription -->
         <v-form @submit.prevent="createPrescription">
-          <v-text-field v-model="newPrescription.patientId" label="Patient ID" type="number" required></v-text-field>
+          <v-text-field v-model="newPrescription.fullName" label="Full Name" required></v-text-field>
           <v-text-field v-model="newPrescription.medication" label="Medication" required></v-text-field>
           <v-text-field v-model="newPrescription.dosage" label="Dosage" required></v-text-field>
           <v-textarea v-model="newPrescription.instructions" label="Instructions"></v-textarea>
@@ -17,7 +17,7 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Patient ID</th>
+              <th>Patient Full Name</th>
               <th>Medication</th>
               <th>Dosage</th>
               <th>Instructions</th>
@@ -27,7 +27,7 @@
           <tbody>
             <tr v-for="prescription in prescriptions" :key="prescription.id">
               <td>{{ prescription.id }}</td>
-              <td>{{ prescription.patientId }}</td>
+              <td>{{ prescription.patient.fullName}}</td>
               <td>{{ prescription.medication }}</td>
               <td>{{ prescription.dosage }}</td>
               <td>{{ prescription.instructions }}</td>
@@ -66,7 +66,7 @@ import api from '../utils/api';
 
 // Data for creating a new prescription
 const newPrescription = ref({
-  patientId: null,
+	fullName: '',
   medication: '',
   dosage: '',
   instructions: '',
@@ -74,7 +74,7 @@ const newPrescription = ref({
 
 // Data for editing a prescription
 const editPrescriptionData = ref({
-  id: null,
+fullName: '',
   patientId: null,
   medication: '',
   dosage: '',
@@ -107,7 +107,7 @@ const createPrescription = async () => {
   try {
     const response = await api.post('/prescriptions', newPrescription.value);
     prescriptions.value.push(response.data.prescription);
-    newPrescription.value = { patientId: null, medication: '', dosage: '', instructions: '' }; // Reset form
+    newPrescription.value = { fullName: '', medication: '', dosage: '', instructions: '' }; // Reset form
   } catch (error) {
     console.error('Failed to create prescription:', error);
   }
