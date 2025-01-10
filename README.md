@@ -1,354 +1,420 @@
-# HealthVault
-## Backend API Documentation
+# Backend Documentation for Frontend Developers
 
-This document provides an overview of the backend API for a healthcare management system. The API is built using **Express.js** and **Prisma** for database management. It supports user authentication, patient management, medical records, lab results, and prescriptions. The API is designed to be consumed by a frontend application, enabling seamless integration with the healthcare system.
+## Overview
 
----
+This README provides a guide for frontend developers to understand and interact with the backend API. The backend is built using Express.js, Prisma, and MySQL, and it exposes various endpoints for managing users, patients, medical records, prescriptions, lab results, and more.
 
 ## Table of Contents
-1. [Getting Started](#getting-started)
-2. [API Endpoints](#api-endpoints)
-   - [Authentication](#authentication)
-   - [Patients](#patients)
-   - [Medical Records](#medical-records)
-   - [Lab Results](#lab-results)
-   - [Prescriptions](#prescriptions)
-   - [Users](#users)
-3. [Database Schema](#database-schema)
-4. [Environment Variables](#environment-variables)
-5. [Error Handling](#error-handling)
-6. [Session Management](#session-management)
-7. [Redis Integration](#redis-integration)
-8. [CORS Configuration](#cors-configuration)
 
----
+1. **Setup and Installation**
+2. **Environment Variables**
+3. **API Endpoints**
+   - Authentication
+   - Users
+   - Patients
+   - Medical Records
+   - Prescriptions
+   - Lab Results
+   - Dashboard
+4. **Authentication**
+5. **Error Handling**
+6. **Data Models**
+7. **Testing the API**
+8. **Troubleshooting**
+9. **Contributing**
 
-## Getting Started
+## 1. Setup and Installation
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- MySQL database
-- Redis (for session management)
-- Prisma CLI (`npm install -g prisma`)
 
-### Installation
-1. Clone the repository:
+- Node.js installed on your machine.
+- MySQL database installed and running.
+- Redis installed and running for session storage (optional but recommended).
+
+### Installation Steps
+
+1. **Clone the repository:**
+
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/yourusername/your-repo.git
+   cd your-repo
    ```
-2. Install dependencies:
+
+2. **Install dependencies:**
+
    ```bash
    npm install
    ```
-3. Set up the database:
-   - Update the `.env` file with your MySQL database URL:
-     ```env
-     DATABASE_URL="mysql://user:password@localhost:3306/database_name"
-     ```
-   - Run Prisma migrations:
-     ```bash
-     npx prisma migrate dev --name init
-     ```
-4. Start the server:
+
+3. **Setup Environment Variables:**
+
+   Create a `.env` file in the root directory with the required environment variables (see the next section).
+
+4. **Run the backend server:**
+
    ```bash
    npm start
    ```
-   The server will run on `http://localhost:5000`.
 
----
+## 2. Environment Variables
 
-## API Endpoints
+Create a `.env` file in the root directory with the following variables:
+
+```env
+PORT=5000
+DATABASE_URL=mysql://username:password@localhost:3306/database_name
+SALT=10
+SESSION_SECRET=your-secret-key
+```
+
+- **PORT:** The port on which the server will run.
+- **DATABASE_URL:** The connection URL for your MySQL database.
+- **SALT:** The number of rounds for bcrypt password hashing.
+- **SESSION_SECRET:** A secret string used to sign session cookies.
+
+## 3. API Endpoints
 
 ### Authentication
-- **POST `/auth/login`**: Log in a user.
-  - Request Body:
-    ```json
-    {
-      "user": "username",
-      "password": "password"
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "login": "success"
-    }
-    ```
 
-- **GET `/auth/logout`**: Log out the current user.
-  - Response:
-    ```json
-    {
-      "logout": "success"
-    }
-    ```
+#### POST /auth/login
 
-- **POST `/auth/check-auth`**: Check if the user is authenticated.
-  - Response:
-    ```json
-    {
-      "userId": "1",
-      "role": "ADMIN"
-    }
-    ```
+- **Description:** Logs in a user and sets a session cookie.
+- **Request Body:**
+  ```json
+  {
+    "user": "username",
+    "password": "password"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "login": "success"
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing username or password
+  - 401: Invalid credentials
+  - 500: Server error
 
----
+#### GET /auth/logout
 
-### Patients
-- **POST `/patients`**: Create a new patient.
-  - Request Body:
-    ```json
-    {
-      "firstName": "John",
-      "lastName": "Doe",
-      "dateOfBirth": "1990-01-01",
-      "phone": "1234567890",
-      "email": "john.doe@example.com",
-      "address": "123 Main St"
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "Patient data:": {
-        "id": 1,
-        "firstName": "John",
-        "lastName": "Doe",
-        "dateOfBirth": "1990-01-01T00:00:00.000Z",
-        "phone": "1234567890",
-        "email": "john.doe@example.com",
-        "address": "123 Main St"
-      }
-    }
-    ```
+- **Description:** Logs out the user and clears the session cookie.
+- **Response:**
+  ```json
+  {
+    "logout": "success"
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 500: Server error
 
-- **GET `/patients/:id`**: Get a patient by ID.
-  - Response:
-    ```json
-    {
-      "patient": {
-        "id": 1,
-        "firstName": "John",
-        "lastName": "Doe",
-        "dateOfBirth": "1990-01-01T00:00:00.000Z",
-        "phone": "1234567890",
-        "email": "john.doe@example.com",
-        "address": "123 Main St"
-      }
-    }
-    ```
+#### POST /auth/check-auth
 
-- **PUT `/patients/:id`**: Update a patient by ID.
-  - Request Body:
-    ```json
-    {
-      "firstName": "Jane",
-      "lastName": "Doe"
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "updated": {
-        "count": 1
-      }
-    }
-    ```
-
----
-
-### Medical Records
-- **POST `/medical-record`**: Add a medical record for a patient.
-  - Request Body:
-    ```json
-    {
-      "patientId": 1,
-      "diagnosis": "Flu",
-      "notes": "Patient reported fever and cough."
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "success": {
-        "id": 1,
-        "patientId": 1,
-        "diagnosis": "Flu",
-        "notes": "Patient reported fever and cough."
-      }
-    }
-    ```
-
-- **GET `/patients/:id/medical-record`**: Get a medical record by patient ID.
-  - Response:
-    ```json
-    {
-      "Medical Record": {
-        "id": 1,
-        "patientId": 1,
-        "diagnosis": "Flu",
-        "notes": "Patient reported fever and cough."
-      }
-    }
-    ```
-
----
-
-### Lab Results
-- **POST `/lab-results/:id`**: Create a new lab result for a patient.
-  - Request Body:
-    ```json
-    {
-      "patientId": 1,
-      "testName": "Blood Test",
-      "result": "Normal",
-      "notes": "No abnormalities detected.",
-      "performedAt": "2023-10-01T12:00:00.000Z"
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "Lab result": {
-        "id": 1,
-        "patientId": 1,
-        "testName": "Blood Test",
-        "result": "Normal",
-        "notes": "No abnormalities detected.",
-        "performedAt": "2023-10-01T12:00:00.000Z"
-      }
-    }
-    ```
-
-- **GET `/lab-results`**: Get all lab results.
-  - Response:
-    ```json
-    {
-      "Lab results": [
-        {
-          "id": 1,
-          "patientId": 1,
-          "testName": "Blood Test",
-          "result": "Normal",
-          "notes": "No abnormalities detected.",
-          "performedAt": "2023-10-01T12:00:00.000Z"
-        }
-      ]
-    }
-    ```
-
----
-
-### Prescriptions
-- **POST `/prescription/:id`**: Create a new prescription for a patient.
-  - Request Body:
-    ```json
-    {
-      "patientId": 1,
-      "medication": "Paracetamol",
-      "dosage": "500mg",
-      "instructions": "Take twice daily."
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "prescription": {
-        "id": 1,
-        "patientId": 1,
-        "medication": "Paracetamol",
-        "dosage": "500mg",
-        "instructions": "Take twice daily."
-      }
-    }
-    ```
-
-- **GET `/prescription/:id`**: Get a prescription by ID.
-  - Response:
-    ```json
-    {
-      "prescription": {
-        "id": 1,
-        "patientId": 1,
-        "medication": "Paracetamol",
-        "dosage": "500mg",
-        "instructions": "Take twice daily."
-      }
-    }
-    ```
-
----
+- **Description:** Checks if the user is authenticated.
+- **Response:**
+  ```json
+  {
+    "userId": "user-id",
+    "role": "user-role"
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 401: Unauthorized
+  - 500: Server error
 
 ### Users
-- **POST `/users`**: Create a new user.
-  - Request Body:
-    ```json
-    {
-      "name": "admin",
-      "email": "admin@example.com",
-      "password": "password",
-      "role": "ADMIN"
+
+#### POST /users
+
+- **Description:** Creates a new user.
+- **Request Body:**
+  ```json
+  {
+    "name": "User Name",
+    "email": "user@example.com",
+    "password": "password",
+    "role": "ADMIN"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "new user:": {
+      // User data
     }
-    ```
-  - Response:
-    ```json
-    {
-      "user": {
-        "id": 1,
-        "name": "admin",
-        "email": "admin@example.com",
-        "role": "ADMIN"
-      }
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing fields
+  - 500: Server error
+
+#### GET /user/:id
+
+- **Description:** Gets a user by ID.
+- **Params:**
+  - `id`: User ID
+- **Response:**
+  ```json
+  {
+    "user": {
+      // User data
     }
-    ```
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing ID
+  - 404: User not found
+  - 500: Server error
+
+### Patients
+
+#### POST /patients
+
+- **Description:** Creates a new patient.
+- **Request Body:**
+  ```json
+  {
+    "fullName": "Patient Name",
+    "dateOfBirth": "2000-01-01",
+    "phone": "1234567890",
+    "email": "patient@example.com",
+    "address": "Patient Address"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "Patient data:": {
+      // Patient data
+    }
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing fullName
+  - 500: Server error
+
+#### GET /patients/:id
+
+- **Description:** Gets a patient by ID.
+- **Params:**
+  - `id`: Patient ID
+- **Response:**
+  ```json
+  {
+    "patient": {
+      // Patient data
+    }
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing ID
+  - 404: Patient not found
+  - 500: Server error
+
+### Medical Records
+
+#### POST /medical-record/
+
+- **Description:** Adds a medical record for a patient.
+- **Request Body:**
+  ```json
+  {
+    "patientId": 1,
+    "diagnosis": "Diagnosis",
+    "notes": "Notes"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "success": {
+      // Medical record data
+    }
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing fields
+  - 500: Server error
+
+### Prescriptions
+
+#### POST /prescriptions
+
+- **Description:** Creates a new prescription.
+- **Request Body:**
+  ```json
+  {
+    "patientId": 1,
+    "medication": "Medication",
+    "dosage": "Dosage",
+    "instructions": "Instructions"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "prescription": {
+      // Prescription data
+    }
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing fields
+  - 500: Server error
+
+### Lab Results
+
+#### POST /lab-results
+
+- **Description:** Creates a new lab result.
+- **Request Body:**
+  ```json
+  {
+    "patientId": 1,
+    "testName": "Test Name",
+    "result": "Result",
+    "notes": "Notes",
+    "performedAt": "2023-10-01T12:00:00Z"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "Lab result": {
+      // Lab result data
+    }
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 400: Missing fields
+  - 500: Server error
+
+### Dashboard
+
+#### GET /dashboard
+
+- **Description:** Fetches dashboard metrics.
+- **Response:**
+  ```json
+  {
+    "metrics": [
+      { "title": "Total Patients", "value": 10 },
+      { "title": "Total Medical Records", "value": 20 },
+      { "title": "Total Prescriptions", "value": 15 },
+      { "title": "Total Lab Results", "value": 25 }
+    ],
+    "recentPatients": [/* Array of recent patients */],
+    "recentLabResults": [/* Array of recent lab results */]
+  }
+  ```
+- **Status Codes:**
+  - 200: Success
+  - 500: Server error
+
+## 4. Authentication
+
+- **Session-Based Authentication:** The backend uses session cookies to manage user sessions.
+- **Middleware:** Certain routes are protected and require an active session.
+- **Logout:** Clearing the session cookie logs the user out.
+
+## 5. Error Handling
+
+- **HTTP Status Codes:** The backend uses standard HTTP status codes to indicate the result of operations.
+- **Error Messages:** Error responses include a JSON object with an `error` field describing the issue.
+
+## 6. Data Models
+
+### User
+
+- **Fields:**
+  - `id`: Unique identifier
+  - `name`: User's name
+  - `email`: User's email
+  - `password`: Hashed password
+  - `role`: User role (ADMIN, DOCTOR, NURSE)
+  - `createdAt`: Creation timestamp
+  - `updatedAt`: Last update timestamp
+  - `patients`: Related patients (array of Patient objects)
+
+### Patient
+
+- **Fields:**
+  - `id`: Unique identifier
+  - `fullName`: Patient's full name
+  - `dateOfBirth`: Date of birth
+  - `phone`: Phone number
+  - `email`: Email address
+  - `address`: Address
+  - `createdAt`: Creation timestamp
+  - `updatedAt`: Last update timestamp
+  - `medicalRecords`: Related medical records
+  - `prescriptions`: Related prescriptions
+  - `labResults`: Related lab results
+  - `User`: Associated user (nullable)
+
+### MedicalRecord
+
+- **Fields:**
+  - `id`: Unique identifier
+  - `patientId`: Foreign key to Patient
+  - `diagnosis`: Diagnosis
+  - `notes`: Additional notes
+  - `createdAt`: Creation timestamp
+  - `updatedAt`: Last update timestamp
+
+### Prescription
+
+- **Fields:**
+  - `id`: Unique identifier
+  - `patientId`: Foreign key to Patient
+  - `medication`: Medication name
+  - `dosage`: Dosage instructions
+  - `instructions`: Prescription instructions
+  - `prescribedAt`: Prescription date
+
+### LabResult
+
+- **Fields:**
+  - `id`: Unique identifier
+  - `patientId`: Foreign key to Patient
+  - `testName`: Name of the test
+  - `result`: Test result
+  - `notes`: Additional notes
+  - `performedAt`: Date the test was performed
+  - `createdAt`: Creation timestamp
+
+## 7. Testing the API
+
+- **Tools:** Use tools like Postman, Insomnia, or curl to test the API endpoints.
+- **Sample Request:**
+
+  ```bash
+  curl -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{"user": "username", "password": "password"}'
+  ```
+
+## 8. Troubleshooting
+
+- **Environment Variables:** Ensure all required environment variables are set correctly.
+- **Database Connection:** Verify that the MySQL database is running and accessible.
+- **Session Issues:** Clear cookies or try incognito mode if session-related problems occur.
+
+## 9. Contributing
+
+- **Code Style:** Follow the existing code style and formatting.
+- **Testing:** Add tests for new features or bug fixes.
+- **Documentation:** Update documentation accordingly for any changes.
 
 ---
 
-## Database Schema
-The database schema is defined using Prisma. Key models include:
-- **User**: Stores user information (name, email, password, role).
-- **Patient**: Stores patient information (name, date of birth, contact details).
-- **MedicalRecord**: Stores medical records linked to patients.
-- **Prescription**: Stores prescriptions linked to patients.
-- **LabResult**: Stores lab results linked to patients.
-
----
-
-## Environment Variables
-- `DATABASE_URL`: MySQL database connection URL.
-- `PORT`: Port on which the server runs (default: `5000`).
-- `SESSION_SECRET`: Secret key for session management.
-
----
-
-## Error Handling
-The API returns appropriate HTTP status codes and error messages:
-- `400`: Bad request (e.g., missing fields).
-- `401`: Unauthorized (e.g., invalid credentials).
-- `404`: Not found (e.g., patient not found).
-- `500`: Internal server error.
-
----
-
-## Session Management
-Sessions are managed using **express-session** with **Redis** for storage. Sessions are valid for 24 hours.
-
----
-
-## Redis Integration
-Redis is used for session storage. Ensure Redis is running and configured in the `.env` file.
-
----
-
-## CORS Configuration
-CORS is enabled for all origins (`*`). The API allows `GET`, `POST`, `PUT`, `DELETE`, and `OPTIONS` methods.
-
----
-
-## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-
-For any questions or issues, please contact the development team.
+This README provides a comprehensive guide for frontend developers to interact with the backend API effectively.
