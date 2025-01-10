@@ -1,121 +1,117 @@
-import prisma from "../utils/prisma";
 import { Request, Response } from "express";
-import createObject from "../utils/utilFunctions";
+import prisma from "../utils/prisma";
 
 class PrescriptionController {
-  // Create a prescription for a patient
+  // Create a new prescription
   static async newPrescription(req: Request, res: Response) {
-    const patientId = req.body.patientId || null;
-    const medication = req.body.medication || null;
-    const dosage = req.body.dosage || null;
-    const instructions = req.body.instructions || null;
-
     try {
-      if (!patientId) throw Error("No patientId provided");
-      if (!medication) throw Error("No medication provided");
-      if (!dosage) throw Error("No dosage provided");
+      const { patientId, medication, dosage, instructions } = req.body;
+
+      if (!patientId || !medication || !dosage) {
+        throw new Error("Missing required fields");
+      }
 
       const prescription = await prisma.prescription.create({
         data: {
-          patientId: patientId,
-          medication: medication,
-          dosage: dosage,
-          instructions: instructions,
-          patient: {
-            connect: {
-              id: patientId,
-            },
-          },
+          patientId: Number(patientId),
+          medication,
+          dosage,
+          instructions,
         },
       });
-      res.status(200).json({ prescription: prescription });
+
+      res.status(200).json({ prescription });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Missing required fields") {
+          res.status(400).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    }
+  }
+
+  // Get a prescription by ID
+  static async getPrescription(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+
+      if (!id) throw new Error("No ID provided");
+
+      const prescription = await prisma.prescription.findUnique({
+        where: { id },
+      });
+
+      if (!prescription) throw new Error("Prescription not found");
+
+      res.status(200).json({ prescription });
     } catch (error) {
       if (error instanceof Error) {
         if (
-          error.message === "No id provided" ||
-          error.message === "No patientId provided" ||
-          error.message === "No medication provided" ||
-          error.message === "No dosage provided"
-        )
-          res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+          error.message === "No ID provided" ||
+          error.message === "Prescription not found"
+        ) {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
 
-  // Fetch a prescription by id
-  static async getPrescription(req: Request, res: Response) {
-    try {
-      const prescId = req.params.id;
-
-      if (!prescId) throw Error("No prescription ID provided");
-
-      const prescription = await prisma.prescription.findUnique({
-        where: {
-          id: Number(prescId),
-        },
-      });
-
-      res.status(200).json({ prescription: prescription });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "No prescription ID provided")
-          res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
-      }
-    }
-  }
-
-  // gets all the prescriptions from the database
+  // Get all prescriptions
   static async allPrescriptions(req: Request, res: Response) {
     try {
-      const prescriptions = await prisma.prescription.findMany();
-      res.status(200).json({ prescriptions: prescriptions });
+      const prescriptions = await prisma.prescription.findMany({
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include only the fullName of the patient
+            },
+          },
+        },
+      });
+
+      // Transform the response to include patient fullName directly in each prescription
+      const transformedPrescriptions = prescriptions.map((prescription) => ({
+        ...prescription,
+      }));
+
+      res.status(200).json({ prescriptions: transformedPrescriptions });
     } catch (error) {
-      if (error instanceof Error)
+      if (error instanceof Error) {
         res.status(500).json({ error: error.message });
+      }
     }
   }
 
-  // update a prescription
+  // Update a prescription
   static async updatePrescription(req: Request, res: Response) {
     try {
-      const prescId = req.params.id;
+      const id = Number(req.params.id);
+      const { patientId, medication, dosage, instructions } = req.body;
 
-      if (!prescId) throw Error("Prescription ID not provided");
+      if (!id) throw new Error("No ID provided");
 
-      const data = createObject({
-        patientId: Number(req.body.patientId),
-        medication: String(req.body.medication),
-        dosage: String(req.body.dosage),
-        instructions: String(req.body.instructions),
-      });
-
-      const updates = await prisma.prescription.updateMany({
-        where: {
-          id: Number(prescId),
+      const updatedPrescription = await prisma.prescription.update({
+        where: { id },
+        data: {
+          patientId: Number(patientId),
+          medication,
+          dosage,
+          instructions,
         },
-        data: data,
       });
-      if (data.patientId)
-        await prisma.prescription.update({
-          where: {
-            id: Number(prescId),
-          },
-          data: {
-            patient: {
-              connect: {
-                id: Number(data.patientId),
-              },
-            },
-          },
-        });
-      res.status(200).json({ updated: updates });
+
+      res.status(200).json({ updated: updatedPrescription });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Prescription ID not provided")
-          res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        if (error.message === "No ID provided") {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
@@ -123,17 +119,23 @@ class PrescriptionController {
   // Delete a prescription
   static async deletePrescription(req: Request, res: Response) {
     try {
-      const prescId = req.params.id || null;
+      const id = Number(req.params.id);
 
-      const result = await prisma.prescription.delete({
-        where: {
-          id: Number(prescId),
-        },
+      if (!id) throw new Error("No ID provided");
+
+      await prisma.prescription.delete({
+        where: { id },
       });
-      res.status(200).json({ result: result });
+
+      res.status(200).json({ message: "Prescription deleted successfully" });
     } catch (error) {
-      if (error instanceof Error)
-        res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        if (error.message === "No ID provided") {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
+      }
     }
   }
 }

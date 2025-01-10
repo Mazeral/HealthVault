@@ -12,9 +12,21 @@ medRecordRouter.post(
 
 // update the medical history
 medRecordRouter.put(
-  "/medical-record/:id",
+  "/medical-records/:id",
   authMiddleware as express.RequestHandler,
   MedRecordController.updateMedRecord,
+);
+
+medRecordRouter.get(
+  "/medical-records",
+  authMiddleware as express.RequestHandler,
+  MedRecordController.allMedicalRecords,
+);
+
+medRecordRouter.delete(
+  "/medical-records/:id",
+  authMiddleware as express.RequestHandler,
+  MedRecordController.deleteRecord,
 );
 
 export default medRecordRouter;

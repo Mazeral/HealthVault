@@ -10,24 +10,32 @@ class LabController {
     const result = String(req.body.result) || null;
     const notes = String(req.body.notes) || null;
     const performedAt = String(req.body.performedAt) || null;
+    let performedAtDate = null;
 
     try {
-      if (!testName) throw Error("No test Name provided");
-      if (!result) throw Error("No result provided");
-      if (!performedAt) throw Error("No performed At provided");
-      if (!patientId) throw Error("No patient ID provided");
+      // Validate required fields
+      if (!testName) throw new Error("No test name provided");
+      if (!result) throw new Error("No result provided");
+      if (!patientId) throw new Error("No patient ID provided");
 
+      // Convert performedAt to a valid DateTime object
+      if (performedAt !== null)
+        performedAtDate = new Date(performedAt).toISOString();
+      else performedAtDate = new Date(Date.now()).toISOString();
+
+      // Create the lab result
       const labResult = await prisma.labResult.create({
         data: {
-          testName: testName,
-          result: result,
-          notes: notes,
-          performedAt: performedAt,
+          testName,
+          result,
+          notes,
+          performedAt: performedAtDate, // Use the formatted DateTime
           patient: {
             connect: { id: patientId },
           },
         },
       });
+
       res.status(200).json({ "Lab result": labResult });
     } catch (error) {
       if (error instanceof Error) {
@@ -36,9 +44,11 @@ class LabController {
           error.message === "No patient ID provided" ||
           error.message === "No result provided" ||
           error.message === "No performed At provided"
-        )
+        ) {
           res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
@@ -96,42 +106,41 @@ class LabController {
   static async updateLabResult(req: Request, res: Response) {
     try {
       const labResultId = Number(req.params.id);
+      if (!labResultId) throw new Error("Lab test ID not provided");
 
-      if (!labResultId) throw Error("Lab test ID not provided");
+      // Validate required fields
+      const { patientId, testName, result, notes, performedAt } = req.body;
+      if (!patientId && !testName && !result && !notes && !performedAt) {
+        throw new Error("No fields provided for update");
+      }
 
+      // Create an object with only the provided fields
       const data = createObject({
-        patientId: Number(req.body.patientId),
-        testName: req.body.testName,
-        result: req.body.result,
-        notes: req.body.notes,
-        performedAt: Date.parse(String(req.body.performedAt)),
+        patientId: patientId ? Number(patientId) : undefined,
+        testName,
+        result,
+        notes,
+        performedAt: performedAt ? new Date(performedAt) : undefined, // Convert to Date object
       });
 
-      const updates = await prisma.labResult.updateMany({
+      // Update the lab result
+      const updatedResult = await prisma.labResult.update({
         where: {
-          id: labResultId,
+          id: labResultId, // Use the lab result ID
         },
-        data: data,
+        data,
       });
-      if (data.patientId)
-        await prisma.labResult.update({
-          where: {
-            id: labResultId,
-          },
-          data: {
-            patient: {
-              connect: {
-                id: Number(data.patientId),
-              },
-            },
-          },
-        });
-      res.status(200).json({ updated: updates });
+
+      res.status(200).json({ updated: updatedResult });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Lab test ID not provided")
+        if (error.message === "Lab test ID not provided") {
           res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else if (error.message === "No fields provided for update") {
+          res.status(400).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }

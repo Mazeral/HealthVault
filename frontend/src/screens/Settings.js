@@ -49,7 +49,9 @@ function Settings() {
           />
           <div className="gap-2 flex-colo">
             <h2 className="text-sm font-semibold">Dr. Joshua Emmanuel</h2>
-            <p className="text-xs text-textGray">softontechsolution@gmail.com</p>
+            <p className="text-xs text-textGray">
+              softontechsolution@gmail.com
+            </p>
             <p className="text-xs">+254 732 345 678</p>
           </div>
           {/* tabs */}

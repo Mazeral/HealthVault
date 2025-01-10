@@ -42,9 +42,7 @@ function Dashboard() {
                 <DashboardSmallChart data={card.datas} colors={card.color[2]} />
               </div>
               <div className="flex flex-col gap-4 col-span-3">
-                <h4 className="text-md font-medium">
-                  {card.value}
-                </h4>
+                <h4 className="text-md font-medium">{card.value}</h4>
                 <p className={`text-sm flex gap-2 ${card.color[1]}`}>
                   {card.percent > 50 && <BsArrowUpRight />}
                   {card.percent > 30 && card.percent < 50 && (

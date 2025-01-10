@@ -30,55 +30,41 @@ class MedRecordController {
   }
 
   static async updateMedRecord(req: Request, res: Response) {
-    // Updates a medical record
     try {
-      const patientId = Number(req.params.id) || null;
+      const medicalRecordId = Number(req.params.id); // Corrected: Use medicalRecordId, not patientId
+      if (!medicalRecordId) throw new Error("No medical record ID provided");
 
-      if (!patientId) throw Error("No id provided");
-
-      const patient = await prisma.patient.findUnique({
-        where: {
-          id: patientId,
-        },
-      });
-      if (!patient) throw Error("No patient found");
-
-      // Creates an object with key names and values
-      const data = createObject({
-        diagnosis: req.body.diagnosis,
-        notes: req.body.notes,
-        patientId: req.body.patientId,
-      });
-
-      const updates = await prisma.medicalRecord.updateMany({
-        where: {
-          id: patientId,
-        },
-        data: data,
-      });
-      if (data.patientId) {
-        await prisma.medicalRecord.update({
-          where: {
-            id: Number(data.patientId),
-          },
-          // Links the id of the record to the id of the patientId
-          data: {
-            patient: {
-              connect: {
-                id: Number(data.patientId),
-              },
-            },
-          },
-        });
+      // Validate required fields
+      const { diagnosis, notes, patientId } = req.body;
+      if (!diagnosis && !notes && !patientId) {
+        throw new Error("No fields provided for update");
       }
-      res.status(200).json({ updated: updates });
+
+      // Create an object with only the provided fields
+      const data = createObject({
+        diagnosis,
+        notes,
+        patientId,
+      });
+
+      // Update the medical record
+      const updatedRecord = await prisma.medicalRecord.update({
+        where: {
+          id: medicalRecordId, // Use the medical record ID
+        },
+        data,
+      });
+
+      res.status(200).json({ updated: updatedRecord });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No id provided")
+        if (error.message === "No medical record ID provided") {
           res.status(400).json({ error: error.message });
-        else if (error.message === "No patient found")
-          res.status(404).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else if (error.message === "No fields provided for update") {
+          res.status(400).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
@@ -156,6 +142,17 @@ class MedRecordController {
         res.status(500).json({ error: error.message });
     });
     res.status(200).json({ "Lab Results": data });
+  }
+
+  static async allMedicalRecords(req: Request, res: Response) {
+    try {
+      const records = await prisma.medicalRecord.findMany();
+      res.status(200).json({ "Medical Records": records });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      }
+    }
   }
 }
 

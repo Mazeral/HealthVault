@@ -8,28 +8,29 @@ import patientRouter from "./routes/patientRouter";
 import authRouter from "./routes/AuthRouter";
 import cors from "cors";
 import { createClient } from "redis";
+import dashboardRouter from "./routes/dashboardRouter";
 const { RedisStore } = require("connect-redis");
 
 const app = express();
+app.use(express.json());
 const port: string = process.env.PORT || "5000";
 
 // Enable CORS for all routes
-app.use(cors({
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
-  credentials: true // Allow credentials (cookies, authorization headers, etc.)
-}));
+// Configure CORS to dynamically set the origin
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g., mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+
+      // Dynamically allow the request's origin
+      callback(null, origin);
+    },
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  }),
+);
 
 // Routes for the application
-app.use(userRouter);
-app.use(medRecordRouter);
-app.use(labRouter);
-app.use(patientRouter);
-app.use(prescriptionRouter);
-app.use("/auth", authRouter);
-
-// Initialize client.
 let redisClient = createClient();
 redisClient.connect().catch(console.error);
 
@@ -60,7 +61,16 @@ app.use(
   }),
 );
 
-app.use(express.json());
+app.use(userRouter);
+app.use(medRecordRouter);
+app.use(labRouter);
+app.use(patientRouter);
+app.use(prescriptionRouter);
+app.use("/auth", authRouter);
+app.use("/dashboard", dashboardRouter);
+
+// Initialize client.
+
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
 });

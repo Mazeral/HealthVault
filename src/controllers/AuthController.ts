@@ -22,23 +22,30 @@ class AuthController {
       const name: string = req.body.user;
       const pwd: string = req.body.password;
 
-      if (!name || !pwd) throw Error("Username and password required");
+      // Validate input
+      if (!name || !pwd) throw new Error("Username and password required");
 
-      const auth = new AuthController();
-      const hashed: string | undefined = await auth.hashPassword(pwd);
+      // Fetch the user from the database
       const user = await prisma.user.findFirst({
         where: {
           name: name,
-          password: hashed,
         },
         select: {
           id: true,
           role: true,
+          password: true, // Include the password hash in the query
         },
       });
 
-      if (!user) throw Error("Invalid credentials");
-      if (!req.session) throw Error("Invalid credentials");
+      // Check if the user exists
+      if (!user) throw new Error("Invalid credentials");
+
+      // Compare the provided password with the stored hash
+      const isPasswordValid = await bcrypt.compare(pwd, user.password);
+      if (!isPasswordValid) throw new Error("Invalid credentials");
+
+      // Ensure the session exists
+      if (!req.session) throw new Error("Session not available");
 
       // Initialize `req.session.user` if it doesn't exist
       if (!req.session.user) {
@@ -49,14 +56,17 @@ class AuthController {
       req.session.user.id = String(user.id); // Set `userId`
       req.session.user.role = user.role; // Set `role`
 
+      // Send success response
       res.status(200).json({ login: "success" });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Username and password required")
+        if (error.message === "Username and password required") {
           res.status(400).json({ error: error.message });
-        else if (error.message === "Invalid credentials")
+        } else if (error.message === "Invalid credentials") {
           res.status(401).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
