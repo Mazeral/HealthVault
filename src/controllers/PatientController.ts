@@ -217,6 +217,37 @@ class PatientController {
       }
     }
   }
+  // Delete a patient by ID
+  static async deletePatient(req: Request, res: Response) {
+    console.log(req.params.id);
+    const id = Number(req.params.id) || null;
+
+    try {
+      if (!id) throw Error("No id provided");
+
+      const patient = await prisma.patient.findUnique({
+        where: {
+          id: id,
+        },
+      });
+      if (!patient) throw Error("No patient found");
+
+      await prisma.patient.delete({
+        where: {
+          id: id,
+        },
+      });
+      res.status(200).json({ message: "Patient deleted successfully" });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "No id provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
+    }
+  }
 }
 
 export default PatientController;

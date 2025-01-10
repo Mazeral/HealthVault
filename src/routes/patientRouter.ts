@@ -51,4 +51,10 @@ patientRouter.get(
   MedRecordController.getLabResults,
 );
 
+patientRouter.delete(
+  "/patients/:id",
+  authMiddleware as express.RequestHandler,
+  PatientController.deletePatient,
+);
+
 export default patientRouter;

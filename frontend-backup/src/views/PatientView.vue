@@ -11,8 +11,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from "../utils/api"
+import { useRouter } from 'vue-router'; // Import the router
+import api from "../utils/api";
 
+const router = useRouter(); // Initialize the router
 const patients = ref([]);
 const headers = [
   { title: 'ID', value: 'id' },
@@ -24,8 +26,7 @@ const headers = [
 const fetchPatients = async () => {
   try {
     const response = await api.get('/patients');
-	console.log(response.data.data)
-    patients.value = response.data.data; // Corrected this line
+    patients.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch patients:', error);
   }
@@ -36,13 +37,14 @@ onMounted(() => {
 });
 
 const editPatient = (patient) => {
-  // Handle edit
+  // Navigate to the edit view with the patient ID
+  router.push({ name: 'edit-patient', params: { id: patient.id } });
 };
 
 const deletePatient = async (patient) => {
   try {
     await api.delete(`/patients/${patient.id}`);
-    fetchPatients();
+    fetchPatients(); // Refresh the list after deletion
   } catch (error) {
     console.error('Failed to delete patient:', error);
   }

@@ -7,6 +7,7 @@ import LabView from "../views/LabView.vue";
 import RecordView from "../views/RecordView.vue";
 import PrescriptionView from "../views/PrescriptionView.vue";
 import DashboardView from "../views/DashboardView.vue";
+import EditPatientView from "../views/EditPatientView.vue";
 import { useAuthStore } from "../stores/auth";
 
 const router = createRouter({
@@ -59,6 +60,12 @@ const router = createRouter({
       path: "/dashboard",
       name: "dashboard",
       component: DashboardView,
+    },
+    {
+      path: "/patients/:id/edit",
+      name: "edit-patient",
+      component: EditPatientView,
+      props: true, // Pass route params as props
     },
   ],
 });
