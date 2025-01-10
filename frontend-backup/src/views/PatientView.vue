@@ -18,13 +18,14 @@ const headers = [
   { title: 'ID', value: 'id' },
   { title: 'First Name', value: 'firstName' },
   { title: 'Last Name', value: 'lastName' },
-  { title: 'Actions', value: 'actions' },
+  { title: 'Actions', value: 'actions', sortable: false },
 ];
 
 const fetchPatients = async () => {
   try {
     const response = await api.get('/patients');
-    patients.value = response.data.patients;
+	console.log(response.data.data)
+    patients.value = response.data.data; // Corrected this line
   } catch (error) {
     console.error('Failed to fetch patients:', error);
   }

@@ -10,11 +10,7 @@ userRouter.get("/user/:id", UserController.getUser);
 userRouter.get("/users", UserController.allUsers);
 
 // Create a user
-userRouter.post(
-  "/users",
-  authMiddleware as express.RequestHandler,
-  UserController.newUser,
-);
+userRouter.post("/users", UserController.newUser);
 
 // Update a user
 userRouter.put(

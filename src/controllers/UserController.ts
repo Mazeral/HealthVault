@@ -21,22 +21,36 @@ class UserController {
       let password = req.body.password || null;
       const role = req.body.role || null;
       const patients = req.body.patients || null;
+      let result = null;
       if (!email || !password || !role) {
         throw Error(`Missing field`);
       }
+      if (await prisma.user.findUnique({ where: { email: email } }))
+        throw Error("Email exists");
       const hash = new UserController();
       password = await hash.hashPassword(password);
-      const result = await prisma.user.create({
-        data: {
-          name: name,
-          email: email,
-          password: password,
-          role: role,
-          patients: {
-            connect: patients.map((id: number) => ({ id })),
+      if (patients !== null) {
+        result = await prisma.user.create({
+          data: {
+            name: name,
+            email: email,
+            password: password,
+            role: role,
+            patients: {
+              connect: patients.map((id: number) => ({ id })),
+            },
           },
-        },
-      });
+        });
+      } else {
+        result = await prisma.user.create({
+          data: {
+            name: name,
+            email: email,
+            password: password,
+            role: role,
+          },
+        });
+      }
       res.status(200).json({ "new user:": result });
     } catch (error) {
       if (error instanceof Error) {

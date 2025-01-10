@@ -108,8 +108,18 @@ class PatientController {
     }
   }
 
-  // Search for a patient according to the request
   static async getPatients(req: Request, res: Response) {
+    try {
+      const data = await prisma.patient.findMany();
+      res.status(200).json({ data: data });
+    } catch (error) {
+      if (error instanceof Error)
+        res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Search for a patient according to the request
+  static async searchPatients(req: Request, res: Response) {
     try {
       const data = createObject({
         firstName: req.body.firstName,

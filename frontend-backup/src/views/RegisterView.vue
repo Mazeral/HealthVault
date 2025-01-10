@@ -39,29 +39,41 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '../utils/api';
+	import { ref } from 'vue';
+	import { useRouter } from 'vue-router';
+	import api from '../utils/api';
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const role = ref('user'); // Default role
-const roles = ref(['user', 'admin']); // Roles available for selection
-const router = useRouter();
+	// Refs for form inputs
+	const name = ref('');
+	const email = ref('');
+	const password = ref('');
+	const role = ref('ADMIN'); // Default role in uppercase
+	const roles = ref(['ADMIN', 'DOCTOR', 'NURSE']); // Roles available for selection
+	const router = useRouter();
 
+	// Registration handler
 const handleRegister = async () => {
+  // Prepare the data
+  const data = {
+    name: name.value,
+    email: email.value,
+    password: password.value,
+    role: role.value.toUpperCase(),
+  };
+
+  console.log('Data being sent:', data); // Debugging: Check the data
+
   try {
-    const response = await api.post('/register', {
-      name: name.value,
-      email: email.value,
-      password: password.value,
-      role: role.value,
-    });
+    // Send POST request to register user
+    const response = await api.post('/users', data)
+
+    // Handle success
     alert('Registration successful!');
-    router.push({ name: 'login' }); // Redirect to login after registration
+    router.push({ name: 'login' });
   } catch (error) {
-    alert('Registration failed: ' + error.response?.data?.error || error.message);
+    // Handle error
+    console.error('Error details:', error); // Debugging: Log the full error
+    alert('Registration failed: ' + (error.response?.data?.error || error.message));
   }
 };
 </script>

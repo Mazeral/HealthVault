@@ -881,7 +881,7 @@ export const dashboardCards = [
   },
   {
     id: 2,
-    title: 'Doctors',
+    title: "Doctors",
     icon: TbUserPin,
     value: 130,
     percent: 25.06,
@@ -890,7 +890,7 @@ export const dashboardCards = [
   },
   {
     id: 3,
-    title: 'Services',
+    title: "Services",
     icon: TbFile,
     value: 4160,
     percent: 65.06,
@@ -899,7 +899,7 @@ export const dashboardCards = [
   },
   {
     id: 4,
-    title: 'Total Medicines',
+    title: "Total Medicines",
     icon: TbMedicineSyrup,
     value: 4590,
     percent: 45.06,
