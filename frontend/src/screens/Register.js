@@ -4,7 +4,7 @@ import { BiLogInCircle } from "react-icons/bi";
 import { TbLogin } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
 
   return (
@@ -17,6 +17,12 @@ function Login() {
         />
         <div className="flex flex-col gap-4 w-full mb-6">
           <Input
+            label="Name"
+            type="text"
+            color={true}
+            placeholder={"Abdul Samuel"}
+          />
+          <Input
             label="Email"
             type="email"
             color={true}
@@ -28,21 +34,27 @@ function Login() {
             color={true}
             placeholder={"*********"}
           />
+          <Input
+            label="Confirm Password"
+            type="password"
+            color={true}
+            placeholder={"*********"}
+          />
         </div>
         <Button
-          label="Login"
+          label="Proceed"
           Icon={BiLogInCircle}
           onClick={() => navigate("/")}
         />
         <br></br>
         <Button
-          label="Register"
+          label="Login instead"
           Icon={TbLogin}
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/login")}
         />
       </form>
     </div>
   );
 }
 
-export default Login;
+export default Register;
