@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const { faker } = require('@faker-js/faker');
+const { PrismaClient } = require("@prisma/client");
+const { faker } = require("@faker-js/faker");
 
 const prisma = new PrismaClient();
 
@@ -11,7 +11,7 @@ const NUM_PRESCRIPTIONS_PER_PATIENT = 3;
 const NUM_LAB_RESULTS_PER_PATIENT = 3;
 
 // Roles for users
-const ROLES = ['ADMIN', 'DOCTOR', 'NURSE'];
+const ROLES = ["ADMIN", "DOCTOR", "NURSE"];
 
 // Function to create fake users
 async function createUsers() {
@@ -34,7 +34,7 @@ async function createPatients(users) {
     const user = users[Math.floor(Math.random() * users.length)];
     patients.push({
       fullName: faker.person.fullName(),
-      dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: 'age' }),
+      dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: "age" }),
       phone: faker.phone.number(),
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
@@ -95,29 +95,35 @@ async function createLabResults(patients) {
 // Main function to generate mock data
 async function main() {
   try {
-    console.log('Creating users...');
+    console.log("Creating users...");
     const users = await createUsers();
     console.log(`${NUM_USERS} users created.`);
 
-    console.log('Creating patients...');
+    console.log("Creating patients...");
     const patients = await createPatients(await prisma.user.findMany());
     console.log(`${NUM_PATIENTS} patients created.`);
 
-    console.log('Creating medical records...');
+    console.log("Creating medical records...");
     await createMedicalRecords(await prisma.patient.findMany());
-    console.log(`${NUM_PATIENTS * NUM_MEDICAL_RECORDS_PER_PATIENT} medical records created.`);
+    console.log(
+      `${NUM_PATIENTS * NUM_MEDICAL_RECORDS_PER_PATIENT} medical records created.`,
+    );
 
-    console.log('Creating prescriptions...');
+    console.log("Creating prescriptions...");
     await createPrescriptions(await prisma.patient.findMany());
-    console.log(`${NUM_PATIENTS * NUM_PRESCRIPTIONS_PER_PATIENT} prescriptions created.`);
+    console.log(
+      `${NUM_PATIENTS * NUM_PRESCRIPTIONS_PER_PATIENT} prescriptions created.`,
+    );
 
-    console.log('Creating lab results...');
+    console.log("Creating lab results...");
     await createLabResults(await prisma.patient.findMany());
-    console.log(`${NUM_PATIENTS * NUM_LAB_RESULTS_PER_PATIENT} lab results created.`);
+    console.log(
+      `${NUM_PATIENTS * NUM_LAB_RESULTS_PER_PATIENT} lab results created.`,
+    );
 
-    console.log('Mock data generation completed successfully!');
+    console.log("Mock data generation completed successfully!");
   } catch (error) {
-    console.error('Error generating mock data:', error);
+    console.error("Error generating mock data:", error);
   } finally {
     await prisma.$disconnect();
   }
