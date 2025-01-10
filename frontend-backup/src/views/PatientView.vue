@@ -18,8 +18,7 @@ const router = useRouter(); // Initialize the router
 const patients = ref([]);
 const headers = [
   { title: 'ID', value: 'id' },
-  { title: 'First Name', value: 'firstName' },
-  { title: 'Last Name', value: 'lastName' },
+  { title: 'Full Name', value: 'fullName' },
   { title: 'Actions', value: 'actions', sortable: false },
 ];
 

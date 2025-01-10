@@ -5,7 +5,7 @@
       <v-card-text>
         <!-- Form to create a new prescription -->
         <v-form @submit.prevent="createPrescription">
-          <v-text-field v-model="newPrescription.patientId" label="Patient ID" required></v-text-field>
+          <v-text-field v-model="newPrescription.patientId" label="Patient ID" type="number" required></v-text-field>
           <v-text-field v-model="newPrescription.medication" label="Medication" required></v-text-field>
           <v-text-field v-model="newPrescription.dosage" label="Dosage" required></v-text-field>
           <v-textarea v-model="newPrescription.instructions" label="Instructions"></v-textarea>
@@ -45,7 +45,7 @@
             <v-card-title>Edit Prescription</v-card-title>
             <v-card-text>
               <v-form @submit.prevent="updatePrescription">
-                <v-text-field v-model="editPrescriptionData.patientId" label="Patient ID" required></v-text-field>
+                <v-text-field v-model="editPrescriptionData.patientId" label="Patient ID" type="number" required></v-text-field>
                 <v-text-field v-model="editPrescriptionData.medication" label="Medication" required></v-text-field>
                 <v-text-field v-model="editPrescriptionData.dosage" label="Dosage" required></v-text-field>
                 <v-textarea v-model="editPrescriptionData.instructions" label="Instructions"></v-textarea>
@@ -123,10 +123,9 @@ const editPrescription = (prescription) => {
 const updatePrescription = async () => {
   try {
     const response = await api.put(`/prescriptions/${editPrescriptionData.value.id}`, editPrescriptionData.value);
-    const updatedPrescription = response.data.updated;
-    const index = prescriptions.value.findIndex((prescription) => prescription.id === updatedPrescription.id);
+    const index = prescriptions.value.findIndex((p) => p.id === editPrescriptionData.value.id);
     if (index !== -1) {
-      prescriptions.value[index] = updatedPrescription;
+      prescriptions.value[index] = response.data.updated;
     }
     editDialog.value = false;
   } catch (error) {
@@ -138,7 +137,7 @@ const updatePrescription = async () => {
 const deletePrescription = async (id) => {
   try {
     await api.delete(`/prescriptions/${id}`);
-    prescriptions.value = prescriptions.value.filter((prescription) => prescription.id !== id);
+    prescriptions.value = prescriptions.value.filter((p) => p.id !== id);
   } catch (error) {
     console.error('Failed to delete prescription:', error);
   }

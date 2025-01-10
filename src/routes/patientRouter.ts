@@ -51,6 +51,7 @@ patientRouter.get(
   MedRecordController.getLabResults,
 );
 
+// delete a patient
 patientRouter.delete(
   "/patients/:id",
   authMiddleware as express.RequestHandler,

@@ -20,8 +20,7 @@ model User {
 
 model Patient {
   id             Int             @id @default(autoincrement())
-  firstName      String
-  lastName       String
+  fullName		 String			 @unique	
   dateOfBirth    DateTime?
   phone          String?         @unique
   email          String?         @unique
