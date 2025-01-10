@@ -274,6 +274,57 @@ class PatientController {
       }
     }
   }
+
+static async getStatistics(req: Request, res: Response) {
+  try {
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+    const todayCount = await prisma.patient.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    const monthlyCount = await prisma.patient.count({
+      where: {
+        createdAt: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+    });
+
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const endOfYear = new Date(today.getFullYear(), 11, 31);
+
+    const yearlyCount = await prisma.patient.count({
+      where: {
+        createdAt: {
+          gte: startOfYear,
+          lte: endOfYear,
+        },
+      },
+    });
+
+    res.status(200).json({
+      today: todayCount,
+      monthly: monthlyCount,
+      yearly: yearlyCount,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
 }
 
 export default PatientController;

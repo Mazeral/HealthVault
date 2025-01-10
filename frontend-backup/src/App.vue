@@ -22,34 +22,27 @@ const logout = () => {
   <v-app>
     <!-- Sidebar -->
     <v-navigation-drawer v-model="drawer" app>
-      <v-list>
-        <!-- Home -->
-        <v-list-item to="/" prepend-icon="mdi-home" title="Home" />
+	  <v-list>
+		<!-- Unauthenticated Links -->
+		<template v-if="!isAuthenticated">
+		  <v-list-item to="/login" prepend-icon="mdi-login" color="light-green" title="Login" />
+		  <v-list-item to="/register" prepend-icon="mdi-account-plus" title="Register" />
+		</template>
 
-        <!-- About -->
-        <v-list-item to="/about" prepend-icon="mdi-information" title="About" />
-
-        <!-- Authentication Links -->
-        <template v-if="!isAuthenticated">
-          <v-list-item to="/login" prepend-icon="mdi-login" title="Login" />
-          <v-list-item to="/register" prepend-icon="mdi-account-plus" title="Register" />
-        </template>
-
-        <!-- Authenticated Links -->
-        <template v-if="isAuthenticated">
-          <v-list-item to="/dashboard" prepend-icon="mdi-view-dashboard" title="Dashboard" />
-          <v-list-item to="/patients" prepend-icon="mdi-account-group" title="Patients" />
-          <v-list-item to="/lab" prepend-icon="mdi-flask" title="Lab" />
-          <v-list-item to="/record" prepend-icon="mdi-file-document" title="Records" />
-          <v-list-item to="/prescription" prepend-icon="mdi-pill" title="Prescriptions" />
-        </template>
-
-      </v-list>
+		<!-- Authenticated Links -->
+		<template v-if="isAuthenticated">
+		  <v-list-item to="/dashboard" prepend-icon="mdi-view-dashboard" color="light-green" title="Dashboard" />
+		  <v-list-item to="/patients" prepend-icon="mdi-account-group" title="Patients" color="light-green" />
+		  <v-list-item to="/lab" prepend-icon="mdi-flask" title="Lab" />
+		  <v-list-item to="/record" prepend-icon="mdi-file-document" title="Records" color="light-green" />
+		  <v-list-item to="/prescription" prepend-icon="mdi-pill" title="Prescriptions" color="light-green" />
+		</template>
+	  </v-list>
 
       <!-- Logout Button -->
       <template v-if="isAuthenticated" v-slot:append>
         <v-list>
-          <v-list-item @click="logout" prepend-icon="mdi-logout" title="Logout" />
+          <v-list-item @click="logout" prepend-icon="mdi-logout" title="Logout" color="light-green" />
         </v-list>
       </template>
     </v-navigation-drawer>

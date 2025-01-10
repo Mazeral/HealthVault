@@ -27,6 +27,9 @@ model Patient {
   address        String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  sex			 Sex	
+  bloodGroup	 BloodGroup?
+  age			 Int
   medicalRecords MedicalRecord[]
   prescriptions  Prescription[]
   labResults     LabResult[]
@@ -71,5 +74,21 @@ model LabResult {
 enum Role {
   ADMIN
   DOCTOR
-  NURSE
+}
+
+enum Sex{
+	MALE
+	FEMALE
+}
+
+
+enum BloodGroup {
+  A_PLUS   @map("A+")
+  A_MINUS  @map("A-")
+  B_PLUS   @map("B+")
+  B_MINUS  @map("B-")
+  AB_PLUS  @map("AB+")
+  AB_MINUS @map("AB-")
+  O_PLUS   @map("O+")
+  O_MINUS  @map("O-")
 }

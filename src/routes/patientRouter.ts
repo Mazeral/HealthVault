@@ -58,4 +58,9 @@ patientRouter.delete(
   PatientController.deletePatient,
 );
 
+// statistics
+patientRouter.get("/patients/statistics",
+	authMiddleware as express.RequestHandler,
+	PatientController.getStatistics);
+
 export default patientRouter;
