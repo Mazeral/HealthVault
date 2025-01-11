@@ -22,6 +22,13 @@
       </v-col>
     </v-row>
 
+    <!-- New Patient Button -->
+    <v-row class="mt-4">
+      <v-col cols="12">
+        <v-btn color="primary" @click="navigateToNewPatient">New Patient</v-btn>
+      </v-col>
+    </v-row>
+
     <!-- Search and Filter Controls -->
     <v-row class="mt-4">
       <v-col cols="12" md="6">
@@ -49,8 +56,8 @@
           v-model="selectedSex"
           :items="sexOptions"
           label="Filter by Sex"
-		  item-title="text"
           outlined
+		  item-title="text"
           dense
           clearable
         ></v-select>
@@ -68,9 +75,9 @@
 
     <!-- Patients Table -->
     <v-data-table :items="filteredPatients" :headers="headers">
-		<template v-slot:item.fullName="{ item }">
-		 {{ item.fullName }}
-		</template>
+      <template v-slot:item.fullName="{ item }">
+        {{ item.fullName }}
+      </template>
       <template v-slot:item.sex="{ item }">
         {{ formatSex(item.sex) }}
       </template>
@@ -256,6 +263,11 @@ const viewPatient = (patient) => {
 // Navigate to edit patient page
 const editPatient = (patient) => {
   router.push({ name: 'edit-patient', params: { id: patient.id } });
+};
+
+// Navigate to new patient page
+const navigateToNewPatient = () => {
+  router.push({ name: 'new-patient' });
 };
 
 // Delete a patient

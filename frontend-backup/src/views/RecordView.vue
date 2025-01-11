@@ -3,13 +3,8 @@
     <v-card>
       <v-card-title>Medical Records</v-card-title>
       <v-card-text>
-        <!-- Form to add a new medical record -->
-        <v-form @submit.prevent="addMedicalRecord">
-          <v-text-field v-model="newRecord.patientId" label="Patient ID" required></v-text-field>
-          <v-text-field v-model="newRecord.diagnosis" label="Diagnosis" required></v-text-field>
-          <v-textarea v-model="newRecord.notes" label="Notes"></v-textarea>
-          <v-btn type="submit" color="primary">Add Medical Record</v-btn>
-        </v-form>
+        <!-- Button to navigate to the new medical record view -->
+        <v-btn @click="navigateToNewMedicalRecord" color="primary" class="mb-4">New Medical Record</v-btn>
 
         <!-- Table to display all medical records -->
         <v-table>
@@ -58,14 +53,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '../utils/api';
 
-// Data for adding a new medical record
-const newRecord = ref({
-  patientId: null,
-  diagnosis: '',
-  notes: '',
-});
+const router = useRouter();
 
 // Data for editing a medical record
 const editRecordData = ref({
@@ -93,17 +84,6 @@ const fetchMedicalRecords = async () => {
     medicalRecords.value = response.data['Medical Records'];
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
-  }
-};
-
-// Add a new medical record
-const addMedicalRecord = async () => {
-  try {
-    const response = await api.post('/medical-records', newRecord.value);
-    medicalRecords.value.push(response.data.success);
-    newRecord.value = { patientId: null, diagnosis: '', notes: '' }; // Reset form
-  } catch (error) {
-    console.error('Failed to add medical record:', error);
   }
 };
 
@@ -136,6 +116,11 @@ const deleteMedicalRecord = async (id) => {
   } catch (error) {
     console.error('Failed to delete medical record:', error);
   }
+};
+
+// Navigate to the new medical record view
+const navigateToNewMedicalRecord = () => {
+  router.push({ name: 'new-medical-record' });
 };
 </script>
 

@@ -3,15 +3,8 @@
     <v-card>
       <v-card-title>Lab Results</v-card-title>
       <v-card-text>
-        <!-- Form to create a new lab result -->
-        <v-form @submit.prevent="createLabResult">
-          <v-text-field v-model="newLabResult.patientId" label="Patient ID" required></v-text-field>
-          <v-text-field v-model="newLabResult.testName" label="Test Name" required></v-text-field>
-          <v-text-field v-model="newLabResult.result" label="Result" required></v-text-field>
-          <v-text-field v-model="newLabResult.notes" label="Notes"></v-text-field>
-          <v-text-field v-model="newLabResult.performedAt" label="Performed At" type="date" required></v-text-field>
-          <v-btn type="submit" color="primary">Create Lab Result</v-btn>
-        </v-form>
+        <!-- Button to navigate to the new lab result view -->
+        <v-btn @click="navigateToNewLabResult" color="primary" class="mb-4">New Lab Result</v-btn>
 
         <!-- Table to display all lab results -->
         <v-table>
@@ -33,7 +26,7 @@
               <td>{{ labResult.testName }}</td>
               <td>{{ labResult.result }}</td>
               <td>{{ labResult.notes }}</td>
-              <td>{{ labResult.performedAt }}</td>
+              <td>{{ formatDate(labResult.performedAt) }}</td>
               <td>
                 <v-btn @click="editLabResult(labResult)" color="warning">Edit</v-btn>
                 <v-btn @click="deleteLabResult(labResult.id)" color="error">Delete</v-btn>
@@ -66,16 +59,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '../utils/api';
 
-// Data for creating a new lab result
-const newLabResult = ref({
-  patientId: null,
-  testName: '',
-  result: '',
-  notes: '',
-  performedAt: '',
-});
+const router = useRouter();
 
 // Data for editing a lab result
 const editLabResultData = ref({
@@ -108,15 +95,13 @@ const fetchLabResults = async () => {
   }
 };
 
-// Create a new lab result
-const createLabResult = async () => {
-  try {
-    const response = await api.post('/lab-results', newLabResult.value);
-    labResults.value.push(response.data['Lab result']);
-    newLabResult.value = { patientId: null, testName: '', result: '', notes: '', performedAt: '' }; // Reset form
-  } catch (error) {
-    console.error('Failed to create lab result:', error);
-  }
+// Format date to dd/mm/yyyy
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 };
 
 // Open edit dialog with lab result data
@@ -154,6 +139,11 @@ const deleteLabResult = async (id) => {
   } catch (error) {
     console.error('Failed to delete lab result:', error);
   }
+};
+
+// Navigate to the new lab result view
+const navigateToNewLabResult = () => {
+  router.push({ name: 'new-lab-result' });
 };
 </script>
 

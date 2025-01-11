@@ -4,8 +4,11 @@ import LoginView from "../views/LoginView.vue";
 import PatientView from "../views/PatientView.vue";
 import RegisterView from "../views/RegisterView.vue";
 import LabView from "../views/LabView.vue";
+import NewLabResultView from "../views/NewLabResultView.vue";
 import RecordView from "../views/RecordView.vue";
+import NewMedicalRecordView from "../views/NewMedicalRecordView.vue";
 import PrescriptionView from "../views/PrescriptionView.vue";
+import NewPrescriptionView from "../views/NewPrescriptionView.vue"; // Import the new component
 import DashboardView from "../views/DashboardView.vue";
 import EditPatientView from "../views/EditPatientView.vue";
 import { useAuthStore } from "../stores/auth";
@@ -16,9 +19,6 @@ const router = createRouter({
     {
       path: "/about",
       name: "about",
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import("../views/AboutView.vue"),
     },
     {
@@ -47,14 +47,29 @@ const router = createRouter({
       component: LabView,
     },
     {
+      path: "/lab/new",
+      name: "new-lab-result",
+      component: NewLabResultView,
+    },
+    {
       path: "/record",
       name: "record",
       component: RecordView,
     },
     {
+      path: "/record/new",
+      name: "new-medical-record",
+      component: NewMedicalRecordView,
+    },
+    {
       path: "/prescription",
       name: "prescription",
       component: PrescriptionView,
+    },
+    {
+      path: "/prescription/new",
+      name: "new-prescription",
+      component: NewPrescriptionView, // Add the new route
     },
     {
       path: "/dashboard",

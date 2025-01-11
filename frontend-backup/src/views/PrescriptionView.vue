@@ -3,14 +3,8 @@
     <v-card>
       <v-card-title>Prescriptions</v-card-title>
       <v-card-text>
-        <!-- Form to create a new prescription -->
-        <v-form @submit.prevent="createPrescription">
-          <v-text-field v-model="newPrescription.fullName" label="Full Name" required></v-text-field>
-          <v-text-field v-model="newPrescription.medication" label="Medication" required></v-text-field>
-          <v-text-field v-model="newPrescription.dosage" label="Dosage" required></v-text-field>
-          <v-textarea v-model="newPrescription.instructions" label="Instructions"></v-textarea>
-          <v-btn type="submit" color="primary">Create Prescription</v-btn>
-        </v-form>
+        <!-- Button to navigate to the new prescription view -->
+        <v-btn @click="navigateToNewPrescription" color="primary" class="mb-4">New Prescription</v-btn>
 
         <!-- Table to display all prescriptions -->
         <v-table>
@@ -27,7 +21,7 @@
           <tbody>
             <tr v-for="prescription in prescriptions" :key="prescription.id">
               <td>{{ prescription.id }}</td>
-              <td>{{ prescription.patient.fullName}}</td>
+              <td>{{ prescription.patient.fullName }}</td>
               <td>{{ prescription.medication }}</td>
               <td>{{ prescription.dosage }}</td>
               <td>{{ prescription.instructions }}</td>
@@ -62,19 +56,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '../utils/api';
 
-// Data for creating a new prescription
-const newPrescription = ref({
-	fullName: '',
-  medication: '',
-  dosage: '',
-  instructions: '',
-});
+const router = useRouter();
 
 // Data for editing a prescription
 const editPrescriptionData = ref({
-fullName: '',
+  id: null,
   patientId: null,
   medication: '',
   dosage: '',
@@ -99,17 +88,6 @@ const fetchPrescriptions = async () => {
     prescriptions.value = response.data.prescriptions;
   } catch (error) {
     console.error('Failed to fetch prescriptions:', error);
-  }
-};
-
-// Create a new prescription
-const createPrescription = async () => {
-  try {
-    const response = await api.post('/prescriptions', newPrescription.value);
-    prescriptions.value.push(response.data.prescription);
-    newPrescription.value = { fullName: '', medication: '', dosage: '', instructions: '' }; // Reset form
-  } catch (error) {
-    console.error('Failed to create prescription:', error);
   }
 };
 
@@ -141,6 +119,11 @@ const deletePrescription = async (id) => {
   } catch (error) {
     console.error('Failed to delete prescription:', error);
   }
+};
+
+// Navigate to the new prescription view
+const navigateToNewPrescription = () => {
+  router.push({ name: 'new-prescription' });
 };
 </script>
 
