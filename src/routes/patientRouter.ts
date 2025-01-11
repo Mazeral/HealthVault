@@ -5,9 +5,6 @@ import { authMiddleware } from "../middlewares/AuthMiddleware";
 
 const patientRouter = express.Router();
 
-// Get all the patients
-patientRouter.get("/patients");
-
 // Creates a new patient without any health records
 patientRouter.post(
   "/patients",
@@ -17,7 +14,7 @@ patientRouter.post(
 
 // Gets a patient by id
 patientRouter.get(
-  "/patients/:id",
+  "/patient/:id",
   authMiddleware as express.RequestHandler,
   PatientController.getPatient,
 );
@@ -51,16 +48,18 @@ patientRouter.get(
   MedRecordController.getLabResults,
 );
 
-// delete a patient
+// Delete a patient
 patientRouter.delete(
   "/patients/:id",
   authMiddleware as express.RequestHandler,
   PatientController.deletePatient,
 );
 
-// statistics
-patientRouter.get("/patients/statistics",
-	authMiddleware as express.RequestHandler,
-	PatientController.getStatistics);
+// Statistics
+patientRouter.get(
+  "/patients/statistics",
+  authMiddleware as express.RequestHandler,
+  PatientController.getStatistics,
+);
 
 export default patientRouter;

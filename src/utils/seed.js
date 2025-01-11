@@ -40,7 +40,16 @@ async function createPatients(users) {
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
       sex: faker.helpers.arrayElement(["MALE", "FEMALE"]),
-      bloodGroup: faker.helpers.arrayElement(["A_PLUS", "A_MINUS", "B_PLUS", "B_MINUS", "AB_PLUS", "AB_MINUS", "O_PLUS", "O_MINUS"]),
+      bloodGroup: faker.helpers.arrayElement([
+        "A_PLUS",
+        "A_MINUS",
+        "B_PLUS",
+        "B_MINUS",
+        "AB_PLUS",
+        "AB_MINUS",
+        "O_PLUS",
+        "O_MINUS",
+      ]),
       userId: user.id,
       createdAt: faker.date.past(),
     });

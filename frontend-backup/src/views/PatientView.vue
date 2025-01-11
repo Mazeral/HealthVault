@@ -38,9 +38,8 @@
           v-model="selectedBloodGroup"
           :items="bloodGroupOptions"
           label="Filter by Blood Group"
-		  item-title="text"
-		  item-value="value"
           outlined
+		  item-title="text"
           dense
           clearable
         ></v-select>
@@ -51,7 +50,6 @@
           :items="sexOptions"
           label="Filter by Sex"
 		  item-title="text"
-		  item-value="value"
           outlined
           dense
           clearable
@@ -64,24 +62,29 @@
           label="Sort By"
           outlined
           dense
-          @change="sortPatients"
         ></v-select>
       </v-col>
     </v-row>
 
     <!-- Patients Table -->
     <v-data-table :items="filteredPatients" :headers="headers">
-      <template v-slot:item.fullName="{ item }">
-        <v-btn text @click="viewPatient(item)">{{ item.fullName }}</v-btn>
-      </template>
+		<template v-slot:item.fullName="{ item }">
+		 {{ item.fullName }}
+		</template>
       <template v-slot:item.sex="{ item }">
         {{ formatSex(item.sex) }}
       </template>
       <template v-slot:item.bloodGroup="{ item }">
         {{ formatBloodGroup(item.bloodGroup) }}
       </template>
+      <template v-slot:item.dateOfBirth="{ item }">
+        {{ formatDate(item.dateOfBirth) }}
+      </template>
       <template v-slot:item.age="{ item }">
         {{ calculateAge(item.dateOfBirth) }}
+      </template>
+      <template v-slot:item.createdAt="{ item }">
+        {{ formatDate(item.createdAt) }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn @click="editPatient(item)">Edit</v-btn>
@@ -92,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import api from "../utils/api";
 
@@ -118,16 +121,17 @@ const bloodGroupOptions = [
 ];
 
 // Sex options for the v-select
-const sexOptions = ref([
+const sexOptions = [
   { text: 'Male', value: 'MALE' },
   { text: 'Female', value: 'FEMALE' },
-]);
+];
 
 const headers = [
   { title: 'ID', value: 'id' },
   { title: 'Full Name', value: 'fullName' },
   { title: 'Gender', value: 'sex' },
   { title: 'Blood Group', value: 'bloodGroup' },
+  { title: 'Date of Birth', value: 'dateOfBirth' }, // Added dateOfBirth column
   { title: 'Age', value: 'age' },
   { title: 'Created At', value: 'createdAt' },
   { title: 'Actions', value: 'actions', sortable: false },
@@ -185,7 +189,16 @@ const formatBloodGroup = (bloodGroup) => {
   return bloodGroupMap[bloodGroup] || bloodGroup;
 };
 
-// Filter patients based on search query, selected blood group, and selected sex
+// Format date to dd/mm/yyyy
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+// Filter and sort patients based on search query, selected blood group, selected sex, and sort criteria
 const filteredPatients = computed(() => {
   let filtered = patients.value;
 
@@ -210,6 +223,17 @@ const filteredPatients = computed(() => {
     );
   }
 
+  // Sort the filtered patients
+  if (sortBy.value === 'Newest Creation') {
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Newest first
+  } else if (sortBy.value === 'Oldest Creation') {
+    filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Oldest first
+  } else if (sortBy.value === 'Youngest') {
+    filtered.sort((a, b) => calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth)); // Youngest first
+  } else if (sortBy.value === 'Oldest') {
+    filtered.sort((a, b) => calculateAge(b.dateOfBirth) - calculateAge(a.dateOfBirth)); // Oldest first
+  }
+
   return filtered;
 });
 
@@ -218,25 +242,15 @@ const handleSearchInput = () => {
   // No need to do anything here, computed property will handle filtering
 };
 
-// Sort patients based on selected criteria
-const sortPatients = () => {
-  patients.value.sort((a, b) => {
-    if (sortBy.value === 'Newest Creation') {
-      return new Date(b.createdAt) - new Date(a.createdAt); // Newest first
-    } else if (sortBy.value === 'Oldest Creation') {
-      return new Date(a.createdAt) - new Date(b.createdAt); // Oldest first
-    } else if (sortBy.value === 'Youngest') {
-      return calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth); // Youngest first
-    } else if (sortBy.value === 'Oldest') {
-      return calculateAge(b.dateOfBirth) - calculateAge(a.dateOfBirth); // Oldest first
-    }
-    return 0;
-  });
-};
+// Watch for changes in sortBy and trigger sorting
+watch(sortBy, () => {
+  // No need to do anything here, computed property will handle sorting
+});
 
 // Navigate to patient preview page
 const viewPatient = (patient) => {
-  router.push({ name: 'patient-preview', params: { id: patient.id } });
+  console.log("Editing patient with ID:", patient.id); // Debugging log
+  router.push({ name: 'edit-patient', params: { id: patient.id } });
 };
 
 // Navigate to edit patient page

@@ -6,11 +6,14 @@ class PatientController {
   // Creates a patient without health records
   static async newPatient(req: Request, res: Response) {
     const fullName = req.body.fullName || null;
-    const dateOfBirth = req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : null;
+    const dateOfBirth = req.body.dateOfBirth
+      ? new Date(req.body.dateOfBirth)
+      : null;
     const phone = String(req.body.phone) || null;
     const email = String(req.body.email) || null;
     const address = String(req.body.address) || null;
     const sex = req.body.sex || null; // Add sex field
+    const bloodGroup = req.body.bloodGroup || null;
 
     try {
       if (!fullName || fullName.trim() === "") {
@@ -29,13 +32,17 @@ class PatientController {
           email: email,
           address: address,
           sex: sex, // Include sex
+          bloodGroup: bloodGroup,
         },
       });
 
       res.status(200).json({ "Patient data:": result });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Full name is required" || error.message === "Sex and age are required") {
+        if (
+          error.message === "Full name is required" ||
+          error.message === "Sex and age are required"
+        ) {
           res.status(400).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
@@ -49,7 +56,7 @@ class PatientController {
     const id = req.params.id ? Number(req.params.id) : null;
 
     try {
-      if (!id) throw new Error("No ID provided");
+      if (!id) throw new Error("No ID provided from getPatient");
 
       const patient = await prisma.patient.findUnique({
         where: {
@@ -62,7 +69,7 @@ class PatientController {
       res.status(200).json({ patient: patient });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided") {
+        if (error.message === "No ID provided from getPatient") {
           res.status(400).json({ error: error.message });
         } else if (error.message === "No patient found") {
           res.status(404).json({ error: error.message });
@@ -78,7 +85,7 @@ class PatientController {
     const id = Number(req.params.id) || null;
 
     try {
-      if (!id) throw new Error("No ID provided");
+      if (!id) throw new Error("No ID provided from updatePatient");
 
       const patient = await prisma.patient.findUnique({
         where: {
@@ -90,11 +97,14 @@ class PatientController {
 
       const data = createObject({
         fullName: String(req.body.fullName),
-        dateOfBirth: req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : undefined,
+        dateOfBirth: req.body.dateOfBirth
+          ? new Date(req.body.dateOfBirth)
+          : undefined,
         phone: String(req.body.phone),
         email: String(req.body.email),
         address: String(req.body.address),
         sex: String(req.body.sex), // Include sex
+        bloodGroup: String(req.body.bloodGroup),
         userId: Number(req.body.userId),
       });
 
@@ -108,7 +118,7 @@ class PatientController {
       res.status(200).json({ updated: result });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided") {
+        if (error.message === "No ID provided from updatePatient") {
           res.status(400).json({ error: error.message });
         } else if (error.message === "No patient found") {
           res.status(404).json({ error: error.message });
@@ -136,7 +146,9 @@ class PatientController {
     try {
       const data = createObject({
         fullName: req.body.fullName,
-        dateOfBirth: req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : undefined,
+        dateOfBirth: req.body.dateOfBirth
+          ? new Date(req.body.dateOfBirth)
+          : undefined,
         phone: req.body.phone,
         email: req.body.email,
         address: req.body.address,
@@ -178,7 +190,7 @@ class PatientController {
       const diagnosis = String(req.body.diagnosis);
       const notes = String(req.body.notes) || null;
 
-      if (!patientId) throw new Error("No ID provided");
+      if (!patientId) throw new Error("No ID provided from addRecord");
 
       const patient = await prisma.patient.findUnique({
         where: {
@@ -203,7 +215,7 @@ class PatientController {
       res.status(200).json({ updated: record });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided") {
+        if (error.message === "No ID provided from addRecord") {
           res.status(400).json({ error: error.message });
         } else if (error.message === "No patient found") {
           res.status(404).json({ error: error.message });
@@ -219,7 +231,7 @@ class PatientController {
     try {
       const patientId = req.params.id || null;
 
-      if (!patientId) throw new Error("No ID provided");
+      if (!patientId) throw new Error("No ID provided from getLabResults");
 
       const patient = await prisma.patient.findUnique({
         where: {
@@ -238,7 +250,7 @@ class PatientController {
       res.status(200).json({ "Lab Results": labResults });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided") {
+        if (error.message === "No ID provided from getLabResults") {
           res.status(400).json({ error: error.message });
         } else if (error.message === "No patient found") {
           res.status(404).json({ error: error.message });
@@ -254,7 +266,7 @@ class PatientController {
     const id = Number(req.params.id) || null;
 
     try {
-      if (!id) throw new Error("No ID provided");
+      if (!id) throw new Error("No ID provided from deletePatient");
 
       const patient = await prisma.patient.findUnique({
         where: {
@@ -273,7 +285,7 @@ class PatientController {
       res.status(200).json({ message: "Patient deleted successfully" });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided") {
+        if (error.message === "No ID provided from deletePatient") {
           res.status(400).json({ error: error.message });
         } else if (error.message === "No patient found") {
           res.status(404).json({ error: error.message });
@@ -287,9 +299,31 @@ class PatientController {
   // Gets statistics for patients
   static async getStatistics(req: Request, res: Response) {
     try {
-      const today = new Date();
-      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+      const today = new Date(); // Current date and time
+
+      // Calculate today's count (UTC)
+      const startOfDay = new Date(
+        Date.UTC(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+      const endOfDay = new Date(
+        Date.UTC(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          23,
+          59,
+          59,
+          999,
+        ),
+      );
 
       const todayCount = await prisma.patient.count({
         where: {
@@ -300,8 +334,13 @@ class PatientController {
         },
       });
 
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      // Calculate monthly count (UTC)
+      const startOfMonth = new Date(
+        Date.UTC(today.getFullYear(), today.getMonth(), 1, 0, 0, 0, 0),
+      );
+      const endOfMonth = new Date(
+        Date.UTC(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999),
+      );
 
       const monthlyCount = await prisma.patient.count({
         where: {
@@ -312,8 +351,13 @@ class PatientController {
         },
       });
 
-      const startOfYear = new Date(today.getFullYear(), 0, 1);
-      const endOfYear = new Date(today.getFullYear(), 11, 31);
+      // Calculate yearly count (UTC)
+      const startOfYear = new Date(
+        Date.UTC(today.getFullYear(), 0, 1, 0, 0, 0, 0),
+      );
+      const endOfYear = new Date(
+        Date.UTC(today.getFullYear(), 11, 31, 23, 59, 59, 999),
+      );
 
       const yearlyCount = await prisma.patient.count({
         where: {
@@ -330,8 +374,11 @@ class PatientController {
         yearly: yearlyCount,
       });
     } catch (error) {
+      console.error("Error in getStatistics:", error); // Log the error for debugging
       if (error instanceof Error) {
         res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unknown error occurred" });
       }
     }
   }

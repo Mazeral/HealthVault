@@ -62,7 +62,7 @@ const router = createRouter({
       component: DashboardView,
     },
     {
-      path: "/patients/:id/edit",
+      path: "/patient/:id/",
       name: "edit-patient",
       component: EditPatientView,
       props: true, // Pass route params as props
@@ -74,14 +74,14 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 
   // Define routes that do not require authentication
-  const publicRoutes = ['login', 'register'];
+  const publicRoutes = ["login", "register"];
 
   // Check if the route requires authentication
   const isAuthRequired = !publicRoutes.includes(to.name);
 
   // Redirect to login if authentication is required and the user is not authenticated
   if (isAuthRequired && !authStore.isAuthenticated) {
-    next({ name: 'login' });
+    next({ name: "login" });
   } else {
     next();
   }
