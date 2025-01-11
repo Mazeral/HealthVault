@@ -11,7 +11,7 @@ const NUM_PRESCRIPTIONS_PER_PATIENT = 3;
 const NUM_LAB_RESULTS_PER_PATIENT = 3;
 
 // Roles for users
-const ROLES = ["ADMIN", "DOCTOR", "NURSE"];
+const ROLES = ["ADMIN", "DOCTOR"];
 
 // Function to create fake users
 async function createUsers() {
@@ -22,6 +22,7 @@ async function createUsers() {
       email: faker.internet.email(),
       password: faker.internet.password(),
       role: ROLES[Math.floor(Math.random() * ROLES.length)],
+      createdAt: faker.date.past(),
     });
   }
   return await prisma.user.createMany({ data: users });
@@ -38,7 +39,10 @@ async function createPatients(users) {
       phone: faker.phone.number(),
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
+      sex: faker.helpers.arrayElement(["MALE", "FEMALE"]),
+      bloodGroup: faker.helpers.arrayElement(["A_PLUS", "A_MINUS", "B_PLUS", "B_MINUS", "AB_PLUS", "AB_MINUS", "O_PLUS", "O_MINUS"]),
       userId: user.id,
+      createdAt: faker.date.past(),
     });
   }
   return await prisma.patient.createMany({ data: patients });
@@ -53,6 +57,7 @@ async function createMedicalRecords(patients) {
         patientId: patient.id,
         diagnosis: faker.lorem.words(5),
         notes: faker.lorem.sentences(2),
+        createdAt: faker.date.past(),
       });
     }
   }
@@ -69,6 +74,7 @@ async function createPrescriptions(patients) {
         medication: faker.lorem.word(),
         dosage: `${Math.floor(Math.random() * 100)} mg`,
         instructions: faker.lorem.sentence(),
+        prescribedAt: faker.date.past(),
       });
     }
   }
@@ -86,6 +92,7 @@ async function createLabResults(patients) {
         result: faker.lorem.sentence(),
         notes: faker.lorem.sentences(2),
         performedAt: faker.date.past(),
+        createdAt: faker.date.past(),
       });
     }
   }

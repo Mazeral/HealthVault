@@ -22,7 +22,7 @@
       </v-col>
     </v-row>
 
-    <!-- Search and Sort Controls -->
+    <!-- Search and Filter Controls -->
     <v-row class="mt-4">
       <v-col cols="12" md="6">
         <v-text-field
@@ -38,6 +38,20 @@
           v-model="selectedBloodGroup"
           :items="bloodGroupOptions"
           label="Filter by Blood Group"
+		  item-title="text"
+		  item-value="value"
+          outlined
+          dense
+          clearable
+        ></v-select>
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-select
+          v-model="selectedSex"
+          :items="sexOptions"
+          label="Filter by Sex"
+		  item-title="text"
+		  item-value="value"
           outlined
           dense
           clearable
@@ -53,22 +67,21 @@
           @change="sortPatients"
         ></v-select>
       </v-col>
-      <v-col cols="12" md="3">
-        <v-select
-          v-model="sortOrder"
-          :items="['Ascending', 'Descending']"
-          label="Sort Order"
-          outlined
-          dense
-          @change="sortPatients"
-        ></v-select>
-      </v-col>
     </v-row>
 
     <!-- Patients Table -->
     <v-data-table :items="filteredPatients" :headers="headers">
       <template v-slot:item.fullName="{ item }">
         <v-btn text @click="viewPatient(item)">{{ item.fullName }}</v-btn>
+      </template>
+      <template v-slot:item.sex="{ item }">
+        {{ formatSex(item.sex) }}
+      </template>
+      <template v-slot:item.bloodGroup="{ item }">
+        {{ formatBloodGroup(item.bloodGroup) }}
+      </template>
+      <template v-slot:item.age="{ item }">
+        {{ calculateAge(item.dateOfBirth) }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn @click="editPatient(item)">Edit</v-btn>
@@ -87,23 +100,37 @@ const router = useRouter();
 const patients = ref([]); // Original list of patients
 const statistics = ref({ today: 0, monthly: 0, yearly: 0 });
 const searchQuery = ref('');
-const sortBy = ref('Newest'); // Default sorting by newest
-const sortOrder = ref('Descending'); // Default sort order
-const sortOptions = ['Newest', 'Oldest', 'Gender']; // Sorting options
-const selectedBloodGroup = ref(null);
+const selectedBloodGroup = ref(null); // Selected blood group for filtering
+const selectedSex = ref(null); // Selected sex for filtering
+const sortBy = ref('Newest Creation'); // Default sorting by newest creation
+const sortOptions = ['Newest Creation', 'Oldest Creation', 'Youngest', 'Oldest']; // Sorting options
+
+// Blood group options for the v-select
+const bloodGroupOptions = [
+  { text: 'A+', value: 'A_PLUS' },
+  { text: 'A-', value: 'A_MINUS' },
+  { text: 'B+', value: 'B_PLUS' },
+  { text: 'B-', value: 'B_MINUS' },
+  { text: 'AB+', value: 'AB_PLUS' },
+  { text: 'AB-', value: 'AB_MINUS' },
+  { text: 'O+', value: 'O_PLUS' },
+  { text: 'O-', value: 'O_MINUS' },
+];
+
+// Sex options for the v-select
+const sexOptions = ref([
+  { text: 'Male', value: 'MALE' },
+  { text: 'Female', value: 'FEMALE' },
+]);
 
 const headers = [
   { title: 'ID', value: 'id' },
   { title: 'Full Name', value: 'fullName' },
-  { title: 'Gender', value: 'sex' }, // Updated to use 'sex' instead of 'gender'
+  { title: 'Gender', value: 'sex' },
   { title: 'Blood Group', value: 'bloodGroup' },
-  { title: 'Created At', value: 'createdAt' }, // Added createdAt column
+  { title: 'Age', value: 'age' },
+  { title: 'Created At', value: 'createdAt' },
   { title: 'Actions', value: 'actions', sortable: false },
-];
-
-// Blood groups
-const bloodGroupOptions = [
-  'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-',
 ];
 
 // Fetch all patients from the backend
@@ -126,7 +153,39 @@ const fetchStatistics = async () => {
   }
 };
 
-// Filter patients based on search query and selected blood group
+// Calculate age from date of birth
+const calculateAge = (dateOfBirth) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
+
+// Format sex for display
+const formatSex = (sex) => {
+  return sex === 'MALE' ? 'Male' : 'Female';
+};
+
+// Format blood group for display
+const formatBloodGroup = (bloodGroup) => {
+  const bloodGroupMap = {
+    'A_PLUS': 'A+',
+    'A_MINUS': 'A-',
+    'B_PLUS': 'B+',
+    'B_MINUS': 'B-',
+    'AB_PLUS': 'AB+',
+    'AB_MINUS': 'AB-',
+    'O_PLUS': 'O+',
+    'O_MINUS': 'O-',
+  };
+  return bloodGroupMap[bloodGroup] || bloodGroup;
+};
+
+// Filter patients based on search query, selected blood group, and selected sex
 const filteredPatients = computed(() => {
   let filtered = patients.value;
 
@@ -144,6 +203,13 @@ const filteredPatients = computed(() => {
     );
   }
 
+  // Filter by selected sex
+  if (selectedSex.value) {
+    filtered = filtered.filter(
+      (patient) => patient.sex === selectedSex.value
+    );
+  }
+
   return filtered;
 });
 
@@ -155,18 +221,14 @@ const handleSearchInput = () => {
 // Sort patients based on selected criteria
 const sortPatients = () => {
   patients.value.sort((a, b) => {
-    if (sortBy.value === 'newest') {
-      return sortOrder.value === 'Ascending'
-        ? new Date(a.createdAt) - new Date(b.createdAt) // Oldest first
-        : new Date(b.createdAt) - new Date(a.createdAt); // Newest first
-    } else if (sortBy.value === 'oldest') {
-      return sortOrder.value === 'Ascending'
-        ? new Date(b.createdAt) - new Date(a.createdAt) // Newest first
-        : new Date(a.createdAt) - new Date(b.createdAt); // Oldest first
-    } else if (sortBy.value === 'sex') {
-      return sortOrder.value === 'Ascending'
-        ? a.sex.localeCompare(b.sex) // Sort by sex (gender) ascending
-        : b.sex.localeCompare(a.sex); // Sort by sex (gender) descending
+    if (sortBy.value === 'Newest Creation') {
+      return new Date(b.createdAt) - new Date(a.createdAt); // Newest first
+    } else if (sortBy.value === 'Oldest Creation') {
+      return new Date(a.createdAt) - new Date(b.createdAt); // Oldest first
+    } else if (sortBy.value === 'Youngest') {
+      return calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth); // Youngest first
+    } else if (sortBy.value === 'Oldest') {
+      return calculateAge(b.dateOfBirth) - calculateAge(a.dateOfBirth); // Oldest first
     }
     return 0;
   });

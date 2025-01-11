@@ -6,14 +6,19 @@ class PatientController {
   // Creates a patient without health records
   static async newPatient(req: Request, res: Response) {
     const fullName = req.body.fullName || null;
-    const dateOfBirth = new Date(req.body.dateOfBirth) || null;
+    const dateOfBirth = req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : null;
     const phone = String(req.body.phone) || null;
     const email = String(req.body.email) || null;
     const address = String(req.body.address) || null;
+    const sex = req.body.sex || null; // Add sex field
 
     try {
       if (!fullName || fullName.trim() === "") {
         throw new Error("Full name is required");
+      }
+
+      if (!sex) {
+        throw new Error("Sex is required");
       }
 
       const result = await prisma.patient.create({
@@ -23,13 +28,14 @@ class PatientController {
           phone: phone,
           email: email,
           address: address,
+          sex: sex, // Include sex
         },
       });
 
       res.status(200).json({ "Patient data:": result });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Full name is required") {
+        if (error.message === "Full name is required" || error.message === "Sex and age are required") {
           res.status(400).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
@@ -84,10 +90,11 @@ class PatientController {
 
       const data = createObject({
         fullName: String(req.body.fullName),
-        dateOfBirth: new Date(Date.parse(req.body.dateOfBirth)),
+        dateOfBirth: req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : undefined,
         phone: String(req.body.phone),
         email: String(req.body.email),
         address: String(req.body.address),
+        sex: String(req.body.sex), // Include sex
         userId: Number(req.body.userId),
       });
 
@@ -129,10 +136,11 @@ class PatientController {
     try {
       const data = createObject({
         fullName: req.body.fullName,
-        dateOfBirth: new Date(Date.parse(String(req.body.dateOfBirth))),
+        dateOfBirth: req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : undefined,
         phone: req.body.phone,
         email: req.body.email,
         address: req.body.address,
+        sex: req.body.sex, // Include sex
       });
 
       // Check if dateOfBirth is a valid date
@@ -147,6 +155,7 @@ class PatientController {
           phone: data.phone,
           email: data.email,
           address: data.address,
+          sex: data.sex,
         },
       });
 
@@ -275,56 +284,57 @@ class PatientController {
     }
   }
 
-static async getStatistics(req: Request, res: Response) {
-  try {
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  // Gets statistics for patients
+  static async getStatistics(req: Request, res: Response) {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const todayCount = await prisma.patient.count({
-      where: {
-        createdAt: {
-          gte: startOfDay,
-          lte: endOfDay,
+      const todayCount = await prisma.patient.count({
+        where: {
+          createdAt: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
         },
-      },
-    });
+      });
 
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    const monthlyCount = await prisma.patient.count({
-      where: {
-        createdAt: {
-          gte: startOfMonth,
-          lte: endOfMonth,
+      const monthlyCount = await prisma.patient.count({
+        where: {
+          createdAt: {
+            gte: startOfMonth,
+            lte: endOfMonth,
+          },
         },
-      },
-    });
+      });
 
-    const startOfYear = new Date(today.getFullYear(), 0, 1);
-    const endOfYear = new Date(today.getFullYear(), 11, 31);
+      const startOfYear = new Date(today.getFullYear(), 0, 1);
+      const endOfYear = new Date(today.getFullYear(), 11, 31);
 
-    const yearlyCount = await prisma.patient.count({
-      where: {
-        createdAt: {
-          gte: startOfYear,
-          lte: endOfYear,
+      const yearlyCount = await prisma.patient.count({
+        where: {
+          createdAt: {
+            gte: startOfYear,
+            lte: endOfYear,
+          },
         },
-      },
-    });
+      });
 
-    res.status(200).json({
-      today: todayCount,
-      monthly: monthlyCount,
-      yearly: yearlyCount,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
+      res.status(200).json({
+        today: todayCount,
+        monthly: monthlyCount,
+        yearly: yearlyCount,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      }
     }
   }
-}
 }
 
 export default PatientController;

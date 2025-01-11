@@ -29,7 +29,6 @@ model Patient {
   updatedAt      DateTime        @updatedAt
   sex			 Sex	
   bloodGroup	 BloodGroup?
-  age			 Int
   medicalRecords MedicalRecord[]
   prescriptions  Prescription[]
   labResults     LabResult[]
@@ -76,9 +75,9 @@ enum Role {
   DOCTOR
 }
 
-enum Sex{
-	MALE
-	FEMALE
+enum Sex {
+  MALE
+  FEMALE
 }
 
 
