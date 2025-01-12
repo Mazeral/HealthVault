@@ -139,7 +139,7 @@ class PrescriptionController {
       }
     }
   }
-	  static async getMyPrescriptions(req: Request, res: Response) {
+  static async getMyPrescriptions(req: Request, res: Response) {
     try {
       const session = req.session as CustomSessionData; // Cast session to CustomSessionData
       const userId = session.user?.id; // Get the user ID from the session

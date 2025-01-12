@@ -37,7 +37,6 @@ prescriptionRouter.delete(
   PrescriptionController.deletePrescription,
 );
 
-
 // New route for fetching prescriptions for the authenticated user
 prescriptionRouter.get(
   "/my-prescriptions",

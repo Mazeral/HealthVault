@@ -36,25 +36,25 @@ userRouter.delete(
 userRouter.get(
   "/users/doctors",
   authMiddleware as express.RequestHandler,
-  UserController.getAllDoctors
+  UserController.getAllDoctors,
 );
 
 // Edit a DOCTOR user (protected for ADMIN)
 userRouter.put(
   "/users/doctors/:id",
   authMiddleware as express.RequestHandler,
-  UserController.editDoctor
+  UserController.editDoctor,
 );
 
 // Delete a DOCTOR user (protected for ADMIN)
 userRouter.delete(
   "/users/doctors/:id",
   authMiddleware as express.RequestHandler,
-  UserController.deleteDoctor
+  UserController.deleteDoctor,
 );
 userRouter.get(
   "/doctor/:doctorId/patients",
   authMiddleware as express.RequestHandler,
-  UserController.getMyPatients
+  UserController.getMyPatients,
 );
 export default userRouter;

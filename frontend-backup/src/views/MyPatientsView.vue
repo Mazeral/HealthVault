@@ -188,7 +188,10 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import api from "../utils/api";
+import { useAuthStore } from '@/stores/auth'; // Import the auth store
+import api from '../utils/api';
+
+const authStore = useAuthStore(); // Initialize the auth storemport api from "../utils/api";
 
 const router = useRouter();
 const patients = ref([]); // Original list of patients
@@ -269,10 +272,20 @@ const headers = [
 const fetchPatients = async () => {
   try {
     loading.value = true;
-    const response = await api.get('/doctor/my-patients'); // Adjust the endpoint as needed
+
+    // Ensure the user is authenticated and has a valid ID
+    if (!authStore.user || !authStore.user.id) {
+      throw new Error('User not authenticated or invalid user ID');
+    }
+
+    // Fetch patients for the logged-in doctor
+    const response = await api.get(`/doctor/${authStore.user.id}/patients`);
+
+    // Update the patients list
     patients.value = response.data.patients;
   } catch (error) {
     console.error('Failed to fetch patients:', error);
+    alert('Failed to fetch patients. Please try again later.');
   } finally {
     loading.value = false;
   }

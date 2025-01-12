@@ -95,11 +95,20 @@ class LabController {
   // gets all the lab results from the database
   static async allLabResults(req: Request, res: Response) {
     try {
-      const labResults: LabResult[] = await prisma.labResult.findMany();
+      const labResults = await prisma.labResult.findMany({
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include the patient's full name
+            },
+          },
+        },
+      });
       res.status(200).json({ "Lab results": labResults });
     } catch (error) {
-      if (error instanceof Error)
+      if (error instanceof Error) {
         res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -168,7 +177,7 @@ class LabController {
       }
     }
   }
-	  // Fetch lab results for the authenticated user (doctor or patient)
+  // Fetch lab results for the authenticated user (doctor or patient)
   static async getMyLabResults(req: Request, res: Response) {
     try {
       const session = req.session as CustomSessionData; // Cast session to CustomSessionData
@@ -186,7 +195,11 @@ class LabController {
           },
         },
         include: {
-          patient: true, // Include patient details if needed
+          patient: {
+            select: {
+              fullName: true, // Include the patient's full name
+            },
+          },
         },
       });
 

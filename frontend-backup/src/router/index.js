@@ -13,7 +13,7 @@ import DashboardView from "../views/DashboardView.vue";
 import EditPatientView from "../views/EditPatientView.vue";
 import NewPatientView from "../views/NewPatientView.vue";
 import AdminView from "../views/AdminView.vue"; // Import the new AdminView
-import MyPatientsView from "../views/MyPatientsView.vue"
+import MyPatientsView from "../views/MyPatientsView.vue";
 import { useAuthStore } from "../stores/auth";
 
 const router = createRouter({
@@ -96,30 +96,30 @@ const router = createRouter({
       component: AdminView,
       meta: { requiresAdmin: true }, // Add meta field for admin-only access
     },
-  {
-    path: '/my-patients',
-    name: 'my-patients',
-    component: MyPatientsView,
-    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
-  },
-	{
-	  path: '/my-lab-results',
-	  name: 'my-lab-results',
-	  component: () => import('@/views/MyLabResultsView.vue'),
-    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
-	},
-	{
-	  path: '/my-health-records',
-	  name: 'my-health-records',
-	  component: () => import('@/views/MyHealthRecordsView.vue'),
-    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
-	},
-	{
-	  path: '/my-prescriptions',
-	  name: 'my-prescriptions',
-	  component: () => import('@/views/MyPrescriptionsView.vue'),
-    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
-	},
+    {
+      path: "/my-patients",
+      name: "my-patients",
+      component: MyPatientsView,
+      meta: { requiresAuth: true, role: "DOCTOR" }, // Ensure only authenticated DOCTORs can access
+    },
+    {
+      path: "/my-lab-results",
+      name: "my-lab-results",
+      component: () => import("@/views/MyLabResultsView.vue"),
+      meta: { requiresAuth: true, role: "DOCTOR" }, // Ensure only authenticated DOCTORs can access
+    },
+    {
+      path: "/my-health-records",
+      name: "my-health-records",
+      component: () => import("@/views/MyHealthRecordsView.vue"),
+      meta: { requiresAuth: true, role: "DOCTOR" }, // Ensure only authenticated DOCTORs can access
+    },
+    {
+      path: "/my-prescriptions",
+      name: "my-prescriptions",
+      component: () => import("@/views/MyPrescriptionsView.vue"),
+      meta: { requiresAuth: true, role: "DOCTOR" }, // Ensure only authenticated DOCTORs can access
+    },
   ],
 });
 

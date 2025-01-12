@@ -62,4 +62,11 @@ patientRouter.get(
   PatientController.getStatistics,
 );
 
+// Search patients by name (new route)
+patientRouter.get(
+  "/patients/search",
+  authMiddleware as express.RequestHandler,
+  PatientController.searchPatients,
+);
+
 export default patientRouter;

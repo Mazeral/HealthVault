@@ -147,7 +147,15 @@ class MedRecordController {
 
   static async allMedicalRecords(req: Request, res: Response) {
     try {
-      const records = await prisma.medicalRecord.findMany();
+      const records = await prisma.medicalRecord.findMany({
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include the patient's full name
+            },
+          },
+        },
+      });
       res.status(200).json({ "Medical Records": records });
     } catch (error) {
       if (error instanceof Error) {
@@ -155,7 +163,7 @@ class MedRecordController {
       }
     }
   }
-	 // Fetch medical records for the authenticated user (doctor or patient)
+  // Fetch medical records for the authenticated user (doctor or patient)
   static async getMyMedicalRecords(req: Request, res: Response) {
     try {
       const session = req.session as CustomSessionData; // Cast session to CustomSessionData

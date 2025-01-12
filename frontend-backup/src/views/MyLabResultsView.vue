@@ -42,6 +42,9 @@
           <template v-slot:item.performedAt="{ item }">
             {{ formatDate(item.performedAt) }}
           </template>
+          <template v-slot:item.patientFullName="{ item }">
+            {{ item.patientFullName }}
+          </template>
         </v-data-table>
 
         <!-- Pagination Controls -->
@@ -58,12 +61,18 @@
       </v-card-text>
     </v-card>
 
-    <!-- New Lab Result Dialog -->
+   <!-- New Lab Result Dialog -->
     <v-dialog v-model="newLabResultDialog" max-width="500">
       <v-card>
         <v-card-title>New Lab Result</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="createLabResult">
+            <!-- Replace v-autocomplete with v-text-field for patient full name -->
+            <v-text-field
+              v-model="newLabResultData.patientFullName"
+              label="Patient Full Name"
+              required
+            ></v-text-field>
             <v-text-field v-model="newLabResultData.testName" label="Test Name" required></v-text-field>
             <v-text-field v-model="newLabResultData.result" label="Result" required></v-text-field>
             <v-text-field v-model="newLabResultData.notes" label="Notes"></v-text-field>
@@ -74,6 +83,11 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <!-- Success/Error Snackbar -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -96,11 +110,13 @@ const headers = [
   { title: 'Result', value: 'result' },
   { title: 'Notes', value: 'notes' },
   { title: 'Performed At', value: 'performedAt' },
+  { title: 'Patient Name', value: 'patientFullName' }, // Add patient full name
 ];
 
 // New lab result dialog state
 const newLabResultDialog = ref(false);
 const newLabResultData = ref({
+  patientFullName: '', // Changed from patientId to patientFullName
   testName: '',
   result: '',
   notes: '',
@@ -112,7 +128,11 @@ const fetchLabResults = async () => {
   try {
     loading.value = true;
     const response = await api.get('/my-lab-results');
-    labResults.value = response.data.labResults;
+    // Include patient fullName in the response
+    labResults.value = response.data.labResults.map((result) => ({
+      ...result,
+      patientFullName: result.patient.fullName, // Add patient fullName to each lab result
+    }));
   } catch (error) {
     console.error('Failed to fetch lab results:', error);
   } finally {
@@ -157,17 +177,37 @@ const openNewLabResultDialog = () => {
 // Create a new lab result
 const createLabResult = async () => {
   try {
-    const response = await api.post('/lab-results', newLabResultData.value);
+    // Fetch patient ID based on full name
+    const patientResponse = await api.get('/patients/search', {
+      params: { name: newLabResultData.value.patientFullName },
+    });
+
+    if (patientResponse.data.patients.length === 0) {
+      throw new Error('Patient not found');
+    }
+
+    const patientId = patientResponse.data.patients[0].id;
+
+    // Create the lab result
+    const response = await api.post('/lab-results', {
+      ...newLabResultData.value,
+      patientId,
+    });
+
     labResults.value.push(response.data); // Add the new lab result to the list
     newLabResultDialog.value = false; // Close the dialog
     newLabResultData.value = { // Reset the form
+      patientFullName: '',
       testName: '',
       result: '',
       notes: '',
       performedAt: '',
     };
+
+    alert('Lab result created successfully!');
   } catch (error) {
     console.error('Failed to create lab result:', error);
+    alert(`Failed to create lab result: ${error.message}`);
   }
 };
 

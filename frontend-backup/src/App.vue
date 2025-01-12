@@ -33,8 +33,8 @@ const logout = () => {
         </template>
 
         <!-- Authenticated Links -->
-        <template v-if="isAuthenticated">
-          <v-list-item to="/dashboard" prepend-icon="mdi-view-dashboard" color="light-green" title="Dashboard"/>
+        <template v-if="isAuthenticated && userRole === 'DOCTOR'">
+          <v-list-item to="/dashboard"  prepend-icon="mdi-view-dashboard" color="light-green" title="Dashboard"/>
           <v-list-item to="/patients" prepend-icon="mdi-account-group" title="Patients" color="light-green"/>
           <v-list-item to="/lab" prepend-icon="mdi-flask" title="Lab" />
           <v-list-item to="/record" prepend-icon="mdi-file-document" color="light-green" title="Records"/>
@@ -47,10 +47,10 @@ const logout = () => {
             <v-list-item to="/my-health-records" prepend-icon="mdi-file-document-outline" title="My Health Records" color="light-green" />
             <v-list-item to="/my-prescriptions" prepend-icon="mdi-pill" title="My Prescriptions" color="light-green" />
           </template>
+        </template>
           <template v-if="userRole === 'ADMIN'">
             <v-list-item to="/staff" prepend-icon="mdi-account-supervisor" title="Staff" color="light-green" />
           </template>
-        </template>
       </v-list>
 
       <!-- Logout Button -->

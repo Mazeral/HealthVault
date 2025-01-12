@@ -142,44 +142,20 @@ class PatientController {
   }
 
   // Searches for patients based on criteria
-  static async searchPatients(req: Request, res: Response) {
+  static async searchPatients(req: Request, res: Response): Promise<void> {
+    let { name } = req.query;
+    name = String(name);
     try {
-      const data = createObject({
-        fullName: req.body.fullName,
-        dateOfBirth: req.body.dateOfBirth
-          ? new Date(req.body.dateOfBirth)
-          : undefined,
-        phone: req.body.phone,
-        email: req.body.email,
-        address: req.body.address,
-        sex: req.body.sex, // Include sex
-      });
-
-      // Check if dateOfBirth is a valid date
-      if (data.dateOfBirth && isNaN(data.dateOfBirth.getTime())) {
-        throw new Error("Invalid date of birth");
-      }
-
       const patients = await prisma.patient.findMany({
         where: {
-          fullName: data.fullName,
-          dateOfBirth: data.dateOfBirth,
-          phone: data.phone,
-          email: data.email,
-          address: data.address,
-          sex: data.sex,
+          fullName: {
+            contains: name,
+          },
         },
       });
-
-      res.status(200).json({ patients: patients });
+      res.json({ patients });
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Invalid date of birth") {
-          res.status(400).json({ error: error.message });
-        } else {
-          res.status(500).json({ error: error.message });
-        }
-      }
+      res.status(500).json({ error: "Failed to search patients" });
     }
   }
 

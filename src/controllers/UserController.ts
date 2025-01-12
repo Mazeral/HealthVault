@@ -255,35 +255,35 @@ class UserController {
       res.status(500).json({ error: "Failed to delete doctor" });
     }
   }
-static async getMyPatients(req: Request, res: Response) {
-  try {
-    const doctorId = req.params.doctorId;
+  static async getMyPatients(req: Request, res: Response) {
+    try {
+      const doctorId = req.params.doctorId;
 
-    if (!doctorId) throw Error("No doctor ID provided");
+      if (!doctorId) throw Error("No doctor ID provided");
 
-    const doctor = await prisma.user.findUnique({
-      where: {
-        id: Number(doctorId),
-        role: "DOCTOR",
-      },
-      include: {
-        patients: true,
-      },
-    });
+      const doctor = await prisma.user.findUnique({
+        where: {
+          id: Number(doctorId),
+          role: "DOCTOR",
+        },
+        include: {
+          patients: true,
+        },
+      });
 
-    if (!doctor) throw Error("Doctor not found");
+      if (!doctor) throw Error("Doctor not found");
 
-    res.status(200).json({ patients: doctor.patients });
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "No doctor ID provided")
-        res.status(400).json({ error: error.message });
-      else if (error.message === "Doctor not found")
-        res.status(404).json({ error: error.message });
-      else res.status(500).json({ error: error.message });
+      res.status(200).json({ patients: doctor.patients });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "No doctor ID provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "Doctor not found")
+          res.status(404).json({ error: error.message });
+        else res.status(500).json({ error: error.message });
+      }
     }
   }
-}
 }
 
 export default UserController;
