@@ -6,6 +6,19 @@
         <!-- Button to navigate to the new medical record view -->
         <v-btn @click="navigateToNewMedicalRecord" color="primary" class="mb-4">New Medical Record</v-btn>
 
+        <!-- Search Bar -->
+        <v-row class="mt-4">
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchQuery"
+              label="Search by Diagnosis"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
         <!-- Table to display all medical records -->
         <v-table>
           <thead>
@@ -18,7 +31,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in medicalRecords" :key="record.id">
+            <tr v-for="record in filteredMedicalRecords" :key="record.id">
               <td>{{ record.id }}</td>
               <td>{{ record.patientId }}</td>
               <td>{{ record.diagnosis }}</td>
@@ -67,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../utils/api';
 
@@ -91,6 +104,9 @@ const editDialog = ref(false);
 const deleteDialog = ref(false);
 const recordToDelete = ref(null); // Stores the medical record to be deleted
 
+// Search query for filtering medical records
+const searchQuery = ref('');
+
 // Fetch all medical records on component mount
 onMounted(() => {
   fetchMedicalRecords();
@@ -104,6 +120,21 @@ const fetchMedicalRecords = async () => {
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
   }
+};
+
+// Filter medical records based on search query
+const filteredMedicalRecords = computed(() => {
+  if (!searchQuery.value) {
+    return medicalRecords.value; // Return all medical records if no search query
+  }
+  return medicalRecords.value.filter((record) =>
+    record.diagnosis.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Handle search input
+const handleSearchInput = () => {
+  // No need to do anything here, computed property will handle filtering
 };
 
 // Open edit dialog with medical record data

@@ -14,6 +14,14 @@
         </v-form>
       </v-card-text>
     </v-card>
+
+    <!-- Success Snackbar -->
+    <v-snackbar v-model="successSnackbar" :timeout="3000" color="success">
+      Lab result created successfully!
+      <template v-slot:actions>
+        <v-btn @click="successSnackbar = false" color="white" variant="text">Close</v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -32,10 +40,17 @@ const newLabResult = ref({
   performedAt: '',
 });
 
+const successSnackbar = ref(false); // Controls the visibility of the success snackbar
+
 const createLabResult = async () => {
   try {
     const response = await api.post('/lab-results', newLabResult.value);
-    router.push({ name: 'lab' }); // Redirect to the lab results list after creation
+    if (response.status === 200) {
+      successSnackbar.value = true; // Show success message
+      setTimeout(() => {
+        router.push({ name: 'lab' }); // Redirect to the lab results list after a short delay
+      }, 1000); // Wait 1 second before redirecting
+    }
   } catch (error) {
     console.error('Failed to create lab result:', error);
   }

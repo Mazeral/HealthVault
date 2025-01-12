@@ -6,6 +6,19 @@
         <!-- Button to navigate to the new prescription view -->
         <v-btn @click="navigateToNewPrescription" color="primary" class="mb-4">New Prescription</v-btn>
 
+        <!-- Search Bar -->
+        <v-row class="mt-4">
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchQuery"
+              label="Search by Patient Name"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
         <!-- Table to display all prescriptions -->
         <v-table>
           <thead>
@@ -19,7 +32,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="prescription in prescriptions" :key="prescription.id">
+            <tr v-for="prescription in filteredPrescriptions" :key="prescription.id">
               <td>{{ prescription.id }}</td>
               <td>{{ prescription.patient.fullName }}</td>
               <td>{{ prescription.medication }}</td>
@@ -70,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../utils/api';
 
@@ -95,6 +108,9 @@ const editDialog = ref(false);
 const deleteDialog = ref(false);
 const prescriptionToDelete = ref(null); // Stores the prescription to be deleted
 
+// Search query for filtering prescriptions
+const searchQuery = ref('');
+
 // Fetch all prescriptions on component mount
 onMounted(() => {
   fetchPrescriptions();
@@ -108,6 +124,21 @@ const fetchPrescriptions = async () => {
   } catch (error) {
     console.error('Failed to fetch prescriptions:', error);
   }
+};
+
+// Filter prescriptions based on search query
+const filteredPrescriptions = computed(() => {
+  if (!searchQuery.value) {
+    return prescriptions.value; // Return all prescriptions if no search query
+  }
+  return prescriptions.value.filter((prescription) =>
+    prescription.patient.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Handle search input
+const handleSearchInput = () => {
+  // No need to do anything here, computed property will handle filtering
 };
 
 // Open edit dialog with prescription data

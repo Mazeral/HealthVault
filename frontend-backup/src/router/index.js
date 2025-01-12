@@ -8,9 +8,12 @@ import NewLabResultView from "../views/NewLabResultView.vue";
 import RecordView from "../views/RecordView.vue";
 import NewMedicalRecordView from "../views/NewMedicalRecordView.vue";
 import PrescriptionView from "../views/PrescriptionView.vue";
-import NewPrescriptionView from "../views/NewPrescriptionView.vue"; // Import the new component
+import NewPrescriptionView from "../views/NewPrescriptionView.vue";
 import DashboardView from "../views/DashboardView.vue";
 import EditPatientView from "../views/EditPatientView.vue";
+import NewPatientView from "../views/NewPatientView.vue";
+import AdminView from "../views/AdminView.vue"; // Import the new AdminView
+import MyPatientsView from "../views/MyPatientsView.vue"
 import { useAuthStore } from "../stores/auth";
 
 const router = createRouter({
@@ -69,7 +72,7 @@ const router = createRouter({
     {
       path: "/prescription/new",
       name: "new-prescription",
-      component: NewPrescriptionView, // Add the new route
+      component: NewPrescriptionView,
     },
     {
       path: "/dashboard",
@@ -82,6 +85,23 @@ const router = createRouter({
       component: EditPatientView,
       props: true, // Pass route params as props
     },
+    {
+      path: "/patients/new-patient",
+      name: "new-patient",
+      component: NewPatientView,
+    },
+    {
+      path: "/staff",
+      name: "admin",
+      component: AdminView,
+      meta: { requiresAdmin: true }, // Add meta field for admin-only access
+    },
+  {
+    path: '/my-patients',
+    name: 'my-patients',
+    component: MyPatientsView,
+    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
+  },
   ],
 });
 
@@ -97,6 +117,9 @@ router.beforeEach((to, from, next) => {
   // Redirect to login if authentication is required and the user is not authenticated
   if (isAuthRequired && !authStore.isAuthenticated) {
     next({ name: "login" });
+  } else if (to.meta.requiresAdmin && authStore.user?.role !== "ADMIN") {
+    // Redirect to home or another page if the user is not an ADMIN
+    next({ name: "home" });
   } else {
     next();
   }

@@ -6,6 +6,19 @@
         <!-- Button to navigate to the new lab result view -->
         <v-btn @click="navigateToNewLabResult" color="primary" class="mb-4">New Lab Result</v-btn>
 
+        <!-- Search Bar -->
+        <v-row class="mt-4">
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchQuery"
+              label="Search by Test Name"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
         <!-- Table to display all lab results -->
         <v-table>
           <thead>
@@ -20,7 +33,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="labResult in labResults" :key="labResult.id">
+            <tr v-for="labResult in filteredLabResults" :key="labResult.id">
               <td>{{ labResult.id }}</td>
               <td>{{ labResult.patientId }}</td>
               <td>{{ labResult.testName }}</td>
@@ -73,7 +86,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../utils/api';
 
@@ -99,6 +112,9 @@ const editDialog = ref(false);
 const deleteDialog = ref(false);
 const labResultToDelete = ref(null); // Stores the lab result to be deleted
 
+// Search query for filtering lab results
+const searchQuery = ref('');
+
 // Fetch all lab results on component mount
 onMounted(() => {
   fetchLabResults();
@@ -121,6 +137,21 @@ const formatDate = (dateString) => {
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
+};
+
+// Filter lab results based on search query
+const filteredLabResults = computed(() => {
+  if (!searchQuery.value) {
+    return labResults.value; // Return all lab results if no search query
+  }
+  return labResults.value.filter((labResult) =>
+    labResult.testName.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Handle search input
+const handleSearchInput = () => {
+  // No need to do anything here, computed property will handle filtering
 };
 
 // Open edit dialog with lab result data
