@@ -52,6 +52,9 @@
           dense
         ></v-select>
       </v-col>
+      <v-col cols="12" md="3">
+        <v-btn color="primary" @click="openNewPatientDialog">New Patient</v-btn>
+      </v-col>
     </v-row>
 
     <!-- Patients Table with Pagination -->
@@ -147,6 +150,38 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <!-- New Patient Dialog -->
+    <v-dialog v-model="newPatientDialog" max-width="500">
+      <v-card>
+        <v-card-title>New Patient</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="createPatient">
+            <v-text-field v-model="newPatientData.fullName" label="Full Name" required></v-text-field>
+            <v-text-field v-model="newPatientData.dateOfBirth" label="Date of Birth" type="date" required></v-text-field>
+            <v-text-field v-model="newPatientData.phone" label="Phone"></v-text-field>
+            <v-text-field v-model="newPatientData.email" label="Email"></v-text-field>
+            <v-text-field v-model="newPatientData.address" label="Address"></v-text-field>
+            <v-select
+              v-model="newPatientData.sex"
+              :items="sexOptions"
+              label="Sex"
+              required
+              item-title="text"
+            ></v-select>
+            <v-select
+              v-model="newPatientData.bloodGroup"
+              :items="bloodGroupOptions"
+              label="Blood Group"
+              required
+              item-title="text"
+            ></v-select>
+            <v-btn type="submit" color="primary">Create</v-btn>
+            <v-btn @click="newPatientDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -180,6 +215,18 @@ const patientToDelete = ref(null); // Stores the patient to be deleted
 const editDialog = ref(false);
 const editPatientData = ref({
   id: null,
+  fullName: '',
+  dateOfBirth: '',
+  phone: '',
+  email: '',
+  address: '',
+  sex: '',
+  bloodGroup: '',
+});
+
+// New patient dialog state
+const newPatientDialog = ref(false);
+const newPatientData = ref({
   fullName: '',
   dateOfBirth: '',
   phone: '',
@@ -367,6 +414,31 @@ const deletePatientConfirmed = async () => {
     console.error('Failed to delete patient:', error);
   } finally {
     deleteDialog.value = false; // Close the dialog
+  }
+};
+
+// Open new patient dialog
+const openNewPatientDialog = () => {
+  newPatientDialog.value = true;
+};
+
+// Create a new patient
+const createPatient = async () => {
+  try {
+    const response = await api.post('/patients', newPatientData.value);
+    patients.value.push(response.data); // Add the new patient to the list
+    newPatientDialog.value = false; // Close the dialog
+    newPatientData.value = { // Reset the form
+      fullName: '',
+      dateOfBirth: '',
+      phone: '',
+      email: '',
+      address: '',
+      sex: '',
+      bloodGroup: '',
+    };
+  } catch (error) {
+    console.error('Failed to create patient:', error);
   }
 };
 

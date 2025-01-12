@@ -14,6 +14,9 @@
               @input="handleSearchInput"
             ></v-text-field>
           </v-col>
+          <v-col cols="12" md="6">
+            <v-btn color="primary" @click="openNewPrescriptionDialog">New Prescription</v-btn>
+          </v-col>
         </v-row>
 
         <!-- Prescriptions Table -->
@@ -54,6 +57,22 @@
         </v-row>
       </v-card-text>
     </v-card>
+
+    <!-- New Prescription Dialog -->
+    <v-dialog v-model="newPrescriptionDialog" max-width="500">
+      <v-card>
+        <v-card-title>New Prescription</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="createPrescription">
+            <v-text-field v-model="newPrescriptionData.medication" label="Medication" required></v-text-field>
+            <v-text-field v-model="newPrescriptionData.dosage" label="Dosage" required></v-text-field>
+            <v-text-field v-model="newPrescriptionData.instructions" label="Instructions"></v-text-field>
+            <v-btn type="submit" color="primary">Create</v-btn>
+            <v-btn @click="newPrescriptionDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -77,6 +96,14 @@ const headers = [
   { title: 'Instructions', value: 'instructions' },
   { title: 'Patient Name', value: 'patient.fullName' },
 ];
+
+// New prescription dialog state
+const newPrescriptionDialog = ref(false);
+const newPrescriptionData = ref({
+  medication: '',
+  dosage: '',
+  instructions: '',
+});
 
 // Fetch prescriptions for the authenticated user
 const fetchPrescriptions = async () => {
@@ -111,14 +138,29 @@ const handlePageChange = (page) => {
   currentPage.value = page;
 };
 
+// Open new prescription dialog
+const openNewPrescriptionDialog = () => {
+  newPrescriptionDialog.value = true;
+};
+
+// Create a new prescription
+const createPrescription = async () => {
+  try {
+    const response = await api.post('/prescriptions', newPrescriptionData.value);
+    prescriptions.value.push(response.data.prescription); // Add the new prescription to the list
+    newPrescriptionDialog.value = false; // Close the dialog
+    newPrescriptionData.value = { // Reset the form
+      medication: '',
+      dosage: '',
+      instructions: '',
+    };
+  } catch (error) {
+    console.error('Failed to create prescription:', error);
+  }
+};
+
 // Fetch data on component mount
 onMounted(() => {
   fetchPrescriptions();
 });
 </script>
-
-<style scoped>
-.v-table {
-  margin-top: 20px;
-}
-</style>

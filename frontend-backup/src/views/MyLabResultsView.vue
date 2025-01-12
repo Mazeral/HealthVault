@@ -14,6 +14,9 @@
               @input="handleSearchInput"
             ></v-text-field>
           </v-col>
+          <v-col cols="12" md="6">
+            <v-btn color="primary" @click="openNewLabResultDialog">New Lab Result</v-btn>
+          </v-col>
         </v-row>
 
         <!-- Lab Results Table -->
@@ -54,6 +57,23 @@
         </v-row>
       </v-card-text>
     </v-card>
+
+    <!-- New Lab Result Dialog -->
+    <v-dialog v-model="newLabResultDialog" max-width="500">
+      <v-card>
+        <v-card-title>New Lab Result</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="createLabResult">
+            <v-text-field v-model="newLabResultData.testName" label="Test Name" required></v-text-field>
+            <v-text-field v-model="newLabResultData.result" label="Result" required></v-text-field>
+            <v-text-field v-model="newLabResultData.notes" label="Notes"></v-text-field>
+            <v-text-field v-model="newLabResultData.performedAt" label="Performed At" type="date" required></v-text-field>
+            <v-btn type="submit" color="primary">Create</v-btn>
+            <v-btn @click="newLabResultDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -77,6 +97,15 @@ const headers = [
   { title: 'Notes', value: 'notes' },
   { title: 'Performed At', value: 'performedAt' },
 ];
+
+// New lab result dialog state
+const newLabResultDialog = ref(false);
+const newLabResultData = ref({
+  testName: '',
+  result: '',
+  notes: '',
+  performedAt: '',
+});
 
 // Fetch lab results for the authenticated user
 const fetchLabResults = async () => {
@@ -120,14 +149,30 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
+// Open new lab result dialog
+const openNewLabResultDialog = () => {
+  newLabResultDialog.value = true;
+};
+
+// Create a new lab result
+const createLabResult = async () => {
+  try {
+    const response = await api.post('/lab-results', newLabResultData.value);
+    labResults.value.push(response.data); // Add the new lab result to the list
+    newLabResultDialog.value = false; // Close the dialog
+    newLabResultData.value = { // Reset the form
+      testName: '',
+      result: '',
+      notes: '',
+      performedAt: '',
+    };
+  } catch (error) {
+    console.error('Failed to create lab result:', error);
+  }
+};
+
 // Fetch data on component mount
 onMounted(() => {
   fetchLabResults();
 });
 </script>
-
-<style scoped>
-.v-table {
-  margin-top: 20px;
-}
-</style>

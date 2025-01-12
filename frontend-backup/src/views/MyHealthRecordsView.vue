@@ -14,6 +14,9 @@
               @input="handleSearchInput"
             ></v-text-field>
           </v-col>
+          <v-col cols="12" md="6">
+            <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
+          </v-col>
         </v-row>
 
         <!-- Medical Records Table -->
@@ -51,6 +54,21 @@
         </v-row>
       </v-card-text>
     </v-card>
+
+    <!-- New Medical Record Dialog -->
+    <v-dialog v-model="newMedicalRecordDialog" max-width="500">
+      <v-card>
+        <v-card-title>New Medical Record</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="createMedicalRecord">
+            <v-text-field v-model="newMedicalRecordData.diagnosis" label="Diagnosis" required></v-text-field>
+            <v-text-field v-model="newMedicalRecordData.notes" label="Notes"></v-text-field>
+            <v-btn type="submit" color="primary">Create</v-btn>
+            <v-btn @click="newMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -73,6 +91,13 @@ const headers = [
   { title: 'Notes', value: 'notes' },
   { title: 'Created At', value: 'createdAt' },
 ];
+
+// New medical record dialog state
+const newMedicalRecordDialog = ref(false);
+const newMedicalRecordData = ref({
+  diagnosis: '',
+  notes: '',
+});
 
 // Fetch medical records for the authenticated user
 const fetchMedicalRecords = async () => {
@@ -116,14 +141,28 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
+// Open new medical record dialog
+const openNewMedicalRecordDialog = () => {
+  newMedicalRecordDialog.value = true;
+};
+
+// Create a new medical record
+const createMedicalRecord = async () => {
+  try {
+    const response = await api.post('/medical-record/', newMedicalRecordData.value);
+    medicalRecords.value.push(response.data); // Add the new medical record to the list
+    newMedicalRecordDialog.value = false; // Close the dialog
+    newMedicalRecordData.value = { // Reset the form
+      diagnosis: '',
+      notes: '',
+    };
+  } catch (error) {
+    console.error('Failed to create medical record:', error);
+  }
+};
+
 // Fetch data on component mount
 onMounted(() => {
   fetchMedicalRecords();
 });
 </script>
-
-<style scoped>
-.v-table {
-  margin-top: 20px;
-}
-</style>
