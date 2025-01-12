@@ -87,7 +87,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '../utils/api';
+import api from "../utils/api"
 
 const router = useRouter();
 
@@ -124,7 +124,7 @@ const loading = ref(false);
 // Table headers
 const headers = [
   { title: 'ID', value: 'id' },
-  { title: 'Patient Full Name', value: 'patient.fullName' },
+  { title: 'Patient Name', value: 'patient.fullName' },
   { title: 'Medication', value: 'medication' },
   { title: 'Dosage', value: 'dosage' },
   { title: 'Instructions', value: 'instructions' },

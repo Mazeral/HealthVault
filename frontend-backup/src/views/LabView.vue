@@ -30,6 +30,9 @@
           loading-text="Loading... Please wait"
           hide-default-footer
         >
+          <template v-slot:item.patientFullName="{ item }">
+            {{ item.patientFullName }}
+          </template>
           <template v-slot:item.actions="{ item }">
             <v-btn @click="editLabResult(item)" color="warning" small>Edit</v-btn>
             <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
@@ -71,7 +74,7 @@
           <v-card>
             <v-card-title class="headline">Are you sure?</v-card-title>
             <v-card-text>
-              You are about to delete the lab result for patient ID: <strong>{{ labResultToDelete?.patientId }}</strong>. This action cannot be undone.
+              You are about to delete the lab result for patient: <strong>{{ labResultToDelete?.patientFullName }}</strong>. This action cannot be undone.
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -126,7 +129,7 @@ const loading = ref(false);
 // Table headers
 const headers = [
   { title: 'ID', value: 'id' },
-  { title: 'Patient ID', value: 'patientId' },
+  { title: 'Patient Name', value: 'patientFullName' }, // Display patient full name
   { title: 'Test Name', value: 'testName' },
   { title: 'Result', value: 'result' },
   { title: 'Notes', value: 'notes' },
@@ -144,7 +147,11 @@ const fetchLabResults = async () => {
   try {
     loading.value = true;
     const response = await api.get('/lab-results');
-    labResults.value = response.data['Lab results'];
+    // Include patient fullName in the response
+    labResults.value = response.data['Lab results'].map((result) => ({
+      ...result,
+      patientFullName: result.patient.fullName, // Add patient fullName to each lab result
+    }));
   } catch (error) {
     console.error('Failed to fetch lab results:', error);
   } finally {

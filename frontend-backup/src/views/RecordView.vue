@@ -30,6 +30,9 @@
           loading-text="Loading... Please wait"
           hide-default-footer
         >
+          <template v-slot:item.patientFullName="{ item }">
+            {{ item.patientFullName }}
+          </template>
           <template v-slot:item.actions="{ item }">
             <v-btn @click="editMedicalRecord(item)" color="warning" small>Edit</v-btn>
             <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
@@ -69,7 +72,7 @@
           <v-card>
             <v-card-title class="headline">Are you sure?</v-card-title>
             <v-card-text>
-              You are about to delete the medical record for patient ID: <strong>{{ recordToDelete?.patientId }}</strong>. This action cannot be undone.
+              You are about to delete the medical record for patient: <strong>{{ recordToDelete?.patientFullName }}</strong>. This action cannot be undone.
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -122,7 +125,7 @@ const loading = ref(false);
 // Table headers
 const headers = [
   { title: 'ID', value: 'id' },
-  { title: 'Patient ID', value: 'patientId' },
+  { title: 'Patient Name', value: 'patientFullName' }, // Display patient full name
   { title: 'Diagnosis', value: 'diagnosis' },
   { title: 'Notes', value: 'notes' },
   { title: 'Actions', value: 'actions', sortable: false },
@@ -138,7 +141,11 @@ const fetchMedicalRecords = async () => {
   try {
     loading.value = true;
     const response = await api.get('/medical-records');
-    medicalRecords.value = response.data['Medical Records'];
+    // Include patient fullName in the response
+    medicalRecords.value = response.data['Medical Records'].map((record) => ({
+      ...record,
+      patientFullName: record.patient.fullName, // Add patient fullName to each medical record
+    }));
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
   } finally {
