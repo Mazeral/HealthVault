@@ -19,34 +19,34 @@
           </v-col>
         </v-row>
 
-        <!-- Table to display all lab results -->
-        <v-table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Patient ID</th>
-              <th>Test Name</th>
-              <th>Result</th>
-              <th>Notes</th>
-              <th>Performed At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="labResult in filteredLabResults" :key="labResult.id">
-              <td>{{ labResult.id }}</td>
-              <td>{{ labResult.patientId }}</td>
-              <td>{{ labResult.testName }}</td>
-              <td>{{ labResult.result }}</td>
-              <td>{{ labResult.notes }}</td>
-              <td>{{ formatDate(labResult.performedAt) }}</td>
-              <td>
-                <v-btn @click="editLabResult(labResult)" color="warning">Edit</v-btn>
-                <v-btn @click="confirmDelete(labResult)" color="error">Delete</v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+        <!-- Table to display all lab results with pagination -->
+        <v-data-table
+          :headers="headers"
+          :items="filteredLabResults"
+          :items-per-page="itemsPerPage"
+          :page.sync="currentPage"
+          :search="searchQuery"
+          :loading="loading"
+          loading-text="Loading... Please wait"
+          hide-default-footer
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-btn @click="editLabResult(item)" color="warning" small>Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+          </template>
+        </v-data-table>
+
+        <!-- Pagination Controls -->
+        <v-row class="mt-4">
+          <v-col cols="12">
+            <v-pagination
+              v-model="currentPage"
+              :length="totalPages"
+              :total-visible="7"
+              @input="handlePageChange"
+            ></v-pagination>
+          </v-col>
+        </v-row>
 
         <!-- Dialog for editing a lab result -->
         <v-dialog v-model="editDialog" max-width="500">
@@ -115,6 +115,25 @@ const labResultToDelete = ref(null); // Stores the lab result to be deleted
 // Search query for filtering lab results
 const searchQuery = ref('');
 
+// Pagination state
+const currentPage = ref(1);
+const itemsPerPage = ref(10); // Number of items per page
+const totalPages = computed(() => Math.ceil(filteredLabResults.value.length / itemsPerPage.value));
+
+// Loading state
+const loading = ref(false);
+
+// Table headers
+const headers = [
+  { title: 'ID', value: 'id' },
+  { title: 'Patient ID', value: 'patientId' },
+  { title: 'Test Name', value: 'testName' },
+  { title: 'Result', value: 'result' },
+  { title: 'Notes', value: 'notes' },
+  { title: 'Performed At', value: 'performedAt' },
+  { title: 'Actions', value: 'actions', sortable: false },
+];
+
 // Fetch all lab results on component mount
 onMounted(() => {
   fetchLabResults();
@@ -123,10 +142,13 @@ onMounted(() => {
 // Fetch all lab results
 const fetchLabResults = async () => {
   try {
+    loading.value = true;
     const response = await api.get('/lab-results');
     labResults.value = response.data['Lab results'];
   } catch (error) {
     console.error('Failed to fetch lab results:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -151,7 +173,12 @@ const filteredLabResults = computed(() => {
 
 // Handle search input
 const handleSearchInput = () => {
-  // No need to do anything here, computed property will handle filtering
+  currentPage.value = 1; // Reset to the first page when searching
+};
+
+// Handle page change
+const handlePageChange = (page) => {
+  currentPage.value = page;
 };
 
 // Open edit dialog with lab result data

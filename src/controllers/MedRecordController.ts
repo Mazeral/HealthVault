@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import createObject from "../utils/utilFunctions";
+import { CustomSessionData } from "../types";
 
 class MedRecordController {
   // Add a medical record for a patient
@@ -151,6 +152,39 @@ class MedRecordController {
     } catch (error) {
       if (error instanceof Error) {
         res.status(500).json({ error: error.message });
+      }
+    }
+  }
+	 // Fetch medical records for the authenticated user (doctor or patient)
+  static async getMyMedicalRecords(req: Request, res: Response) {
+    try {
+      const session = req.session as CustomSessionData; // Cast session to CustomSessionData
+      const userId = Number(session.user?.id); // Get the user ID from the session
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
+
+      // Fetch medical records for the user
+      const medicalRecords = await prisma.medicalRecord.findMany({
+        where: {
+          patient: {
+            userId: Number(userId), // Filter by the user's ID
+          },
+        },
+        include: {
+          patient: true, // Include patient details if needed
+        },
+      });
+
+      res.status(200).json({ medicalRecords });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Unauthorized: No user ID found in session") {
+          res.status(401).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }

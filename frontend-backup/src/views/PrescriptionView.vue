@@ -19,32 +19,34 @@
           </v-col>
         </v-row>
 
-        <!-- Table to display all prescriptions -->
-        <v-table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Patient Full Name</th>
-              <th>Medication</th>
-              <th>Dosage</th>
-              <th>Instructions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="prescription in filteredPrescriptions" :key="prescription.id">
-              <td>{{ prescription.id }}</td>
-              <td>{{ prescription.patient.fullName }}</td>
-              <td>{{ prescription.medication }}</td>
-              <td>{{ prescription.dosage }}</td>
-              <td>{{ prescription.instructions }}</td>
-              <td>
-                <v-btn @click="editPrescription(prescription)" color="warning">Edit</v-btn>
-                <v-btn @click="confirmDelete(prescription)" color="error">Delete</v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+        <!-- Table to display all prescriptions with pagination -->
+        <v-data-table
+          :headers="headers"
+          :items="filteredPrescriptions"
+          :items-per-page="itemsPerPage"
+          :page.sync="currentPage"
+          :search="searchQuery"
+          :loading="loading"
+          loading-text="Loading... Please wait"
+          hide-default-footer
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-btn @click="editPrescription(item)" color="warning" small>Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+          </template>
+        </v-data-table>
+
+        <!-- Pagination Controls -->
+        <v-row class="mt-4">
+          <v-col cols="12">
+            <v-pagination
+              v-model="currentPage"
+              :length="totalPages"
+              :total-visible="7"
+              @input="handlePageChange"
+            ></v-pagination>
+          </v-col>
+        </v-row>
 
         <!-- Dialog for editing a prescription -->
         <v-dialog v-model="editDialog" max-width="500">
@@ -111,6 +113,24 @@ const prescriptionToDelete = ref(null); // Stores the prescription to be deleted
 // Search query for filtering prescriptions
 const searchQuery = ref('');
 
+// Pagination state
+const currentPage = ref(1);
+const itemsPerPage = ref(10); // Number of items per page
+const totalPages = computed(() => Math.ceil(filteredPrescriptions.value.length / itemsPerPage.value));
+
+// Loading state
+const loading = ref(false);
+
+// Table headers
+const headers = [
+  { title: 'ID', value: 'id' },
+  { title: 'Patient Full Name', value: 'patient.fullName' },
+  { title: 'Medication', value: 'medication' },
+  { title: 'Dosage', value: 'dosage' },
+  { title: 'Instructions', value: 'instructions' },
+  { title: 'Actions', value: 'actions', sortable: false },
+];
+
 // Fetch all prescriptions on component mount
 onMounted(() => {
   fetchPrescriptions();
@@ -119,10 +139,13 @@ onMounted(() => {
 // Fetch all prescriptions
 const fetchPrescriptions = async () => {
   try {
+    loading.value = true;
     const response = await api.get('/prescriptions');
     prescriptions.value = response.data.prescriptions;
   } catch (error) {
     console.error('Failed to fetch prescriptions:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -138,7 +161,12 @@ const filteredPrescriptions = computed(() => {
 
 // Handle search input
 const handleSearchInput = () => {
-  // No need to do anything here, computed property will handle filtering
+  currentPage.value = 1; // Reset to the first page when searching
+};
+
+// Handle page change
+const handlePageChange = (page) => {
+  currentPage.value = page;
 };
 
 // Open edit dialog with prescription data

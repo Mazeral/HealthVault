@@ -73,8 +73,17 @@
       </v-col>
     </v-row>
 
-    <!-- Patients Table -->
-    <v-data-table :items="filteredPatients" :headers="headers">
+    <!-- Patients Table with Pagination -->
+    <v-data-table
+      :headers="headers"
+      :items="filteredPatients"
+      :items-per-page="itemsPerPage"
+      :page.sync="currentPage"
+      :search="searchQuery"
+      :loading="loading"
+      loading-text="Loading... Please wait"
+      hide-default-footer
+    >
       <template v-slot:item.fullName="{ item }">
         {{ item.fullName }}
       </template>
@@ -94,10 +103,22 @@
         {{ formatDate(item.createdAt) }}
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn @click="editPatient(item)">Edit</v-btn>
-        <v-btn @click="confirmDelete(item)">Delete</v-btn>
+        <v-btn @click="editPatient(item)" color="primary" small>Edit</v-btn>
+        <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
       </template>
     </v-data-table>
+
+    <!-- Pagination Controls -->
+    <v-row class="mt-4">
+      <v-col cols="12">
+        <v-pagination
+          v-model="currentPage"
+          :length="totalPages"
+          :total-visible="7"
+          @input="handlePageChange"
+        ></v-pagination>
+      </v-col>
+    </v-row>
 
     <!-- Confirmation Dialog -->
     <v-dialog v-model="deleteDialog" max-width="400">
@@ -130,14 +151,14 @@
               :items="sexOptions"
               label="Sex"
               required
-			  item-title="text"
+              item-title="text"
             ></v-select>
             <v-select
               v-model="editPatientData.bloodGroup"
               :items="bloodGroupOptions"
               label="Blood Group"
               required
-			  item-title="text"
+              item-title="text"
             ></v-select>
             <v-btn type="submit" color="primary">Update</v-btn>
             <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
@@ -161,6 +182,14 @@ const selectedBloodGroup = ref(null); // Selected blood group for filtering
 const selectedSex = ref(null); // Selected sex for filtering
 const sortBy = ref('Newest Creation'); // Default sorting by newest creation
 const sortOptions = ['Newest Creation', 'Oldest Creation', 'Youngest', 'Oldest']; // Sorting options
+
+// Pagination state
+const currentPage = ref(1);
+const itemsPerPage = ref(10); // Number of items per page
+const totalPages = computed(() => Math.ceil(filteredPatients.value.length / itemsPerPage.value));
+
+// Loading state
+const loading = ref(false);
 
 // Confirmation dialog state
 const deleteDialog = ref(false);
@@ -211,10 +240,13 @@ const headers = [
 // Fetch all patients from the backend
 const fetchPatients = async () => {
   try {
+    loading.value = true;
     const response = await api.get('/patients');
     patients.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch patients:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -310,13 +342,13 @@ const filteredPatients = computed(() => {
 
 // Handle search input
 const handleSearchInput = () => {
-  // No need to do anything here, computed property will handle filtering
+  currentPage.value = 1; // Reset to the first page when searching
 };
 
-// Watch for changes in sortBy and trigger sorting
-watch(sortBy, () => {
-  // No need to do anything here, computed property will handle sorting
-});
+// Handle page change
+const handlePageChange = (page) => {
+  currentPage.value = page;
+};
 
 // Open edit dialog with patient data
 const editPatient = (patient) => {
@@ -337,11 +369,6 @@ const updatePatient = async () => {
   } catch (error) {
     console.error('Failed to update patient:', error);
   }
-};
-
-// Navigate to new patient page
-const navigateToNewPatient = () => {
-  router.push({ name: 'new-patient' });
 };
 
 // Open confirmation dialog for deletion

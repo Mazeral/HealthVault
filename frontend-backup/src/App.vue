@@ -43,6 +43,9 @@ const logout = () => {
           <!-- Conditional Buttons Based on Role -->
           <template v-if="userRole === 'DOCTOR'">
             <v-list-item to="/my-patients" prepend-icon="mdi-account-heart" title="My Patients" color="light-green" />
+            <v-list-item to="/my-lab-results" prepend-icon="mdi-flask-outline" title="My Lab Results" color="light-green" />
+            <v-list-item to="/my-health-records" prepend-icon="mdi-file-document-outline" title="My Health Records" color="light-green" />
+            <v-list-item to="/my-prescriptions" prepend-icon="mdi-pill" title="My Prescriptions" color="light-green" />
           </template>
           <template v-if="userRole === 'ADMIN'">
             <v-list-item to="/staff" prepend-icon="mdi-account-supervisor" title="Staff" color="light-green" />

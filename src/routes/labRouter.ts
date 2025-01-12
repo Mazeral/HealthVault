@@ -33,4 +33,11 @@ labRouter.put(
   LabController.updateLabResult,
 ); // Protected
 
+// New route for fetching lab results for the authenticated user
+labRouter.get(
+  "/my-lab-results",
+  authMiddleware as express.RequestHandler,
+  LabController.getMyLabResults,
+);
+
 export default labRouter;

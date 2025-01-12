@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
+import { CustomSessionData } from "../types";
 
 class PrescriptionController {
   // Create a new prescription
@@ -132,6 +133,42 @@ class PrescriptionController {
       if (error instanceof Error) {
         if (error.message === "No ID provided") {
           res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    }
+  }
+	  static async getMyPrescriptions(req: Request, res: Response) {
+    try {
+      const session = req.session as CustomSessionData; // Cast session to CustomSessionData
+      const userId = session.user?.id; // Get the user ID from the session
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
+
+      // Fetch prescriptions for the user
+      const prescriptions = await prisma.prescription.findMany({
+        where: {
+          patient: {
+            userId: Number(userId), // Filter by the user's ID
+          },
+        },
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include only the fullName of the patient
+            },
+          },
+        },
+      });
+
+      res.status(200).json({ prescriptions });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Unauthorized: No user ID found in session") {
+          res.status(401).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
         }

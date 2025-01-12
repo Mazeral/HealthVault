@@ -102,6 +102,24 @@ const router = createRouter({
     component: MyPatientsView,
     meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
   },
+	{
+	  path: '/my-lab-results',
+	  name: 'my-lab-results',
+	  component: () => import('@/views/MyLabResultsView.vue'),
+    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
+	},
+	{
+	  path: '/my-health-records',
+	  name: 'my-health-records',
+	  component: () => import('@/views/MyHealthRecordsView.vue'),
+    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
+	},
+	{
+	  path: '/my-prescriptions',
+	  name: 'my-prescriptions',
+	  component: () => import('@/views/MyPrescriptionsView.vue'),
+    meta: { requiresAuth: true, role: 'DOCTOR' } // Ensure only authenticated DOCTORs can access
+	},
   ],
 });
 

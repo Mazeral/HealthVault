@@ -19,30 +19,34 @@
           </v-col>
         </v-row>
 
-        <!-- Table to display all medical records -->
-        <v-table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Patient ID</th>
-              <th>Diagnosis</th>
-              <th>Notes</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="record in filteredMedicalRecords" :key="record.id">
-              <td>{{ record.id }}</td>
-              <td>{{ record.patientId }}</td>
-              <td>{{ record.diagnosis }}</td>
-              <td>{{ record.notes }}</td>
-              <td>
-                <v-btn @click="editMedicalRecord(record)" color="warning">Edit</v-btn>
-                <v-btn @click="confirmDelete(record)" color="error">Delete</v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+        <!-- Table to display all medical records with pagination -->
+        <v-data-table
+          :headers="headers"
+          :items="filteredMedicalRecords"
+          :items-per-page="itemsPerPage"
+          :page.sync="currentPage"
+          :search="searchQuery"
+          :loading="loading"
+          loading-text="Loading... Please wait"
+          hide-default-footer
+        >
+          <template v-slot:item.actions="{ item }">
+            <v-btn @click="editMedicalRecord(item)" color="warning" small>Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+          </template>
+        </v-data-table>
+
+        <!-- Pagination Controls -->
+        <v-row class="mt-4">
+          <v-col cols="12">
+            <v-pagination
+              v-model="currentPage"
+              :length="totalPages"
+              :total-visible="7"
+              @input="handlePageChange"
+            ></v-pagination>
+          </v-col>
+        </v-row>
 
         <!-- Dialog for editing a medical record -->
         <v-dialog v-model="editDialog" max-width="500">
@@ -107,6 +111,23 @@ const recordToDelete = ref(null); // Stores the medical record to be deleted
 // Search query for filtering medical records
 const searchQuery = ref('');
 
+// Pagination state
+const currentPage = ref(1);
+const itemsPerPage = ref(10); // Number of items per page
+const totalPages = computed(() => Math.ceil(filteredMedicalRecords.value.length / itemsPerPage.value));
+
+// Loading state
+const loading = ref(false);
+
+// Table headers
+const headers = [
+  { title: 'ID', value: 'id' },
+  { title: 'Patient ID', value: 'patientId' },
+  { title: 'Diagnosis', value: 'diagnosis' },
+  { title: 'Notes', value: 'notes' },
+  { title: 'Actions', value: 'actions', sortable: false },
+];
+
 // Fetch all medical records on component mount
 onMounted(() => {
   fetchMedicalRecords();
@@ -115,10 +136,13 @@ onMounted(() => {
 // Fetch all medical records
 const fetchMedicalRecords = async () => {
   try {
+    loading.value = true;
     const response = await api.get('/medical-records');
     medicalRecords.value = response.data['Medical Records'];
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -134,7 +158,12 @@ const filteredMedicalRecords = computed(() => {
 
 // Handle search input
 const handleSearchInput = () => {
-  // No need to do anything here, computed property will handle filtering
+  currentPage.value = 1; // Reset to the first page when searching
+};
+
+// Handle page change
+const handlePageChange = (page) => {
+  currentPage.value = page;
 };
 
 // Open edit dialog with medical record data

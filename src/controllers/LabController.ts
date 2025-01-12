@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import { LabResult } from "@prisma/client";
 import createObject from "../utils/utilFunctions";
+import { CustomSessionData } from "../types";
 class LabController {
   // Create a lab result for a patient
   static async newLabResult(req: Request, res: Response) {
@@ -164,6 +165,39 @@ class LabController {
         if (error.message === "Bad request")
           res.status(400).json({ error: error.message });
         res.status(500).json({ error: error.message });
+      }
+    }
+  }
+	  // Fetch lab results for the authenticated user (doctor or patient)
+  static async getMyLabResults(req: Request, res: Response) {
+    try {
+      const session = req.session as CustomSessionData; // Cast session to CustomSessionData
+      const userId = Number(session.user?.id); // Get the user ID from the session
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
+
+      // Fetch lab results for the user
+      const labResults = await prisma.labResult.findMany({
+        where: {
+          patient: {
+            userId: userId, // Filter by the user's ID
+          },
+        },
+        include: {
+          patient: true, // Include patient details if needed
+        },
+      });
+
+      res.status(200).json({ labResults });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Unauthorized: No user ID found in session") {
+          res.status(401).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
