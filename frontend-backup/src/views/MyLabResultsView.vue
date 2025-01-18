@@ -11,11 +11,12 @@
               label="Search by Test Name"
               outlined
               dense
-              @input="handleSearchInput"
+              @keyup.enter="handleSearch"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="6">
             <v-btn color="primary" @click="openNewLabResultDialog">New Lab Result</v-btn>
+            <v-btn color="secondary" @click="handleSearch" class="ml-2">Search</v-btn>
           </v-col>
         </v-row>
 
@@ -25,7 +26,6 @@
           :items="filteredLabResults"
           :items-per-page="itemsPerPage"
           :page.sync="currentPage"
-          :search="searchQuery"
           :loading="loading"
           loading-text="Loading... Please wait"
           hide-default-footer
@@ -61,13 +61,12 @@
       </v-card-text>
     </v-card>
 
-   <!-- New Lab Result Dialog -->
+    <!-- New Lab Result Dialog -->
     <v-dialog v-model="newLabResultDialog" max-width="500">
       <v-card>
         <v-card-title>New Lab Result</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="createLabResult">
-            <!-- Replace v-autocomplete with v-text-field for patient full name -->
             <v-text-field
               v-model="newLabResultData.patientFullName"
               label="Patient Full Name"
@@ -90,7 +89,6 @@
     </v-snackbar>
   </v-container>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '../utils/api';
@@ -110,17 +108,24 @@ const headers = [
   { title: 'Result', value: 'result' },
   { title: 'Notes', value: 'notes' },
   { title: 'Performed At', value: 'performedAt' },
-  { title: 'Patient Name', value: 'patientFullName' }, // Add patient full name
+  { title: 'Patient Name', value: 'patientFullName' },
 ];
 
 // New lab result dialog state
 const newLabResultDialog = ref(false);
 const newLabResultData = ref({
-  patientFullName: '', // Changed from patientId to patientFullName
+  patientFullName: '',
   testName: '',
   result: '',
   notes: '',
   performedAt: '',
+});
+
+// Snackbar for feedback
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success',
 });
 
 // Fetch lab results for the authenticated user
@@ -128,13 +133,13 @@ const fetchLabResults = async () => {
   try {
     loading.value = true;
     const response = await api.get('/my-lab-results');
-    // Include patient fullName in the response
     labResults.value = response.data.labResults.map((result) => ({
       ...result,
-      patientFullName: result.patient.fullName, // Add patient fullName to each lab result
+      patientFullName: result.patient.fullName,
     }));
   } catch (error) {
     console.error('Failed to fetch lab results:', error);
+    showSnackbar('Failed to fetch lab results', 'error');
   } finally {
     loading.value = false;
   }
@@ -150,8 +155,8 @@ const filteredLabResults = computed(() => {
   );
 });
 
-// Handle search input
-const handleSearchInput = () => {
+// Handle search
+const handleSearch = () => {
   currentPage.value = 1; // Reset to the first page when searching
 };
 
@@ -204,11 +209,18 @@ const createLabResult = async () => {
       performedAt: '',
     };
 
-    alert('Lab result created successfully!');
+    showSnackbar('Lab result created successfully!', 'success');
   } catch (error) {
     console.error('Failed to create lab result:', error);
-    alert(`Failed to create lab result: ${error.message}`);
+    showSnackbar(`Failed to create lab result: ${error.message}`, 'error');
   }
+};
+
+// Show snackbar message
+const showSnackbar = (message, color = 'success') => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
 };
 
 // Fetch data on component mount
