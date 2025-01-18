@@ -1,58 +1,72 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { LabResult } from "@prisma/client";
 import createObject from "../utils/utilFunctions";
 import { CustomSessionData } from "../types";
 class LabController {
   // Create a lab result for a patient
-  static async newLabResult(req: Request, res: Response) {
-    const patientId = Number(req.body.patientId) || null;
-    const testName = String(req.body.testName) || null;
-    const result = String(req.body.result) || null;
-    const notes = String(req.body.notes) || null;
-    const performedAt = String(req.body.performedAt) || null;
-    let performedAtDate = null;
+static async newLabResult(req: Request, res: Response) {
+  const { patientFullName, testName, result, notes, performedAt } = req.body;
 
-    try {
-      // Validate required fields
-      if (!testName) throw new Error("No test name provided");
-      if (!result) throw new Error("No result provided");
-      if (!patientId) throw new Error("No patient ID provided");
+  try {
+    // Log the request body for debugging
+    console.log('Request body:', req.body);
 
-      // Convert performedAt to a valid DateTime object
-      if (performedAt !== null)
-        performedAtDate = new Date(performedAt).toISOString();
-      else performedAtDate = new Date(Date.now()).toISOString();
+    // Validate required fields
+    if (!testName) throw new Error("No test name provided");
+    if (!result) throw new Error("No result provided");
+    if (!patientFullName) throw new Error("No patient full name provided");
 
-      // Create the lab result
-      const labResult = await prisma.labResult.create({
-        data: {
-          testName,
-          result,
-          notes,
-          performedAt: performedAtDate, // Use the formatted DateTime
-          patient: {
-            connect: { id: patientId },
-          },
+    // Fetch patient ID based on full name
+    console.log('Searching for patient:', patientFullName);
+    const patient = await prisma.patient.findFirst({
+      where: {
+        fullName: patientFullName,
+      },
+    });
+
+    if (!patient) {
+      throw new Error("Patient not found");
+    }
+
+    console.log('Patient found:', patient);
+
+    const patientId = patient.id;
+
+    // Convert performedAt to a valid DateTime object
+    const performedAtDate = performedAt ? new Date(performedAt).toISOString() : new Date(Date.now()).toISOString();
+
+    // Create the lab result
+    const labResult = await prisma.labResult.create({
+      data: {
+        testName,
+        result,
+        notes,
+        performedAt: performedAtDate,
+        patient: {
+          connect: { id: patientId },
         },
-      });
+      },
+    });
 
-      res.status(200).json({ "Lab result": labResult });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (
-          error.message === "No test name provided" ||
-          error.message === "No patient ID provided" ||
-          error.message === "No result provided" ||
-          error.message === "No performed At provided"
-        ) {
-          res.status(400).json({ error: error.message });
-        } else {
-          res.status(500).json({ error: error.message });
-        }
+    console.log('Lab result created:', labResult);
+
+    res.status(200).json({ "Lab result": labResult });
+  } catch (error) {
+    console.error('Error creating lab result:', error);
+    if (error instanceof Error) {
+      if (
+        error.message === "No test name provided" ||
+        error.message === "No patient full name provided" ||
+        error.message === "No result provided" ||
+        error.message === "Patient not found"
+      ) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: error.message });
       }
     }
   }
+}
 
   // Fetch a lab result by id
   static async getLabResult(req: Request, res: Response) {
@@ -178,41 +192,37 @@ class LabController {
     }
   }
   // Fetch lab results for the authenticated user (doctor or patient)
-  static async getMyLabResults(req: Request, res: Response) {
-    try {
-      const session = req.session as CustomSessionData; // Cast session to CustomSessionData
-      const userId = Number(session.user?.id); // Get the user ID from the session
+	static async getMyLabResults(req: Request, res: Response): Promise<void> {
+	  try {
+		console.log("Inside the getMyLabResults method");
 
-      if (!userId) {
-        throw new Error("Unauthorized: No user ID found in session");
-      }
+		const session = req.session as CustomSessionData; // Cast session to CustomSessionData
+		const userId = Number(session.user?.id); // Get the user ID from the session
+		const userRole = session.user?.role; // Get the user's role
 
-      // Fetch lab results for the user
-      const labResults = await prisma.labResult.findMany({
-        where: {
-          patient: {
-            userId: userId, // Filter by the user's ID
-          },
-        },
-        include: {
-          patient: {
-            select: {
-              fullName: true, // Include the patient's full name
-            },
-          },
-        },
-      });
+		if (!userId) {
+		  throw new Error("Unauthorized: No user ID found in session");
+		}
 
-      res.status(200).json({ labResults });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Unauthorized: No user ID found in session") {
-          res.status(401).json({ error: error.message });
-        } else {
-          res.status(500).json({ error: error.message });
-        }
-      }
-    }
-  }
+		let labResults = null;
+		labResults = await prisma.labResult.findMany({
+				where:{
+					
+				}
+			})
+
+		console.log("Lab results with patient data:", labResultsWithPatientData);
+		res.status(200).json({ labResults: labResultsWithPatientData });
+	  } catch (error) {
+		console.error("Error in getMyLabResults:", error);
+		if (error instanceof Error) {
+		  if (error.message === "Unauthorized: No user ID found in session") {
+			res.status(401).json({ error: error.message });
+		  } else {
+			res.status(500).json({ error: "Internal server error" });
+		  }
+		}
+	  }
+	}
 }
 export default LabController;

@@ -8,14 +8,17 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  email     String    @unique
-  password  String    // Encrypted password
-  role      Role
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  patients  Patient[] // No onDelete here
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
+  email          String          @unique
+  password       String          // Encrypted password
+  role           Role
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  patients       Patient[]       // Patients created by this user
+  medicalRecords MedicalRecord[] // Medical records created by this user
+  prescriptions  Prescription[]  // Prescriptions created by this user
+  labResults     LabResult[]     // Lab results created by this user
 }
 
 model Patient {
@@ -29,10 +32,10 @@ model Patient {
   updatedAt      DateTime        @updatedAt
   sex            Sex
   bloodGroup     BloodGroup
-  medicalRecords MedicalRecord[] // No onDelete here
-  prescriptions  Prescription[]  // No onDelete here
-  labResults     LabResult[]     // No onDelete here
-  User           User?           @relation(fields: [userId], references: [id], onDelete: Cascade) // onDelete here
+  medicalRecords MedicalRecord[] // Medical records for this patient
+  prescriptions  Prescription[]  // Prescriptions for this patient
+  labResults     LabResult[]     // Lab results for this patient
+  User           User?           @relation(fields: [userId], references: [id], onDelete: Cascade) // User who created this patient
   userId         Int?
 }
 
@@ -44,7 +47,9 @@ model MedicalRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // onDelete here
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this medical record
+  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this medical record
+  userId  Int?
 }
 
 model Prescription {
@@ -55,7 +60,9 @@ model Prescription {
   instructions String?
   prescribedAt DateTime @default(now())
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // onDelete here
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this prescription
+  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this prescription
+  userId  Int?
 }
 
 model LabResult {
@@ -67,7 +74,9 @@ model LabResult {
   performedAt DateTime
   createdAt   DateTime @default(now())
 
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // onDelete here
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this lab result
+  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this lab result
+  userId  Int?
 }
 
 enum Role {

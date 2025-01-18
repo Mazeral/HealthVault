@@ -21,31 +21,34 @@
         </v-row>
 
         <!-- Lab Results Table -->
-        <v-data-table
-          :headers="headers"
-          :items="filteredLabResults"
-          :items-per-page="itemsPerPage"
-          :page.sync="currentPage"
-          :loading="loading"
-          loading-text="Loading... Please wait"
-          hide-default-footer
-        >
-          <template v-slot:item.testName="{ item }">
-            {{ item.testName }}
-          </template>
-          <template v-slot:item.result="{ item }">
-            {{ item.result }}
-          </template>
-          <template v-slot:item.notes="{ item }">
-            {{ item.notes }}
-          </template>
-          <template v-slot:item.performedAt="{ item }">
-            {{ formatDate(item.performedAt) }}
-          </template>
-          <template v-slot:item.patientFullName="{ item }">
-            {{ item.patientFullName }}
-          </template>
-        </v-data-table>
+<v-data-table
+  :headers="headers"
+  :items="filteredLabResults"
+  :items-per-page="itemsPerPage"
+  :page.sync="currentPage"
+  :loading="loading"
+  loading-text="Loading... Please wait"
+  hide-default-footer
+>
+  <template v-slot:item.testName="{ item }">
+    {{ item.testName }}
+  </template>
+  <template v-slot:item.result="{ item }">
+    {{ item.result }}
+  </template>
+  <template v-slot:item.notes="{ item }">
+    {{ item.notes }}
+  </template>
+  <template v-slot:item.performedAt="{ item }">
+    {{ formatDate(item.performedAt) }}
+  </template>
+  <template v-slot:item.patientFullName="{ item }">
+    {{ item.patientFullName }}
+  </template>
+  <template v-slot:no-data>
+    <v-alert type="info">No data available</v-alert>
+  </template>
+</v-data-table>
 
         <!-- Pagination Controls -->
         <v-row class="mt-4">
@@ -89,6 +92,7 @@
     </v-snackbar>
   </v-container>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '../utils/api';
@@ -132,11 +136,21 @@ const snackbar = ref({
 const fetchLabResults = async () => {
   try {
     loading.value = true;
-    const response = await api.get('/my-lab-results');
-    labResults.value = response.data.labResults.map((result) => ({
-      ...result,
-      patientFullName: result.patient.fullName,
-    }));
+    const response = await api.get('/my-lab-results'); // Ensure the URL matches the backend route
+    
+    // Log the response for debugging
+    console.log('Backend response:', response.data);
+
+    // Ensure the response contains the expected data structure
+    if (response.data && response.data.labResults) {
+      labResults.value = response.data.labResults.map((result) => ({
+        ...result,
+        patientFullName: result.patient.fullName, // Add patient fullName to each lab result
+      }));
+    } else {
+      console.error('Unexpected response structure:', response.data);
+      showSnackbar('Unexpected data format from the server', 'error');
+    }
   } catch (error) {
     console.error('Failed to fetch lab results:', error);
     showSnackbar('Failed to fetch lab results', 'error');
