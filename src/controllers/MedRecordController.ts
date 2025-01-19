@@ -7,11 +7,11 @@ class MedRecordController {
   // Add a medical record for a patient
   static async addRecord(req: Request, res: Response) {
     try {
-      const patientId = Number(req.body.patientId) || null;
+      const patientFullName = req.body.patientFullName
       const diagnosis = req.body.diagnosis;
       const notes = req.body.notes;
 
-      if (!patientId || !diagnosis || diagnosis === "")
+      if (!patientFullName || !diagnosis || diagnosis === "")
         throw Error("Missing fields");
 
       // Get the user ID from the session
@@ -21,16 +21,23 @@ class MedRecordController {
       if (!userId || userId === undefined) {
         throw new Error("Unauthorized: No user ID found in session");
       }
-
+	const patient = await prisma.patient.findUnique({
+				where:{
+					fullName: patientFullName
+				}
+			})
+	
+	if (patient)
       if (userId !== undefined) {
         const medRecord = await prisma.medicalRecord.create({
           data: {
-            patientId: patientId,
+            patientId: Number(patient.id),
             diagnosis: diagnosis,
             notes: notes,
             userId: userId,
           },
         });
+		res.status(200).json({medRecord})
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -41,45 +48,73 @@ class MedRecordController {
     }
   }
 
-  static async updateMedRecord(req: Request, res: Response) {
-    try {
-      const medicalRecordId = Number(req.params.id); // Corrected: Use medicalRecordId, not patientId
-      if (!medicalRecordId) throw new Error("No medical record ID provided");
+static async updateMedRecord(req: Request, res: Response) {
+  try {
+    const medicalRecordId = Number(req.params.id);
+    if (!medicalRecordId) throw new Error("No medical record ID provided");
 
-      // Validate required fields
-      const { diagnosis, notes, patientId } = req.body;
-      if (!diagnosis && !notes && !patientId) {
-        throw new Error("No fields provided for update");
+    // Validate required fields
+    const { diagnosis, notes, patientId, patientFullName } = req.body;
+    if (!diagnosis && !notes && !patientId && !patientFullName) {
+      throw new Error("No fields provided for update");
+    }
+
+    // If patientFullName is provided, validate it
+    if (patientFullName && typeof patientFullName !== "string") {
+      throw new Error("Invalid patient full name provided");
+    }
+
+    // If patientId is provided, validate it
+    if (patientId && isNaN(Number(patientId))) {
+      throw new Error("Invalid patient ID provided");
+    }
+
+    let updatedPatientId = patientId ? Number(patientId) : undefined; // Default to the provided patientId
+
+    // If patientFullName is provided, find the patient
+    if (patientFullName) {
+      const patient = await prisma.patient.findFirst({
+        where: { fullName: patientFullName },
+      });
+
+      if (!patient) {
+        throw new Error(`No patient found with the name: ${patientFullName}`);
       }
 
-      // Create an object with only the provided fields
-      const data = createObject({
-        diagnosis,
-        notes,
-        patientId,
-      });
+      updatedPatientId = patient.id; // Use the found patient's ID
+    }
 
-      // Update the medical record
-      const updatedRecord = await prisma.medicalRecord.update({
-        where: {
-          id: medicalRecordId, // Use the medical record ID
-        },
-        data,
-      });
+    // Create an object with only the provided fields for the MedicalRecord
+    const medicalRecordData = createObject({
+      diagnosis,
+      notes,
+      patientId: updatedPatientId, // Use the updated patientId
+    });
 
-      res.status(200).json({ updated: updatedRecord });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "No medical record ID provided") {
-          res.status(400).json({ error: error.message });
-        } else if (error.message === "No fields provided for update") {
-          res.status(400).json({ error: error.message });
-        } else {
-          res.status(500).json({ error: error.message });
-        }
+    // Update the medical record and include the patient relationship
+    const updatedRecord = await prisma.medicalRecord.update({
+      where: { id: medicalRecordId },
+      data: medicalRecordData,
+      include: { patient: true }, // Include the patient relationship
+    });
+
+    res.status(200).json({ updated: updatedRecord });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === "No medical record ID provided" ||
+        error.message === "No fields provided for update" ||
+        error.message === "Invalid patient full name provided" ||
+        error.message === "Invalid patient ID provided" ||
+        error.message.startsWith("No patient found with the name:")
+      ) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: error.message });
       }
     }
   }
+}
 
   // Fetch a medical record of a patient from the database
   static async getMedRecord(req: Request, res: Response) {

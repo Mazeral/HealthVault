@@ -1,7 +1,13 @@
 <template>
-  <v-container>
+ <v-container>
     <v-card>
       <v-card-title>My Health Records</v-card-title>
+	  <!-- Add a medical record button -->
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
+          </v-col>
+        </v-row>
       <v-card-text>
         <!-- Search Bar -->
         <v-row class="mt-4">
@@ -15,9 +21,16 @@
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="6">
-            <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
+            <v-text-field
+              v-model="patientSearchQuery"
+              label="Search by Patient Name"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
           </v-col>
         </v-row>
+
 
         <!-- Medical Records Table -->
         <v-data-table
@@ -25,7 +38,6 @@
           :items="filteredMedicalRecords"
           :items-per-page="itemsPerPage"
           :page.sync="currentPage"
-          :search="searchQuery"
           :loading="loading"
           loading-text="Loading... Please wait"
           hide-default-footer
@@ -68,6 +80,13 @@
         <v-card-title>New Medical Record</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="createMedicalRecord">
+
+            <!-- Patient Full Name Field (Optional) -->
+            <v-text-field
+              v-model="newMedicalRecordData.patientFullName"
+              label="Patient Full Name"
+            ></v-text-field>
+
             <!-- Diagnosis Field -->
             <v-text-field
               v-model="newMedicalRecordData.diagnosis"
@@ -81,11 +100,6 @@
               label="Notes"
             ></v-text-field>
 
-            <!-- Patient Full Name Field (Optional) -->
-            <v-text-field
-              v-model="newMedicalRecordData.patientFullName"
-              label="Patient Full Name (Optional)"
-            ></v-text-field>
 
             <!-- Action Buttons -->
             <v-btn type="submit" color="primary">Create</v-btn>
@@ -133,7 +147,7 @@
       <v-card>
         <v-card-title class="headline">Are you sure?</v-card-title>
         <v-card-text>
-          You are about to delete the medical record for: <strong>{{ medicalRecordToDelete?.diagnosis }}</strong>. This action cannot be undone.
+          You are about to delete the medical record for: <strong>{{ medicalRecordToDelete?.patient?.fullName }}</strong>. This action cannot be undone.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -150,7 +164,8 @@ import { ref, computed, onMounted } from 'vue';
 import api from '../utils/api';
 
 const medicalRecords = ref([]); // List of medical records
-const searchQuery = ref(''); // Search query
+const searchQuery = ref(''); // Search query for diagnosis
+const patientSearchQuery = ref(''); // Search query for patient name
 const loading = ref(false); // Loading state for fetching records
 const loadingUpdate = ref(false); // Loading state for updating a record
 
@@ -187,6 +202,7 @@ const newMedicalRecordDialog = ref(false);
 const newMedicalRecordData = ref({
   diagnosis: '',
   notes: '',
+  patientFullName: '', // Ensure this field is included
 });
 
 // Edit medical record dialog state
@@ -219,14 +235,28 @@ const fetchMedicalRecords = async () => {
   }
 };
 
-// Filter medical records based on search query
+// Filter and sort medical records based on search queries
 const filteredMedicalRecords = computed(() => {
-  if (!searchQuery.value) {
-    return medicalRecords.value; // Return all medical records if no search query
+  let filtered = medicalRecords.value;
+
+  // Filter by diagnosis (match first letters)
+  if (searchQuery.value) {
+    filtered = filtered.filter((record) =>
+      record.diagnosis.toLowerCase().startsWith(searchQuery.value.toLowerCase())
+    );
   }
-  return medicalRecords.value.filter((record) =>
-    record.diagnosis.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+
+  // Filter by patient name (match first letters)
+  if (patientSearchQuery.value) {
+    filtered = filtered.filter((record) =>
+      record.patient?.fullName
+        .toLowerCase()
+        .startsWith(patientSearchQuery.value.toLowerCase())
+    );
+  }
+
+  // Sort by createdAt in descending order (newest first)
+  return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 });
 
 // Handle search input
@@ -256,6 +286,16 @@ const openNewMedicalRecordDialog = () => {
 // Create a new medical record
 const createMedicalRecord = async () => {
   try {
+    console.log("Starting createMedicalRecord method"); // Debugging: Log method start
+
+    // Log the data being sent to the API
+    console.log("Data being sent to API:", {
+      ...newMedicalRecordData.value,
+      patient: {
+        fullName: newMedicalRecordData.value.patientFullName || 'N/A',
+      },
+    });
+
     const response = await api.post('/medical-record/', {
       ...newMedicalRecordData.value,
       patient: {
@@ -263,19 +303,36 @@ const createMedicalRecord = async () => {
       },
     });
 
+    console.log("API Response:", response.data); // Debugging: Log the response
+
+    // Log before adding the new record to the list
+    console.log("Before adding new record to medicalRecords:", medicalRecords.value);
+
     // Add the new medical record to the list
-    medicalRecords.value.push(response.data);
+    medicalRecords.value.unshift({
+      ...response.data,
+      patient: response.data.patient || { fullName: 'N/A' }, // Ensure patient exists
+    });
+
+    // Log after adding the new record to the list
+    console.log("After adding new record to medicalRecords:", medicalRecords.value);
 
     // Close the dialog and reset the form
     newMedicalRecordDialog.value = false;
+    console.log("Dialog closed"); // Debugging: Verify dialog closure
+
     newMedicalRecordData.value = {
       diagnosis: '',
       notes: '',
       patientFullName: '',
     };
 
+    // Log after resetting the form
+    console.log("Form reset:", newMedicalRecordData.value);
+
     // Show success message
     showSnackbar('Medical record created successfully!', 'success');
+    console.log("Snackbar shown"); // Debugging: Verify snackbar display
   } catch (error) {
     console.error('Failed to create medical record:', error);
     showSnackbar('Failed to create medical record', 'error');
@@ -324,6 +381,7 @@ const updateMedicalRecord = async () => {
     showSnackbar('Medical record updated successfully!', 'success');
 
     // Close the edit dialog
+
     editMedicalRecordDialog.value = false;
   } catch (error) {
     console.error('Failed to update medical record:', error);
