@@ -7,8 +7,17 @@
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="searchQuery"
+              v-model="searchTestNameQuery"
               label="Search by Test Name"
+              outlined
+              dense
+              @keyup.enter="handleSearch"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchPatientNameQuery"
+              label="Search by Patient Name"
               outlined
               dense
               @keyup.enter="handleSearch"
@@ -21,34 +30,38 @@
         </v-row>
 
         <!-- Lab Results Table -->
-<v-data-table
-  :headers="headers"
-  :items="filteredLabResults"
-  :items-per-page="itemsPerPage"
-  :page.sync="currentPage"
-  :loading="loading"
-  loading-text="Loading... Please wait"
-  hide-default-footer
->
-  <template v-slot:item.testName="{ item }">
-    {{ item.testName }}
-  </template>
-  <template v-slot:item.result="{ item }">
-    {{ item.result }}
-  </template>
-  <template v-slot:item.notes="{ item }">
-    {{ item.notes }}
-  </template>
-  <template v-slot:item.performedAt="{ item }">
-    {{ formatDate(item.performedAt) }}
-  </template>
-  <template v-slot:item.patientFullName="{ item }">
-    {{ item.patientFullName }}
-  </template>
-  <template v-slot:no-data>
-    <v-alert type="info">No data available</v-alert>
-  </template>
-</v-data-table>
+        <v-data-table
+          :headers="headers"
+          :items="filteredLabResults"
+          :items-per-page="itemsPerPage"
+          :page.sync="currentPage"
+          :loading="loading"
+          loading-text="Loading... Please wait"
+          hide-default-footer
+        >
+          <template v-slot:item.testName="{ item }">
+            {{ item.testName }}
+          </template>
+          <template v-slot:item.result="{ item }">
+            {{ item.result }}
+          </template>
+          <template v-slot:item.notes="{ item }">
+            {{ item.notes }}
+          </template>
+          <template v-slot:item.performedAt="{ item }">
+            {{ formatDate(item.performedAt) }}
+          </template>
+          <template v-slot:item.patientFullName="{ item }">
+            {{ item.patientFullName }}
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn @click="editLabResult(item)" color="primary" small>Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+          </template>
+          <template v-slot:no-data>
+            <v-alert type="info">No data available</v-alert>
+          </template>
+        </v-data-table>
 
         <!-- Pagination Controls -->
         <v-row class="mt-4">
@@ -86,6 +99,43 @@
       </v-card>
     </v-dialog>
 
+    <!-- Edit Lab Result Dialog -->
+    <v-dialog v-model="editLabResultDialog" max-width="500">
+      <v-card>
+        <v-card-title>Edit Lab Result</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="updateLabResult">
+            <v-text-field
+              v-model="editLabResultData.patientFullName"
+              label="Patient Full Name"
+              required
+            ></v-text-field>
+            <v-text-field v-model="editLabResultData.testName" label="Test Name" required></v-text-field>
+            <v-text-field v-model="editLabResultData.result" label="Result" required></v-text-field>
+            <v-text-field v-model="editLabResultData.notes" label="Notes"></v-text-field>
+            <v-text-field v-model="editLabResultData.performedAt" label="Performed At" type="date" required></v-text-field>
+            <v-btn type="submit" color="primary">Update</v-btn>
+            <v-btn @click="editLabResultDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="400">
+      <v-card>
+        <v-card-title class="headline">Are you sure?</v-card-title>
+        <v-card-text>
+          You are about to delete the lab result for: <strong>{{ labResultToDelete?.testName }}</strong>. This action cannot be undone.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="secondary" @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn color="error" @click="deleteLabResultConfirmed">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Success/Error Snackbar -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
       {{ snackbar.message }}
@@ -98,7 +148,8 @@ import { ref, computed, onMounted } from 'vue';
 import api from '../utils/api';
 
 const labResults = ref([]); // List of lab results
-const searchQuery = ref(''); // Search query
+const searchTestNameQuery = ref(''); // Search query for test name
+const searchPatientNameQuery = ref(''); // Search query for patient name
 const loading = ref(false); // Loading state
 
 // Pagination state
@@ -113,6 +164,7 @@ const headers = [
   { title: 'Notes', value: 'notes' },
   { title: 'Performed At', value: 'performedAt' },
   { title: 'Patient Name', value: 'patientFullName' },
+  { title: 'Actions', value: 'actions', sortable: false }, // Add actions column
 ];
 
 // New lab result dialog state
@@ -124,6 +176,21 @@ const newLabResultData = ref({
   notes: '',
   performedAt: '',
 });
+
+// Edit lab result dialog state
+const editLabResultDialog = ref(false);
+const editLabResultData = ref({
+  id: null,
+  patientFullName: '',
+  testName: '',
+  result: '',
+  notes: '',
+  performedAt: '',
+});
+
+// Delete confirmation dialog state
+const deleteDialog = ref(false);
+const labResultToDelete = ref(null); // Stores the lab result to be deleted
 
 // Snackbar for feedback
 const snackbar = ref({
@@ -159,14 +226,25 @@ const fetchLabResults = async () => {
   }
 };
 
-// Filter lab results based on search query
+// Filter lab results based on search queries
 const filteredLabResults = computed(() => {
-  if (!searchQuery.value) {
-    return labResults.value; // Return all lab results if no search query
+  let filtered = labResults.value;
+
+  // Filter by test name
+  if (searchTestNameQuery.value) {
+    filtered = filtered.filter((result) =>
+      result.testName.toLowerCase().includes(searchTestNameQuery.value.toLowerCase())
+    );
   }
-  return labResults.value.filter((result) =>
-    result.testName.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+
+  // Filter by patient name
+  if (searchPatientNameQuery.value) {
+    filtered = filtered.filter((result) =>
+      result.patientFullName.toLowerCase().includes(searchPatientNameQuery.value.toLowerCase())
+    );
+  }
+
+  return filtered;
 });
 
 // Handle search
@@ -227,6 +305,49 @@ const createLabResult = async () => {
   } catch (error) {
     console.error('Failed to create lab result:', error);
     showSnackbar(`Failed to create lab result: ${error.message}`, 'error');
+  }
+};
+
+// Open edit dialog with lab result data
+const editLabResult = (labResult) => {
+  editLabResultData.value = { ...labResult };
+  editLabResultDialog.value = true;
+};
+
+// Update a lab result
+const updateLabResult = async () => {
+  try {
+    const response = await api.put(`/lab-results/${editLabResultData.value.id}`, editLabResultData.value);
+    const updatedLabResult = response.data.updated;
+    const index = labResults.value.findIndex((result) => result.id === updatedLabResult.id);
+    if (index !== -1) {
+      labResults.value[index] = updatedLabResult;
+    }
+    editLabResultDialog.value = false; // Close the dialog
+    showSnackbar('Lab result updated successfully!', 'success');
+  } catch (error) {
+    console.error('Failed to update lab result:', error);
+    showSnackbar(`Failed to update lab result: ${error.message}`, 'error');
+  }
+};
+
+// Open confirmation dialog for deletion
+const confirmDelete = (labResult) => {
+  labResultToDelete.value = labResult;
+  deleteDialog.value = true;
+};
+
+// Delete a lab result after confirmation
+const deleteLabResultConfirmed = async () => {
+  try {
+    await api.delete(`/lab-results/${labResultToDelete.value.id}`);
+    fetchLabResults(); // Refresh the list after deletion
+    showSnackbar('Lab result deleted successfully!', 'success');
+  } catch (error) {
+    console.error('Failed to delete lab result:', error);
+    showSnackbar(`Failed to delete lab result: ${error.message}`, 'error');
+  } finally {
+    deleteDialog.value = false; // Close the dialog
   }
 };
 
