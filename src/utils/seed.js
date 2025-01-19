@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { faker } = require("@faker-js/faker");
+const bcrypt = require("bcrypt");
 
 const prisma = new PrismaClient();
 
@@ -13,26 +14,54 @@ const NUM_LAB_RESULTS_PER_PATIENT = 3;
 // Roles for users
 const ROLES = ["ADMIN", "DOCTOR"];
 
+// Function to hash passwords
+async function hashPassword(password) {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
+}
+
 // Function to create fake users
 async function createUsers() {
   const users = [];
-  for (let i = 0; i < NUM_USERS; i++) {
+
+  // Create the admin user "mohamad"
+  users.push({
+    name: "mohamad",
+    email: "mohamad@example.com",
+    password: await hashPassword("0000"),
+    role: "ADMIN",
+    createdAt: new Date(),
+  });
+
+  // Create the doctor user "mamdoh"
+  users.push({
+    name: "mamdoh",
+    email: "mamdoh@example.com",
+    password: await hashPassword("0000"),
+    role: "DOCTOR",
+    createdAt: new Date(),
+  });
+
+  // Create additional fake users
+  for (let i = 0; i < NUM_USERS - 2; i++) {
     users.push({
       name: faker.person.fullName(),
       email: faker.internet.email(),
-      password: faker.internet.password(),
+      password: await hashPassword(faker.internet.password()),
       role: ROLES[Math.floor(Math.random() * ROLES.length)],
       createdAt: faker.date.past(),
     });
   }
+
   return await prisma.user.createMany({ data: users });
 }
 
 // Function to create fake patients
 async function createPatients(users) {
   const patients = [];
+  const doctor = users.find((user) => user.name === "mamdoh"); // Get the doctor "mamdoh"
+
   for (let i = 0; i < NUM_PATIENTS; i++) {
-    const user = users[Math.floor(Math.random() * users.length)];
     patients.push({
       fullName: faker.person.fullName(),
       dateOfBirth: faker.date.birthdate({ min: 18, max: 90, mode: "age" }),
@@ -50,7 +79,7 @@ async function createPatients(users) {
         "O_PLUS",
         "O_MINUS",
       ]),
-      userId: user.id,
+      userId: doctor.id, // Associate all patients with the doctor "mamdoh"
       createdAt: faker.date.past(),
     });
   }
@@ -66,6 +95,7 @@ async function createMedicalRecords(patients) {
         patientId: patient.id,
         diagnosis: faker.lorem.words(5),
         notes: faker.lorem.sentences(2),
+        userId: patient.userId, // Associate with the doctor "mamdoh"
         createdAt: faker.date.past(),
       });
     }
@@ -83,6 +113,7 @@ async function createPrescriptions(patients) {
         medication: faker.lorem.word(),
         dosage: `${Math.floor(Math.random() * 100)} mg`,
         instructions: faker.lorem.sentence(),
+        userId: patient.userId, // Associate with the doctor "mamdoh"
         prescribedAt: faker.date.past(),
       });
     }
@@ -100,6 +131,7 @@ async function createLabResults(patients) {
         testName: faker.lorem.words(2),
         result: faker.lorem.sentence(),
         notes: faker.lorem.sentences(2),
+        userId: patient.userId, // Associate with the doctor "mamdoh"
         performedAt: faker.date.past(),
         createdAt: faker.date.past(),
       });
@@ -112,27 +144,33 @@ async function createLabResults(patients) {
 async function main() {
   try {
     console.log("Creating users...");
-    const users = await createUsers();
+    await createUsers();
     console.log(`${NUM_USERS} users created.`);
 
+    console.log("Fetching users...");
+    const users = await prisma.user.findMany();
+
     console.log("Creating patients...");
-    const patients = await createPatients(await prisma.user.findMany());
+    await createPatients(users);
     console.log(`${NUM_PATIENTS} patients created.`);
 
+    console.log("Fetching patients...");
+    const patients = await prisma.patient.findMany();
+
     console.log("Creating medical records...");
-    await createMedicalRecords(await prisma.patient.findMany());
+    await createMedicalRecords(patients);
     console.log(
       `${NUM_PATIENTS * NUM_MEDICAL_RECORDS_PER_PATIENT} medical records created.`,
     );
 
     console.log("Creating prescriptions...");
-    await createPrescriptions(await prisma.patient.findMany());
+    await createPrescriptions(patients);
     console.log(
       `${NUM_PATIENTS * NUM_PRESCRIPTIONS_PER_PATIENT} prescriptions created.`,
     );
 
     console.log("Creating lab results...");
-    await createLabResults(await prisma.patient.findMany());
+    await createLabResults(patients);
     console.log(
       `${NUM_PATIENTS * NUM_LAB_RESULTS_PER_PATIENT} lab results created.`,
     );

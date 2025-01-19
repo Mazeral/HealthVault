@@ -13,14 +13,25 @@ class MedRecordController {
 
       if (!patientId || !diagnosis || diagnosis === "")
         throw Error("Missing fields");
-      const medRecord = await prisma.medicalRecord.create({
-        data: {
-          patientId: patientId,
-          diagnosis: diagnosis,
-          notes: notes,
-        },
-      });
-      res.status(200).json({ success: medRecord });
+
+      // Get the user ID from the session
+      const session = req.session as CustomSessionData;
+      const userId = Number(session.user?.id);
+
+      if (!userId || userId === undefined) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
+
+      if (userId !== undefined) {
+        const medRecord = await prisma.medicalRecord.create({
+          data: {
+            patientId: patientId,
+            diagnosis: diagnosis,
+            notes: notes,
+            userId: userId,
+          },
+        });
+      }
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "Missing fields")
@@ -81,7 +92,11 @@ class MedRecordController {
         where: {
           id: id,
         },
+        include: {
+          User: true, // Include the user who created the medical record
+        },
       });
+
       if (!medRecord) throw Error("Medical record not found");
       else res.status(200).json({ "Medical Record": medRecord });
     } catch (error) {
@@ -154,6 +169,7 @@ class MedRecordController {
               fullName: true, // Include the patient's full name
             },
           },
+          User: true, // Include the user who created the medical record
         },
       });
       res.status(200).json({ "Medical Records": records });

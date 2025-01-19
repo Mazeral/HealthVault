@@ -35,8 +35,8 @@ model Patient {
   medicalRecords MedicalRecord[] // Medical records for this patient
   prescriptions  Prescription[]  // Prescriptions for this patient
   labResults     LabResult[]     // Lab results for this patient
-  User           User?           @relation(fields: [userId], references: [id], onDelete: Cascade) // User who created this patient
-  userId         Int?
+  User           User            @relation(fields: [userId], references: [id], onDelete: Cascade) // User who created this patient
+  userId         Int             // Required field
 }
 
 model MedicalRecord {
@@ -48,8 +48,8 @@ model MedicalRecord {
   updatedAt DateTime @updatedAt
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this medical record
-  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this medical record
-  userId  Int?
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this medical record
+  userId  Int     // Required field
 }
 
 model Prescription {
@@ -61,8 +61,8 @@ model Prescription {
   prescribedAt DateTime @default(now())
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this prescription
-  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this prescription
-  userId  Int?
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this prescription
+  userId  Int     // Required field
 }
 
 model LabResult {
@@ -75,8 +75,8 @@ model LabResult {
   createdAt   DateTime @default(now())
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this lab result
-  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this lab result
-  userId  Int?
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this lab result
+  userId  Int     // Required field
 }
 
 enum Role {

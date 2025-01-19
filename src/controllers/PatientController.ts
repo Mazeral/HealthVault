@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import createObject from "../utils/utilFunctions";
+import { CustomSessionData } from "../types";
 
 class PatientController {
   // Creates a patient without health records
@@ -14,6 +15,12 @@ class PatientController {
     const address = String(req.body.address) || null;
     const sex = req.body.sex || null; // Add sex field
     const bloodGroup = req.body.bloodGroup || null;
+    const session = req.session as CustomSessionData;
+    const userId = Number(session.user?.id);
+
+    if (!userId) {
+      throw Error("Not authenticated");
+    }
 
     try {
       if (!fullName || fullName.trim() === "") {
@@ -33,6 +40,7 @@ class PatientController {
           address: address,
           sex: sex, // Include sex
           bloodGroup: bloodGroup,
+          userId: userId,
         },
       });
 
@@ -165,6 +173,12 @@ class PatientController {
       const patientId = Number(req.params.id) || null;
       const diagnosis = String(req.body.diagnosis);
       const notes = String(req.body.notes) || null;
+      const session = req.session as CustomSessionData;
+      const userId = Number(session.user?.id);
+
+      if (!userId) {
+        throw Error("Not authenticated");
+      }
 
       if (!patientId) throw new Error("No ID provided from addRecord");
 
@@ -180,11 +194,8 @@ class PatientController {
         data: {
           notes: notes,
           diagnosis: diagnosis,
-          patient: {
-            connect: {
-              id: patientId,
-            },
-          },
+          userId: userId,
+          patientId: patientId,
         },
       });
 

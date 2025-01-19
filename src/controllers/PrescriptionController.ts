@@ -12,12 +12,21 @@ class PrescriptionController {
         throw new Error("Missing required fields");
       }
 
+      // Get the user ID from the session
+      const session = req.session as CustomSessionData;
+      const userId = Number(session.user?.id);
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
+
       const prescription = await prisma.prescription.create({
         data: {
           patientId: Number(patientId),
           medication,
           dosage,
           instructions,
+          userId: userId,
         },
       });
 
@@ -42,6 +51,9 @@ class PrescriptionController {
 
       const prescription = await prisma.prescription.findUnique({
         where: { id },
+        include: {
+          User: true, // Include the user who created the prescription
+        },
       });
 
       if (!prescription) throw new Error("Prescription not found");
@@ -68,18 +80,14 @@ class PrescriptionController {
         include: {
           patient: {
             select: {
-              fullName: true, // Include only the fullName of the patient
+              fullName: true, // Include the patient's full name
             },
           },
+          User: true, // Include the user who created the prescription
         },
       });
 
-      // Transform the response to include patient fullName directly in each prescription
-      const transformedPrescriptions = prescriptions.map((prescription) => ({
-        ...prescription,
-      }));
-
-      res.status(200).json({ prescriptions: transformedPrescriptions });
+      res.status(200).json({ prescriptions });
     } catch (error) {
       if (error instanceof Error) {
         res.status(500).json({ error: error.message });
