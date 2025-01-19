@@ -36,8 +36,15 @@
           <template v-slot:item.notes="{ item }">
             {{ item.notes }}
           </template>
+          <template v-slot:item.patientFullName="{ item }">
+            {{ item.patient?.fullName || 'N/A' }}
+          </template>
           <template v-slot:item.createdAt="{ item }">
             {{ formatDate(item.createdAt) }}
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn @click="editMedicalRecord(item)" color="primary" small>Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
           </template>
         </v-data-table>
 
@@ -61,12 +68,78 @@
         <v-card-title>New Medical Record</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="createMedicalRecord">
-            <v-text-field v-model="newMedicalRecordData.diagnosis" label="Diagnosis" required></v-text-field>
-            <v-text-field v-model="newMedicalRecordData.notes" label="Notes"></v-text-field>
+            <!-- Diagnosis Field -->
+            <v-text-field
+              v-model="newMedicalRecordData.diagnosis"
+              label="Diagnosis"
+              required
+            ></v-text-field>
+
+            <!-- Notes Field -->
+            <v-text-field
+              v-model="newMedicalRecordData.notes"
+              label="Notes"
+            ></v-text-field>
+
+            <!-- Patient Full Name Field (Optional) -->
+            <v-text-field
+              v-model="newMedicalRecordData.patientFullName"
+              label="Patient Full Name (Optional)"
+            ></v-text-field>
+
+            <!-- Action Buttons -->
             <v-btn type="submit" color="primary">Create</v-btn>
             <v-btn @click="newMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
           </v-form>
         </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Edit Medical Record Dialog -->
+    <v-dialog v-model="editMedicalRecordDialog" max-width="500">
+      <v-card>
+        <v-card-title>Edit Medical Record</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="updateMedicalRecord">
+            <!-- Diagnosis Field -->
+            <v-text-field
+              v-model="editMedicalRecordData.diagnosis"
+              label="Diagnosis"
+              required
+            ></v-text-field>
+
+            <!-- Notes Field -->
+            <v-text-field
+              v-model="editMedicalRecordData.notes"
+              label="Notes"
+            ></v-text-field>
+
+            <!-- Patient Full Name Field (Optional) -->
+            <v-text-field
+              v-model="editMedicalRecordData.patientFullName"
+              label="Patient Full Name (Optional)"
+            ></v-text-field>
+
+            <!-- Action Buttons -->
+            <v-btn type="submit" color="primary">Update</v-btn>
+            <v-btn @click="editMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="400">
+      <v-card>
+        <v-card-title class="headline">Are you sure?</v-card-title>
+        <v-card-text>
+          You are about to delete the medical record for: <strong>{{ medicalRecordToDelete?.diagnosis }}</strong>. This action cannot be undone.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="secondary" @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn color="error" @click="deleteMedicalRecordConfirmed">Delete</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>
@@ -78,7 +151,22 @@ import api from '../utils/api';
 
 const medicalRecords = ref([]); // List of medical records
 const searchQuery = ref(''); // Search query
-const loading = ref(false); // Loading state
+const loading = ref(false); // Loading state for fetching records
+const loadingUpdate = ref(false); // Loading state for updating a record
+
+// Snackbar for feedback
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success',
+});
+
+// Show snackbar message
+const showSnackbar = (message, color = 'success') => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
+};
 
 // Pagination state
 const currentPage = ref(1);
@@ -89,7 +177,9 @@ const totalPages = computed(() => Math.ceil(filteredMedicalRecords.value.length 
 const headers = [
   { title: 'Diagnosis', value: 'diagnosis' },
   { title: 'Notes', value: 'notes' },
+  { title: 'Patient Name', value: 'patientFullName' }, // Add patient name column
   { title: 'Created At', value: 'createdAt' },
+  { title: 'Actions', value: 'actions', sortable: false }, // Add actions column
 ];
 
 // New medical record dialog state
@@ -99,14 +189,31 @@ const newMedicalRecordData = ref({
   notes: '',
 });
 
+// Edit medical record dialog state
+const editMedicalRecordDialog = ref(false);
+const editMedicalRecordData = ref({
+  id: null,
+  diagnosis: '',
+  notes: '',
+  patientId: null, // Ensure patientId is included
+});
+
+// Delete confirmation dialog state
+const deleteDialog = ref(false);
+const medicalRecordToDelete = ref(null); // Stores the medical record to be deleted
+
 // Fetch medical records for the authenticated user
 const fetchMedicalRecords = async () => {
   try {
     loading.value = true;
     const response = await api.get('/my-medical-records');
-    medicalRecords.value = response.data.medicalRecords;
+    medicalRecords.value = response.data.medicalRecords.map((record) => ({
+      ...record,
+      patient: record.patient || { fullName: 'N/A' }, // Ensure patient exists
+    }));
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
+    showSnackbar('Failed to fetch medical records', 'error');
   } finally {
     loading.value = false;
   }
@@ -149,15 +256,100 @@ const openNewMedicalRecordDialog = () => {
 // Create a new medical record
 const createMedicalRecord = async () => {
   try {
-    const response = await api.post('/medical-record/', newMedicalRecordData.value);
-    medicalRecords.value.push(response.data); // Add the new medical record to the list
-    newMedicalRecordDialog.value = false; // Close the dialog
-    newMedicalRecordData.value = { // Reset the form
+    const response = await api.post('/medical-record/', {
+      ...newMedicalRecordData.value,
+      patient: {
+        fullName: newMedicalRecordData.value.patientFullName || 'N/A', // Use the provided full name or default to 'N/A'
+      },
+    });
+
+    // Add the new medical record to the list
+    medicalRecords.value.push(response.data);
+
+    // Close the dialog and reset the form
+    newMedicalRecordDialog.value = false;
+    newMedicalRecordData.value = {
       diagnosis: '',
       notes: '',
+      patientFullName: '',
     };
+
+    // Show success message
+    showSnackbar('Medical record created successfully!', 'success');
   } catch (error) {
     console.error('Failed to create medical record:', error);
+    showSnackbar('Failed to create medical record', 'error');
+  }
+};
+
+// Open edit dialog with medical record data
+const editMedicalRecord = (medicalRecord) => {
+  editMedicalRecordData.value = {
+    ...medicalRecord,
+    patientFullName: medicalRecord.patient?.fullName || '', // Initialize with current full name
+  };
+  editMedicalRecordDialog.value = true;
+};
+
+// Update a medical record
+const updateMedicalRecord = async () => {
+  try {
+    loadingUpdate.value = true;
+
+    // Prepare the request body
+    const requestBody = {
+      ...editMedicalRecordData.value,
+      patient: {
+        ...editMedicalRecordData.value.patient,
+        fullName: editMedicalRecordData.value.patientFullName || editMedicalRecordData.value.patient?.fullName, // Use the new full name if provided, otherwise keep the existing one
+      },
+    };
+
+    // Send the update request
+    const response = await api.put(
+      `/medical-records/${editMedicalRecordData.value.id}`,
+      requestBody
+    );
+
+    // Update the medical record in the list
+    const updatedMedicalRecord = response.data.updated;
+    const index = medicalRecords.value.findIndex(
+      (record) => record.id === updatedMedicalRecord.id
+    );
+    if (index !== -1) {
+      medicalRecords.value[index] = updatedMedicalRecord;
+    }
+
+    // Show success message
+    showSnackbar('Medical record updated successfully!', 'success');
+
+    // Close the edit dialog
+    editMedicalRecordDialog.value = false;
+  } catch (error) {
+    console.error('Failed to update medical record:', error);
+    showSnackbar('Failed to update medical record. Please try again.', 'error');
+  } finally {
+    loadingUpdate.value = false;
+  }
+};
+
+// Open confirmation dialog for deletion
+const confirmDelete = (medicalRecord) => {
+  medicalRecordToDelete.value = medicalRecord;
+  deleteDialog.value = true;
+};
+
+// Delete a medical record after confirmation
+const deleteMedicalRecordConfirmed = async () => {
+  try {
+    await api.delete(`/medical-records/${medicalRecordToDelete.value.id}`);
+    fetchMedicalRecords(); // Refresh the list after deletion
+    showSnackbar('Medical record deleted successfully!', 'success');
+  } catch (error) {
+    console.error('Failed to delete medical record:', error);
+    showSnackbar('Failed to delete medical record', 'error');
+  } finally {
+    deleteDialog.value = false; // Close the dialog
   }
 };
 
