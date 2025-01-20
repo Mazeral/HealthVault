@@ -19,16 +19,16 @@ import { useAuthStore } from "../stores/auth";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: "/about",
-      name: "about",
-      component: () => import("../views/AboutView.vue"),
-    },
-    {
-      path: "/",
-      name: "home",
-      component: HomeView,
-    },
+    // {
+    //   path: "/about",
+    //   name: "about",
+    //   component: () => import("../views/AboutView.vue"),
+    // },
+    // {
+    //   path: "/",
+    //   name: "home",
+    //   component: HomeView,
+    // },
     {
       path: "/login",
       name: "login",
@@ -136,8 +136,8 @@ router.beforeEach((to, from, next) => {
   if (isAuthRequired && !authStore.isAuthenticated) {
     next({ name: "login" });
   } else if (to.meta.requiresAdmin && authStore.user?.role !== "ADMIN") {
-    // Redirect to home or another page if the user is not an ADMIN
-    next({ name: "home" });
+    // Redirect to dashboard if the user is not an ADMIN
+    next({ name: "dashboard" });
   } else {
     next();
   }
