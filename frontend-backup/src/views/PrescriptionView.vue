@@ -48,22 +48,54 @@
           </v-col>
         </v-row>
 
-        <!-- Dialog for editing a prescription -->
-        <v-dialog v-model="editDialog" max-width="500">
-          <v-card>
-            <v-card-title>Edit Prescription</v-card-title>
-            <v-card-text>
-              <v-form @submit.prevent="updatePrescription">
-                <v-text-field v-model="editPrescriptionData.patientId" label="Patient ID" type="number" required></v-text-field>
-                <v-text-field v-model="editPrescriptionData.medication" label="Medication" required></v-text-field>
-                <v-text-field v-model="editPrescriptionData.dosage" label="Dosage" required></v-text-field>
-                <v-textarea v-model="editPrescriptionData.instructions" label="Instructions"></v-textarea>
-                <v-btn type="submit" color="primary">Update</v-btn>
-                <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
-              </v-form>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
+		<!-- Dialog for editing a prescription -->
+		<v-dialog v-model="editDialog" max-width="500">
+		  <v-card>
+			<v-card-title>Edit Prescription</v-card-title>
+			<v-card-text>
+			  <v-form @submit.prevent="updatePrescription">
+				<!-- Patient Full Name Field -->
+				<v-text-field
+				  v-model="editPrescriptionData.patientFullName"
+				  label="Patient Full Name"
+				  required
+				></v-text-field>
+
+				<!-- Patient ID Field -->
+				<v-text-field
+				  v-model="editPrescriptionData.patientId"
+				  label="Patient ID"
+				  type="number"
+				  required
+				></v-text-field>
+
+				<!-- Medication Field -->
+				<v-text-field
+				  v-model="editPrescriptionData.medication"
+				  label="Medication"
+				  required
+				></v-text-field>
+
+				<!-- Dosage Field -->
+				<v-text-field
+				  v-model="editPrescriptionData.dosage"
+				  label="Dosage"
+				  required
+				></v-text-field>
+
+				<!-- Instructions Field -->
+				<v-textarea
+				  v-model="editPrescriptionData.instructions"
+				  label="Instructions"
+				></v-textarea>
+
+				<!-- Action Buttons -->
+				<v-btn type="submit" color="primary">Update</v-btn>
+				<v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
+			  </v-form>
+			</v-card-text>
+		  </v-card>
+		</v-dialog>
 
         <!-- Confirmation Dialog for Deletion -->
         <v-dialog v-model="deleteDialog" max-width="400">
@@ -87,7 +119,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import api from "../utils/api"
+import api from "../utils/api";
 
 const router = useRouter();
 
@@ -95,6 +127,7 @@ const router = useRouter();
 const editPrescriptionData = ref({
   id: null,
   patientId: null,
+  patientFullName: '', // Add patientFullName field
   medication: '',
   dosage: '',
   instructions: '',
@@ -171,18 +204,36 @@ const handlePageChange = (page) => {
 
 // Open edit dialog with prescription data
 const editPrescription = (prescription) => {
-  editPrescriptionData.value = { ...prescription };
+  editPrescriptionData.value = {
+    ...prescription,
+    patientFullName: prescription.patient.fullName || '', // Initialize patientFullName
+  };
   editDialog.value = true;
 };
 
 // Update a prescription
 const updatePrescription = async () => {
   try {
-    const response = await api.put(`/prescriptions/${editPrescriptionData.value.id}`, editPrescriptionData.value);
-    const index = prescriptions.value.findIndex((p) => p.id === editPrescriptionData.value.id);
+    // Prepare the payload
+    const payload = {
+      ...editPrescriptionData.value,
+      patientFullName: editPrescriptionData.value.patientFullName, // Include patientFullName in the payload
+    };
+
+    const response = await api.put(`/prescriptions/${editPrescriptionData.value.id}`, payload);
+    const updatedPrescription = response.data.updated;
+
+    // Find the index of the updated prescription in the prescriptions array
+    const index = prescriptions.value.findIndex((p) => p.id === updatedPrescription.id);
+
     if (index !== -1) {
-      prescriptions.value[index] = response.data.updated;
+      // Update the prescription in the array
+      prescriptions.value[index] = {
+        ...updatedPrescription,
+        patientFullName: updatedPrescription.patient?.fullName || "Unknown", // Ensure patientFullName is preserved
+      };
     }
+
     editDialog.value = false;
   } catch (error) {
     console.error('Failed to update prescription:', error);
@@ -217,4 +268,19 @@ const navigateToNewPrescription = () => {
 .v-table {
   margin-top: 20px;
 }
+
+/* Ensure the container and card have a white background */
+.v-container {
+  background-color: white;
+}
+
+.v-card {
+  background-color: white;
+}
+
+/* Ensure the table has a white background */
+.v-data-table {
+  background-color: white;
+}
+
 </style>

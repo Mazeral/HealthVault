@@ -146,7 +146,13 @@ class PrescriptionController {
         },
       });
 
-      res.status(200).json({ updated: updatedPrescription });
+      // Add the patientFullName field to the response
+      const response = {
+        ...updatedPrescription,
+        patientFullName: updatedPrescription.patient?.fullName || "Unknown",
+      };
+
+      res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
         if (

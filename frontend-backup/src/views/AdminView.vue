@@ -29,19 +29,48 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="doctor in filteredDoctors" :key="doctor.id">
+            <tr
+              v-for="doctor in filteredDoctors"
+              :key="doctor.id"
+              @click="showDoctorDetails(doctor)"
+            >
               <td>{{ doctor.id }}</td>
               <td>{{ doctor.name }}</td>
               <td>{{ doctor.email }}</td>
               <td>{{ doctor.role }}</td>
               <td>{{ formatDate(doctor.createdAt) }}</td>
               <td>
-                <v-btn @click="editDoctor(doctor)" color="warning">Edit</v-btn>
-                <v-btn @click="confirmDelete(doctor)" color="error">Delete</v-btn>
+                <v-btn @click.stop="editDoctor(doctor)" color="warning">Edit</v-btn>
+                <v-btn @click.stop="confirmDelete(doctor)" color="error">Delete</v-btn>
               </td>
             </tr>
           </tbody>
         </v-table>
+
+        <!-- Doctor Details Dialog -->
+        <v-dialog v-model="doctorDetailsDialog" max-width="800">
+          <v-card>
+            <v-card-title>Doctor Details</v-card-title>
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <h3>Name: {{ selectedDoctor?.name }}</h3>
+                  <h3>Email: {{ selectedDoctor?.email }}</h3>
+                  <h3>Role: {{ selectedDoctor?.role }}</h3>
+                  <h3>Created At: {{ formatDate(selectedDoctor?.createdAt) }}</h3>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <!-- Graph Component -->
+                  <DoctorGraph :data="graphData" />
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn @click="doctorDetailsDialog = false" color="secondary">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
 
         <!-- Edit Dialog -->
         <v-dialog v-model="editDialog" max-width="500">
@@ -80,6 +109,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '../utils/api';
+import DoctorGraph from '../components/DoctorGraph.vue'; // Import the graph component
 
 // List of all DOCTOR users
 const doctors = ref([]);
@@ -98,6 +128,20 @@ const editDoctorData = ref({
 // Confirmation dialog state for deletion
 const deleteDialog = ref(false);
 const doctorToDelete = ref(null);
+
+// Doctor details dialog state
+const doctorDetailsDialog = ref(false);
+const selectedDoctor = ref(null);
+const graphData = ref({
+  labels: ['Patients', 'Medical Records', 'Prescriptions', 'Lab Results'],
+  datasets: [
+    {
+      label: 'Count',
+      data: [0, 0, 0, 0], // Default data (all zeros)
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+    },
+  ],
+});
 
 // Fetch all DOCTOR users on component mount
 onMounted(() => {
@@ -169,6 +213,30 @@ const deleteDoctorConfirmed = async () => {
   }
 };
 
+// Show doctor details and fetch data for the graph
+const showDoctorDetails = async (doctor) => {
+  try {
+    selectedDoctor.value = doctor;
+
+    // Fetch detailed data for the selected doctor
+    const response = await api.get(`/users/doctors/${doctor.id}/details`);
+    const { patients, medicalRecords, prescriptions, labResults } = response.data;
+
+    // Update graph data
+    graphData.value.datasets[0].data = [
+      patients.length,
+      medicalRecords.length,
+      prescriptions.length,
+      labResults.length,
+    ];
+
+    // Open the dialog
+    doctorDetailsDialog.value = true;
+  } catch (error) {
+    console.error('Failed to fetch doctor details:', error);
+  }
+};
+
 // Format date to dd/mm/yyyy
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -182,5 +250,16 @@ const formatDate = (dateString) => {
 <style scoped>
 .v-table {
   margin-top: 20px;
+}
+
+/* Add hover effect to table rows */
+.v-table tbody tr:hover {
+  background-color: #f5f5f5; /* Light gray background on hover */
+  cursor: pointer; /* Change cursor to pointer to indicate clickability */
+}
+
+/* Optional: Add a transition for smoother hover effect */
+.v-table tbody tr {
+  transition: background-color 0.2s ease;
 }
 </style>

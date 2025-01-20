@@ -299,6 +299,43 @@ class UserController {
       }
     }
   }
+  // Fetch detailed data for a specific doctor
+  static async getDoctorDetails(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      if (!id) throw new Error("No ID provided");
+
+      const doctor = await prisma.user.findUnique({
+        where: { id: Number(id), role: "DOCTOR" },
+        include: {
+          patients: true,
+          medicalRecords: true,
+          prescriptions: true,
+          labResults: true,
+        },
+      });
+
+      if (!doctor) throw new Error("Doctor not found");
+
+      res.status(200).json({
+        patients: doctor.patients,
+        medicalRecords: doctor.medicalRecords,
+        prescriptions: doctor.prescriptions,
+        labResults: doctor.labResults,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "No ID provided") {
+          res.status(400).json({ error: error.message });
+        } else if (error.message === "Doctor not found") {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    }
+  }
 }
 
 export default UserController;

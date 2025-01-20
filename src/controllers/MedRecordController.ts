@@ -98,7 +98,13 @@ class MedRecordController {
         include: { patient: true }, // Include the patient relationship
       });
 
-      res.status(200).json({ updated: updatedRecord });
+      // Add the patientFullName field to the response
+      const response = {
+        ...updatedRecord,
+        patientFullName: updatedRecord.patient?.fullName || "Unknown",
+      };
+
+      res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
         if (

@@ -70,11 +70,20 @@ class PatientController {
         where: {
           id: id,
         },
+        include: {
+          User: true, // Include the User relation
+        },
       });
 
       if (!patient) throw new Error("No patient found");
 
-      res.status(200).json({ patient: patient });
+      // Add the creator's name to the response
+      const response = {
+        ...patient,
+        createdBy: patient.User?.name || "Unknown",
+      };
+
+      res.status(200).json({ patient: response });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "No ID provided from getPatient") {
@@ -99,6 +108,9 @@ class PatientController {
         where: {
           id: id,
         },
+        include: {
+          User: true, // Include the User relation
+        },
       });
 
       if (!patient) throw new Error("No patient found");
@@ -116,14 +128,23 @@ class PatientController {
         userId: Number(req.body.userId),
       });
 
-      const result = await prisma.patient.update({
+      const updatedPatient = await prisma.patient.update({
         where: {
           id: id,
         },
         data: data,
+        include: {
+          User: true, // Include the User relation
+        },
       });
 
-      res.status(200).json({ updated: result });
+      // Add the createdBy field to the response
+      const response = {
+        ...updatedPatient,
+        createdBy: updatedPatient.User?.name || "Unknown",
+      };
+
+      res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "No ID provided from updatePatient") {
@@ -140,8 +161,19 @@ class PatientController {
   // Gets all patients
   static async getPatients(req: Request, res: Response) {
     try {
-      const data = await prisma.patient.findMany();
-      res.status(200).json({ data: data });
+      const patients = await prisma.patient.findMany({
+        include: {
+          User: true, // Include the User relation
+        },
+      });
+
+      // Add the creator's name to each patient
+      const response = patients.map((patient) => ({
+        ...patient,
+        createdBy: patient.User?.name || "Unknown",
+      }));
+
+      res.status(200).json({ data: response });
     } catch (error) {
       if (error instanceof Error) {
         res.status(500).json({ error: error.message });
@@ -160,8 +192,18 @@ class PatientController {
             contains: name,
           },
         },
+        include: {
+          User: true, // Include the User relation
+        },
       });
-      res.json({ patients });
+
+      // Add the creator's name to each patient
+      const response = patients.map((patient) => ({
+        ...patient,
+        createdBy: patient.User?.name || "Unknown",
+      }));
+
+      res.json({ patients: response });
     } catch (error) {
       res.status(500).json({ error: "Failed to search patients" });
     }

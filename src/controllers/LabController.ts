@@ -164,15 +164,24 @@ class LabController {
         performedAt: performedAt ? new Date(performedAt) : undefined, // Convert to Date object
       });
 
-      // Update the lab result
+      // Update the lab result and include the patient relation
       const updatedResult = await prisma.labResult.update({
         where: {
           id: labResultId, // Use the lab result ID
         },
         data,
+        include: {
+          patient: true, // Include the patient relation
+        },
       });
 
-      res.status(200).json({ updated: updatedResult });
+      // Add the patientFullName field to the response
+      const response = {
+        ...updatedResult,
+        patientFullName: updatedResult.patient?.fullName || "Unknown",
+      };
+
+      res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "Lab test ID not provided") {

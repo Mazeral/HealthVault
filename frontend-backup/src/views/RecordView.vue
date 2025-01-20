@@ -50,38 +50,63 @@
             ></v-pagination>
           </v-col>
         </v-row>
+      </v-card-text> <!-- Close v-card-text here -->
 
-        <!-- Dialog for editing a medical record -->
-        <v-dialog v-model="editDialog" max-width="500">
-          <v-card>
-            <v-card-title>Edit Medical Record</v-card-title>
-            <v-card-text>
-              <v-form @submit.prevent="updateMedicalRecord">
-                <v-text-field v-model="editRecordData.patientId" label="Patient ID" required></v-text-field>
-                <v-text-field v-model="editRecordData.diagnosis" label="Diagnosis" required></v-text-field>
-                <v-textarea v-model="editRecordData.notes" label="Notes"></v-textarea>
-                <v-btn type="submit" color="primary">Update</v-btn>
-                <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
-              </v-form>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
+      <!-- Dialog for editing a medical record -->
+      <v-dialog v-model="editDialog" max-width="500">
+        <v-card>
+          <v-card-title>Edit Medical Record</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="updateMedicalRecord">
+              <!-- Patient Full Name Field -->
+              <v-text-field
+                v-model="editRecordData.patientFullName"
+                label="Patient Full Name"
+                required
+              ></v-text-field>
 
-        <!-- Confirmation Dialog for Deletion -->
-        <v-dialog v-model="deleteDialog" max-width="400">
-          <v-card>
-            <v-card-title class="headline">Are you sure?</v-card-title>
-            <v-card-text>
-              You are about to delete the medical record for patient: <strong>{{ recordToDelete?.patientFullName }}</strong>. This action cannot be undone.
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="secondary" @click="deleteDialog = false">Cancel</v-btn>
-              <v-btn color="error" @click="deleteMedicalRecordConfirmed">Delete</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-card-text>
+              <!-- Patient ID Field -->
+              <v-text-field
+                v-model="editRecordData.patientId"
+                label="Patient ID"
+                required
+              ></v-text-field>
+
+              <!-- Diagnosis Field -->
+              <v-text-field
+                v-model="editRecordData.diagnosis"
+                label="Diagnosis"
+                required
+              ></v-text-field>
+
+              <!-- Notes Field -->
+              <v-textarea
+                v-model="editRecordData.notes"
+                label="Notes"
+              ></v-textarea>
+
+              <!-- Action Buttons -->
+              <v-btn type="submit" color="primary">Update</v-btn>
+              <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <!-- Confirmation Dialog for Deletion -->
+      <v-dialog v-model="deleteDialog" max-width="400">
+        <v-card>
+          <v-card-title class="headline">Are you sure?</v-card-title>
+          <v-card-text>
+            You are about to delete the medical record for patient: <strong>{{ recordToDelete?.patientFullName }}</strong>. This action cannot be undone.
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="deleteDialog = false">Cancel</v-btn>
+            <v-btn color="error" @click="deleteMedicalRecordConfirmed">Delete</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-card>
   </v-container>
 </template>
@@ -97,6 +122,7 @@ const router = useRouter();
 const editRecordData = ref({
   id: null,
   patientId: null,
+  patientFullName: '', // Add patientFullName field
   diagnosis: '',
   notes: '',
 });
@@ -175,19 +201,36 @@ const handlePageChange = (page) => {
 
 // Open edit dialog with medical record data
 const editMedicalRecord = (record) => {
-  editRecordData.value = { ...record };
+  editRecordData.value = {
+    ...record,
+    patientFullName: record.patientFullName || '', // Initialize patientFullName
+  };
   editDialog.value = true;
 };
 
 // Update a medical record
 const updateMedicalRecord = async () => {
   try {
-    const response = await api.put(`/medical-records/${editRecordData.value.id}`, editRecordData.value);
+    // Prepare the payload
+    const payload = {
+      ...editRecordData.value,
+      patientFullName: editRecordData.value.patientFullName, // Include patientFullName in the payload
+    };
+
+    const response = await api.put(`/medical-records/${editRecordData.value.id}`, payload);
     const updatedRecord = response.data.updated;
+
+    // Find the index of the updated medical record in the medicalRecords array
     const index = medicalRecords.value.findIndex((record) => record.id === updatedRecord.id);
+
     if (index !== -1) {
-      medicalRecords.value[index] = updatedRecord;
+      // Update the medical record in the array
+      medicalRecords.value[index] = {
+        ...updatedRecord,
+        patientFullName: updatedRecord.patientFullName || "Unknown", // Ensure patientFullName is preserved
+      };
     }
+
     editDialog.value = false;
   } catch (error) {
     console.error('Failed to update medical record:', error);
@@ -221,5 +264,18 @@ const navigateToNewMedicalRecord = () => {
 <style scoped>
 .v-table {
   margin-top: 20px;
+}
+/* Ensure the container and card have a white background */
+.v-container {
+  background-color: white;
+}
+
+.v-card {
+  background-color: white;
+}
+
+/* Ensure the table has a white background */
+.v-data-table {
+  background-color: white;
 }
 </style>

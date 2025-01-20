@@ -57,4 +57,9 @@ userRouter.get(
   authMiddleware as express.RequestHandler,
   UserController.getMyPatients,
 );
+userRouter.get(
+  "/users/doctors/:id/details",
+  authMiddleware as express.RequestHandler,
+  UserController.getDoctorDetails,
+);
 export default userRouter;

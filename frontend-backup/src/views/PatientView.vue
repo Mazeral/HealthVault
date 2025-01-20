@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container style="overflow: auto;">
     <!-- Statistics Section -->
     <v-row>
       <v-col cols="12" md="4">
@@ -101,6 +101,15 @@
       </template>
       <template v-slot:item.createdAt="{ item }">
         {{ formatDate(item.createdAt) }}
+      </template>
+      <template v-slot:item.phone="{ item }">
+        {{ item.phone || 'N/A' }}
+      </template>
+      <template v-slot:item.address="{ item }">
+        {{ item.address || 'N/A' }}
+      </template>
+      <template v-slot:item.createdBy="{ item }">
+        {{ item.createdBy || 'N/A' }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn @click="editPatient(item)" color="primary" small>Edit</v-btn>
@@ -234,6 +243,9 @@ const headers = [
   { title: 'Date of Birth', value: 'dateOfBirth' },
   { title: 'Age', value: 'age' },
   { title: 'Created At', value: 'createdAt' },
+  { title: 'Phone', value: 'phone' },
+  { title: 'Address', value: 'address' },
+  { title: 'Created By', value: 'createdBy' },
   { title: 'Actions', value: 'actions', sortable: false },
 ];
 
@@ -361,10 +373,18 @@ const updatePatient = async () => {
   try {
     const response = await api.put(`/patients/${editPatientData.value.id}`, editPatientData.value);
     const updatedPatient = response.data.updated;
+
+    // Find the index of the updated patient in the patients array
     const index = patients.value.findIndex((p) => p.id === updatedPatient.id);
+
     if (index !== -1) {
-      patients.value[index] = updatedPatient;
+      // Update the patient in the array
+      patients.value[index] = {
+        ...updatedPatient,
+        createdBy: updatedPatient.createdBy || "Unknown", // Ensure createdBy is preserved
+      };
     }
+
     editDialog.value = false; // Close the dialog
   } catch (error) {
     console.error('Failed to update patient:', error);
@@ -395,3 +415,13 @@ onMounted(() => {
   fetchStatistics();
 });
 </script>
+
+<style scoped>
+.v-container {
+  background-color: white; /* Set a background color */
+}
+
+.v-data-table {
+  background-color: white; /* Set a background color */
+}
+</style>

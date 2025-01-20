@@ -385,3 +385,24 @@ onMounted(() => {
   fetchPrescriptions();
 });
 </script>
+
+<style scoped>
+.v-table {
+  margin-top: 20px;
+}
+
+/* Ensure the container and card have a white background */
+.v-container {
+  background-color: white;
+}
+
+.v-card {
+  background-color: white;
+}
+
+/* Ensure the table has a white background */
+.v-data-table {
+  background-color: white;
+}
+
+</style>

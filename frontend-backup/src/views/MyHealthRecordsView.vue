@@ -1,13 +1,13 @@
 <template>
- <v-container>
+  <v-container>
     <v-card>
       <v-card-title>My Health Records</v-card-title>
-	  <!-- Add a medical record button -->
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
-          </v-col>
-        </v-row>
+      <!-- Add a medical record button -->
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
+        </v-col>
+      </v-row>
       <v-card-text>
         <!-- Search Bar -->
         <v-row class="mt-4">
@@ -31,34 +31,33 @@
           </v-col>
         </v-row>
 
-
         <!-- Medical Records Table -->
-		<v-data-table
-		  :headers="headers"
-		  :items="medicalRecords"
-		  :items-per-page="itemsPerPage"
-		  :page.sync="currentPage"
-		  :loading="loading"
-		  loading-text="Loading... Please wait"
-		  hide-default-footer
-		>
-		<template v-slot:item.diagnosis="{ item }">
-		  {{ item.diagnosis || 'N/A' }}
-		</template>
-		<template v-slot:item.notes="{ item }">
-		  {{ item.notes || 'N/A' }}
-		</template>
-		<template v-slot:item.patientFullName="{ item }">
-		  {{ item.patientFullName || 'N/A' }}
-		</template>
-		<template v-slot:item.createdAt="{ item }">
-		  {{ formatDate(item.createdAt) }}
-		</template>
-		  <template v-slot:item.actions="{ item }">
-			<v-btn @click="editMedicalRecord(item)" color="primary" small>Edit</v-btn>
-			<v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
-		  </template>
-		</v-data-table>
+        <v-data-table
+          :headers="headers"
+          :items="medicalRecords"
+          :items-per-page="itemsPerPage"
+          :page.sync="currentPage"
+          :loading="loading"
+          loading-text="Loading... Please wait"
+          hide-default-footer
+        >
+          <template v-slot:item.diagnosis="{ item }">
+            {{ item.diagnosis || 'N/A' }}
+          </template>
+          <template v-slot:item.notes="{ item }">
+            {{ item.notes || 'N/A' }}
+          </template>
+          <template v-slot:item.patientFullName="{ item }">
+            {{ item.patientFullName || 'N/A' }}
+          </template>
+          <template v-slot:item.createdAt="{ item }">
+            {{ formatDate(item.createdAt) }}
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn @click="editMedicalRecord(item)" color="primary" small>Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+          </template>
+        </v-data-table>
 
         <!-- Pagination Controls -->
         <v-row class="mt-4">
@@ -80,7 +79,6 @@
         <v-card-title>New Medical Record</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="createMedicalRecord">
-
             <!-- Patient Full Name Field (Optional) -->
             <v-text-field
               v-model="newMedicalRecordData.patientFullName"
@@ -100,7 +98,6 @@
               label="Notes"
             ></v-text-field>
 
-
             <!-- Action Buttons -->
             <v-btn type="submit" color="primary">Create</v-btn>
             <v-btn @click="newMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
@@ -115,6 +112,13 @@
         <v-card-title>Edit Medical Record</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="updateMedicalRecord">
+            <!-- Patient Full Name Field (Non-Optional) -->
+            <v-text-field
+              v-model="editMedicalRecordData.patientFullName"
+              label="Patient Full Name"
+              required
+            ></v-text-field>
+
             <!-- Diagnosis Field -->
             <v-text-field
               v-model="editMedicalRecordData.diagnosis"
@@ -126,12 +130,6 @@
             <v-text-field
               v-model="editMedicalRecordData.notes"
               label="Notes"
-            ></v-text-field>
-
-            <!-- Patient Full Name Field (Optional) -->
-            <v-text-field
-              v-model="editMedicalRecordData.patientFullName"
-              label="Patient Full Name (Optional)"
             ></v-text-field>
 
             <!-- Action Buttons -->
@@ -168,7 +166,6 @@ const searchQuery = ref(''); // Search query for diagnosis
 const patientSearchQuery = ref(''); // Search query for patient name
 const loading = ref(false); // Loading state for fetching records
 const loadingUpdate = ref(false); // Loading state for updating a record
-const tableKey = ref(0); // Add this ref for forcing re-render
 
 // Snackbar for feedback
 const snackbar = ref({
@@ -193,9 +190,9 @@ const totalPages = computed(() => Math.ceil(filteredMedicalRecords.value.length 
 const headers = [
   { title: 'Diagnosis', value: 'diagnosis' },
   { title: 'Notes', value: 'notes' },
-  { title: 'Patient Name', value: 'patientFullName' }, // Add patient name column
+  { title: 'Patient Name', value: 'patientFullName' },
   { title: 'Created At', value: 'createdAt' },
-  { title: 'Actions', value: 'actions', sortable: false }, // Add actions column
+  { title: 'Actions', value: 'actions', sortable: false },
 ];
 
 // New medical record dialog state
@@ -203,7 +200,7 @@ const newMedicalRecordDialog = ref(false);
 const newMedicalRecordData = ref({
   diagnosis: '',
   notes: '',
-  patientFullName: '', // Ensure this field is included
+  patientFullName: '',
 });
 
 // Edit medical record dialog state
@@ -212,7 +209,7 @@ const editMedicalRecordData = ref({
   id: null,
   diagnosis: '',
   notes: '',
-  patientId: null, // Ensure patientId is included
+  patientFullName: '', // Ensure this field is included
 });
 
 // Delete confirmation dialog state
@@ -356,8 +353,10 @@ const createMedicalRecord = async () => {
 // Open edit dialog with medical record data
 const editMedicalRecord = (medicalRecord) => {
   editMedicalRecordData.value = {
-    ...medicalRecord,
-    patientFullName: medicalRecord.patient?.fullName || '', // Initialize with current full name
+    id: medicalRecord.id,
+    diagnosis: medicalRecord.diagnosis,
+    notes: medicalRecord.notes,
+    patientFullName: medicalRecord.patientFullName || '', // Pre-fill with current patient name
   };
   editMedicalRecordDialog.value = true;
 };
@@ -371,8 +370,7 @@ const updateMedicalRecord = async () => {
     const requestBody = {
       ...editMedicalRecordData.value,
       patient: {
-        ...editMedicalRecordData.value.patient,
-        fullName: editMedicalRecordData.value.patientFullName || editMedicalRecordData.value.patient?.fullName, // Use the new full name if provided, otherwise keep the existing one
+        fullName: editMedicalRecordData.value.patientFullName,
       },
     };
 
@@ -384,11 +382,22 @@ const updateMedicalRecord = async () => {
 
     // Update the medical record in the list
     const updatedMedicalRecord = response.data.updated;
+
+    // Find the index of the updated record in the medicalRecords array
     const index = medicalRecords.value.findIndex(
       (record) => record.id === updatedMedicalRecord.id
     );
+
     if (index !== -1) {
-      medicalRecords.value[index] = updatedMedicalRecord;
+      // Preserve the patientFullName from the existing record
+      const existingRecord = medicalRecords.value[index];
+      updatedMedicalRecord.patientFullName = existingRecord.patientFullName;
+
+      // Update the record in the array
+      medicalRecords.value[index] = {
+        ...updatedMedicalRecord,
+        patientFullName: existingRecord.patientFullName, // Ensure patientFullName is preserved
+      };
     }
 
     // Show success message
@@ -429,3 +438,23 @@ onMounted(() => {
   fetchMedicalRecords();
 });
 </script>
+
+<style scoped>
+.v-table {
+  margin-top: 20px;
+}
+
+/* Ensure the container and card have a white background */
+.v-container {
+  background-color: white;
+}
+
+.v-card {
+  background-color: white;
+}
+
+/* Ensure the table has a white background */
+.v-data-table {
+  background-color: white;
+}
+</style>

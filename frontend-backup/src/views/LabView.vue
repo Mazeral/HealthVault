@@ -205,10 +205,18 @@ const updateLabResult = async () => {
 
     const response = await api.put(`/lab-results/${editLabResultData.value.id}`, payload);
     const updatedResult = response.data.updated;
+
+    // Find the index of the updated lab result in the labResults array
     const index = labResults.value.findIndex((result) => result.id === updatedResult.id);
+
     if (index !== -1) {
-      labResults.value[index] = updatedResult;
+      // Update the lab result in the array
+      labResults.value[index] = {
+        ...updatedResult,
+        patientFullName: updatedResult.patientFullName || "Unknown", // Ensure patientFullName is preserved
+      };
     }
+
     editDialog.value = false;
   } catch (error) {
     console.error('Failed to update lab result:', error);
@@ -243,4 +251,19 @@ const navigateToNewLabResult = () => {
 .v-table {
   margin-top: 20px;
 }
+
+/* Ensure the container and card have a white background */
+.v-container {
+  background-color: white;
+}
+
+.v-card {
+  background-color: white;
+}
+
+/* Ensure the table has a white background */
+.v-data-table {
+  background-color: white;
+}
+
 </style>
