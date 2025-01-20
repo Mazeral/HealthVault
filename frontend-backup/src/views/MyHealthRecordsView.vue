@@ -33,32 +33,32 @@
 
 
         <!-- Medical Records Table -->
-        <v-data-table
-          :headers="headers"
-          :items="filteredMedicalRecords"
-          :items-per-page="itemsPerPage"
-          :page.sync="currentPage"
-          :loading="loading"
-          loading-text="Loading... Please wait"
-          hide-default-footer
-        >
-          <template v-slot:item.diagnosis="{ item }">
-            {{ item.diagnosis }}
-          </template>
-          <template v-slot:item.notes="{ item }">
-            {{ item.notes }}
-          </template>
-          <template v-slot:item.patientFullName="{ item }">
-            {{ item.patient?.fullName || 'N/A' }}
-          </template>
-          <template v-slot:item.createdAt="{ item }">
-            {{ formatDate(item.createdAt) }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn @click="editMedicalRecord(item)" color="primary" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
-          </template>
-        </v-data-table>
+		<v-data-table
+		  :headers="headers"
+		  :items="medicalRecords"
+		  :items-per-page="itemsPerPage"
+		  :page.sync="currentPage"
+		  :loading="loading"
+		  loading-text="Loading... Please wait"
+		  hide-default-footer
+		>
+		<template v-slot:item.diagnosis="{ item }">
+		  {{ item.diagnosis || 'N/A' }}
+		</template>
+		<template v-slot:item.notes="{ item }">
+		  {{ item.notes || 'N/A' }}
+		</template>
+		<template v-slot:item.patientFullName="{ item }">
+		  {{ item.patientFullName || 'N/A' }}
+		</template>
+		<template v-slot:item.createdAt="{ item }">
+		  {{ formatDate(item.createdAt) }}
+		</template>
+		  <template v-slot:item.actions="{ item }">
+			<v-btn @click="editMedicalRecord(item)" color="primary" small>Edit</v-btn>
+			<v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+		  </template>
+		</v-data-table>
 
         <!-- Pagination Controls -->
         <v-row class="mt-4">
@@ -168,6 +168,7 @@ const searchQuery = ref(''); // Search query for diagnosis
 const patientSearchQuery = ref(''); // Search query for patient name
 const loading = ref(false); // Loading state for fetching records
 const loadingUpdate = ref(false); // Loading state for updating a record
+const tableKey = ref(0); // Add this ref for forcing re-render
 
 // Snackbar for feedback
 const snackbar = ref({
@@ -223,10 +224,17 @@ const fetchMedicalRecords = async () => {
   try {
     loading.value = true;
     const response = await api.get('/my-medical-records');
+
+    // Transform the data to match the table structure
     medicalRecords.value = response.data.medicalRecords.map((record) => ({
-      ...record,
-      patient: record.patient || { fullName: 'N/A' }, // Ensure patient exists
+      id: record.id,
+      diagnosis: record.diagnosis,
+      notes: record.notes,
+      patientFullName: record.patient?.fullName || 'N/A', // Extract patient full name
+      createdAt: record.createdAt,
     }));
+
+    console.log("Fetched and transformed medicalRecords:", medicalRecords.value); // Debugging
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
     showSnackbar('Failed to fetch medical records', 'error');
@@ -286,7 +294,7 @@ const openNewMedicalRecordDialog = () => {
 // Create a new medical record
 const createMedicalRecord = async () => {
   try {
-    console.log("Starting createMedicalRecord method"); // Debugging: Log method start
+    console.log("Starting createMedicalRecord method");
 
     // Log the data being sent to the API
     console.log("Data being sent to API:", {
@@ -299,40 +307,46 @@ const createMedicalRecord = async () => {
     const response = await api.post('/medical-record/', {
       ...newMedicalRecordData.value,
       patient: {
-        fullName: newMedicalRecordData.value.patientFullName || 'N/A', // Use the provided full name or default to 'N/A'
+        fullName: newMedicalRecordData.value.patientFullName || 'N/A',
       },
     });
 
     console.log("API Response:", response.data); // Debugging: Log the response
 
-    // Log before adding the new record to the list
-    console.log("Before adding new record to medicalRecords:", medicalRecords.value);
+    // Flatten the new record
+    const newRecord = {
+      id: response.data.id,
+      diagnosis: response.data.diagnosis || newMedicalRecordData.value.diagnosis,
+      notes: response.data.notes || newMedicalRecordData.value.notes,
+      patientFullName: response.data.patient?.fullName || newMedicalRecordData.value.patientFullName || 'N/A',
+      createdAt: response.data.createdAt || new Date().toISOString(),
+    };
+
+    console.log("New Record to Add:", newRecord); // Debugging: Log the new record
+
+    // Log the medicalRecords array BEFORE insertion
+    console.log("medicalRecords BEFORE insertion:", medicalRecords.value);
 
     // Add the new medical record to the list
-    medicalRecords.value.unshift({
-      ...response.data,
-      patient: response.data.patient || { fullName: 'N/A' }, // Ensure patient exists
-    });
+    medicalRecords.value.unshift(newRecord); // Add to the beginning of the array
 
-    // Log after adding the new record to the list
-    console.log("After adding new record to medicalRecords:", medicalRecords.value);
+    // Log the medicalRecords array AFTER insertion
+    console.log("medicalRecords AFTER insertion:", medicalRecords.value);
 
     // Close the dialog and reset the form
     newMedicalRecordDialog.value = false;
-    console.log("Dialog closed"); // Debugging: Verify dialog closure
+    console.log("Dialog closed");
 
     newMedicalRecordData.value = {
       diagnosis: '',
       notes: '',
       patientFullName: '',
     };
-
-    // Log after resetting the form
-    console.log("Form reset:", newMedicalRecordData.value);
+    console.log("Form reset"); // Debugging: Log the form reset
 
     // Show success message
     showSnackbar('Medical record created successfully!', 'success');
-    console.log("Snackbar shown"); // Debugging: Verify snackbar display
+    console.log("Snackbar shown");
   } catch (error) {
     console.error('Failed to create medical record:', error);
     showSnackbar('Failed to create medical record', 'error');
@@ -381,7 +395,6 @@ const updateMedicalRecord = async () => {
     showSnackbar('Medical record updated successfully!', 'success');
 
     // Close the edit dialog
-
     editMedicalRecordDialog.value = false;
   } catch (error) {
     console.error('Failed to update medical record:', error);
