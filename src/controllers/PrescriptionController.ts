@@ -6,9 +6,9 @@ class PrescriptionController {
   // Create a new prescription
   static async newPrescription(req: Request, res: Response) {
     try {
-      const { patientId, medication, dosage, instructions } = req.body;
+      const { patientFullName, medication, dosage, instructions } = req.body;
 
-      if (!patientId || !medication || !dosage) {
+      if (!patientFullName || !medication || !dosage) {
         throw new Error("Missing required fields");
       }
 
@@ -20,13 +20,26 @@ class PrescriptionController {
         throw new Error("Unauthorized: No user ID found in session");
       }
 
+      // Create or find the patient
+      let patient = await prisma.patient.findFirst({
+        where: { fullName: patientFullName, userId },
+      });
+
+      if (!patient) {
+        throw Error("No patient found");
+      }
+
+      // Create the prescription
       const prescription = await prisma.prescription.create({
         data: {
-          patientId: Number(patientId),
+          patientId: patient.id,
           medication,
           dosage,
           instructions,
-          userId: userId,
+          userId,
+        },
+        include: {
+          patient: true,
         },
       });
 
@@ -99,24 +112,47 @@ class PrescriptionController {
   static async updatePrescription(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      const { patientId, medication, dosage, instructions } = req.body;
+      const { patientFullName, medication, dosage, instructions } = req.body;
 
       if (!id) throw new Error("No ID provided");
 
+      // Find the prescription
+      const prescription = await prisma.prescription.findUnique({
+        where: { id },
+      });
+
+      if (!prescription) throw new Error("Prescription not found");
+
+      // Find or create the patient
+      let patient = await prisma.patient.findFirst({
+        where: { fullName: patientFullName, userId: prescription.userId },
+      });
+
+      if (!patient) {
+        throw new Error("No patient found");
+      }
+
+      // Update the prescription
       const updatedPrescription = await prisma.prescription.update({
         where: { id },
         data: {
-          patientId: Number(patientId),
+          patientId: patient.id,
           medication,
           dosage,
           instructions,
+        },
+        include: {
+          patient: true, // Include the patient object in the response
         },
       });
 
       res.status(200).json({ updated: updatedPrescription });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No ID provided") {
+        if (
+          error.message === "No ID provided" ||
+          error.message === "Prescription not found"
+        ) {
           res.status(404).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
@@ -171,7 +207,6 @@ class PrescriptionController {
           },
         },
       });
-
       res.status(200).json({ prescriptions });
     } catch (error) {
       if (error instanceof Error) {
