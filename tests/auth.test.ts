@@ -7,8 +7,6 @@ import { Session, SessionData } from "express-session";
 import { CustomSession } from "../src/types/index";
 import { authMiddleware } from "../src/middlewares/AuthMiddleware";
 
-jest.mock("bcrypt");
-
 // Extend the SessionData interface to include custom properties
 declare module "express-session" {
   interface SessionData {
@@ -60,146 +58,145 @@ describe("AuthController", () => {
     jest.clearAllMocks();
   });
 
-  describe("login", () => {
-    it("should return 400 if username or password is missing", async () => {
-      req.body = {};
+describe("login", () => {
+  it("should return 400 if username or password is missing", async () => {
+    req.body = {};
 
-      await AuthController.login(req as Request, res as Response);
+    await AuthController.login(req as Request, res as Response);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "Username and password required",
-      });
-    });
-
-    it("should return 401 if credentials are invalid", async () => {
-      req.body = { user: "testuser", password: "wrongpassword" };
-      (prisma.user.findFirst as jest.Mock).mockResolvedValue(null);
-
-      await AuthController.login(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ error: "Invalid credentials" });
-    });
-
-    it("should return 200 and set session if credentials are valid", async () => {
-      req.body = { user: "testuser", password: "correctpassword" };
-      const mockUser = { id: 1, role: "user" };
-      (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
-      (bcrypt.hash as jest.Mock).mockResolvedValue("hashedpassword");
-
-      // Mock the session
-      req.session = {
-        user: { id: "", role: "" }, // Initialize `req.session.user`
-        id: "mock-session-id",
-        cookie: {
-          originalMaxAge: null,
-          httpOnly: true,
-          secure: false,
-          path: "/",
-          sameSite: "lax",
-        },
-        destroy: jest.fn((callback: (err?: Error) => void) => callback()),
-        regenerate: jest.fn((callback: (err?: Error) => void) => callback()),
-        reload: jest.fn((callback: (err?: Error) => void) => callback()),
-        resetMaxAge: jest.fn(),
-        save: jest.fn((callback: (err?: Error) => void) => callback()),
-        touch: jest.fn(),
-      } as unknown as Session;
-
-      await AuthController.login(req as Request, res as Response);
-
-      expect(req.session?.user?.id).toBe("1"); // Check `req.session.user.id`
-      expect(req.session?.user?.role).toBe("user"); // Check `req.session.user.role`
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ login: "success" });
-    });
-
-    it("should return 500 if an error occurs", async () => {
-      req.body = { user: "testuser", password: "correctpassword" };
-      (prisma.user.findFirst as jest.Mock).mockRejectedValue(
-        new Error("Database error"),
-      );
-
-      await AuthController.login(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Database error" });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Username and password required",
     });
   });
 
-  describe("logout", () => {
-    it("should return 200 on successful logout", () => {
-      AuthController.logout(req as Request, res as Response);
+  it("should return 401 if credentials are invalid", async () => {
+    req.body = { user: "testuser", password: "wrongpassword" };
+    (prisma.user.findFirst as jest.Mock).mockResolvedValue(null);
 
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ logout: "success" });
-    });
+    await AuthController.login(req as Request, res as Response);
 
-    it("should return 500 if logout fails", () => {
-      (req.session?.destroy as jest.Mock).mockImplementation((callback) =>
-        callback(new Error("Logout failed")),
-      );
-
-      AuthController.logout(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Could not log out" });
-    });
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ error: "Invalid credentials" });
   });
 
-  describe("checkAuth", () => {
-    it("should return 401 if user is not authenticated", () => {
-      req.session = {
-        id: "mock-session-id",
-        cookie: {
-          originalMaxAge: null,
-          httpOnly: true,
-          secure: false,
-          path: "/",
-          sameSite: "lax",
-        },
-        destroy: jest.fn((callback: (err?: Error) => void) => callback()),
-        regenerate: jest.fn((callback: (err?: Error) => void) => callback()),
-        reload: jest.fn((callback: (err?: Error) => void) => callback()),
-        resetMaxAge: jest.fn(),
-        save: jest.fn((callback: (err?: Error) => void) => callback()),
-        touch: jest.fn(),
-        userId: undefined,
-        role: undefined,
-      } as unknown as Session;
+  it("should return 200 and set session if credentials are valid", async () => {
+    req.body = { user: "testuser", password: "correctpassword" };
+    const mockUser = { id: 1, role: "user", password: "hashedpassword" };
+    (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      AuthController.checkAuth(req as Request, res as Response);
+    // Mock the session
+    req.session = {
+      user: { id: "", role: "" }, // Initialize `req.session.user`
+      id: "mock-session-id",
+      cookie: {
+        originalMaxAge: null,
+        httpOnly: true,
+        secure: false,
+        path: "/",
+        sameSite: "lax",
+      },
+      destroy: jest.fn((callback: (err?: Error) => void) => callback()),
+      regenerate: jest.fn((callback: (err?: Error) => void) => callback()),
+      reload: jest.fn((callback: (err?: Error) => void) => callback()),
+      resetMaxAge: jest.fn(),
+      save: jest.fn((callback: (err?: Error) => void) => callback()),
+      touch: jest.fn(),
+    } as unknown as Session;
 
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ error: "Unauthorized" });
-    });
+    await AuthController.login(req as Request, res as Response);
 
-    it("should return 200 with user details if authenticated", () => {
-      req.session = {
-        user: { id: "1", role: "user" }, // Set `req.session.user`
-        id: "mock-session-id",
-        cookie: {
-          originalMaxAge: null,
-          httpOnly: true,
-          secure: false,
-          path: "/",
-          sameSite: "lax",
-        },
-        destroy: jest.fn((callback: (err?: Error) => void) => callback()),
-        regenerate: jest.fn((callback: (err?: Error) => void) => callback()),
-        reload: jest.fn((callback: (err?: Error) => void) => callback()),
-        resetMaxAge: jest.fn(),
-        save: jest.fn((callback: (err?: Error) => void) => callback()),
-        touch: jest.fn(),
-      } as unknown as Session;
-
-      AuthController.checkAuth(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ userId: "1", role: "user" });
-    });
+    expect(req.session?.user?.id).toBe("1"); // Check `req.session.user.id`
+    expect(req.session?.user?.role).toBe("user"); // Check `req.session.user.role`
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ login: "success" });
   });
+
+  it("should return 500 if an error occurs", async () => {
+    req.body = { user: "testuser", password: "correctpassword" };
+    (prisma.user.findFirst as jest.Mock).mockRejectedValue(
+      new Error("Database error"),
+    );
+
+    await AuthController.login(req as Request, res as Response);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Database error" });
+  });
+});
+
+describe("logout", () => {
+  it("should return 200 on successful logout", () => {
+    AuthController.logout(req as Request, res as Response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ logout: "success" });
+  });
+
+  it("should return 500 if logout fails", () => {
+    (req.session?.destroy as jest.Mock).mockImplementation((callback) =>
+      callback(new Error("Logout failed")),
+    );
+
+    AuthController.logout(req as Request, res as Response);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Could not log out" });
+  });
+});
+
+describe("checkAuth", () => {
+  it("should return 401 if user is not authenticated", () => {
+    req.session = {
+      id: "mock-session-id",
+      cookie: {
+        originalMaxAge: null,
+        httpOnly: true,
+        secure: false,
+        path: "/",
+        sameSite: "lax",
+      },
+      destroy: jest.fn((callback: (err?: Error) => void) => callback()),
+      regenerate: jest.fn((callback: (err?: Error) => void) => callback()),
+      reload: jest.fn((callback: (err?: Error) => void) => callback()),
+      resetMaxAge: jest.fn(),
+      save: jest.fn((callback: (err?: Error) => void) => callback()),
+      touch: jest.fn(),
+      user: undefined, // Ensure `user` is undefined
+    } as unknown as Session;
+
+    AuthController.checkAuth(req as Request, res as Response);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ error: "Unauthorized" });
+  });
+
+  it("should return 200 with user details if authenticated", () => {
+    req.session = {
+      user: { id: "1", role: "user" }, // Set `req.session.user`
+      id: "mock-session-id",
+      cookie: {
+        originalMaxAge: null,
+        httpOnly: true,
+        secure: false,
+        path: "/",
+        sameSite: "lax",
+      },
+      destroy: jest.fn((callback: (err?: Error) => void) => callback()),
+      regenerate: jest.fn((callback: (err?: Error) => void) => callback()),
+      reload: jest.fn((callback: (err?: Error) => void) => callback()),
+      resetMaxAge: jest.fn(),
+      save: jest.fn((callback: (err?: Error) => void) => callback()),
+      touch: jest.fn(),
+    } as unknown as Session;
+
+    AuthController.checkAuth(req as Request, res as Response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ userId: "1", role: "user" });
+  });
+});
 });
 
 it("should allow access if the user is authenticated", () => {
