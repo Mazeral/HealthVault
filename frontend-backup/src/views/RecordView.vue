@@ -29,6 +29,10 @@
                 <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
                 <v-btn @click="newMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
               </v-form>
+              <!-- Error message for creating a new medical record -->
+              <v-alert v-if="createError" type="error" class="mt-4">
+                {{ createError }}
+              </v-alert>
             </v-card-text>
           </v-card>
         </v-dialog>
@@ -154,6 +158,9 @@ const newMedicalRecordData = ref({
   notes: '',
 });
 
+// Error message for creating a new medical record
+const createError = ref('');
+
 // Data for editing a medical record
 const editRecordData = ref({
   id: null,
@@ -233,8 +240,13 @@ const createNewMedicalRecord = async () => {
       diagnosis: '',
       notes: '',
     };
+
+    // Clear any previous error message
+    createError.value = '';
   } catch (error) {
     console.error('Failed to create new medical record:', error);
+    // Set the error message
+    createError.value = error.response?.data?.message || 'Failed to create medical record. Please try again.';
   }
 };
 

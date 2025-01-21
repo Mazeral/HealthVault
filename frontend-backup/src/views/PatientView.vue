@@ -1,5 +1,5 @@
 <template>
-  <v-container style="overflow: auto;">
+  <v-container style="overflow: visible;" class="v-container">
     <!-- Statistics Section -->
     <v-row>
       <v-col cols="12" md="4">
@@ -75,6 +75,10 @@
             <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
             <v-btn @click="newPatientDialog = false" color="secondary">Cancel</v-btn>
           </v-form>
+          <!-- Error message for creating a new patient -->
+          <v-alert v-if="createError" type="error" class="mt-4">
+            {{ createError }}
+          </v-alert>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -133,6 +137,7 @@
       :loading="loading"
       loading-text="Loading... Please wait"
       hide-default-footer
+		class="custom-data-table"
     >
       <template v-slot:item.fullName="{ item }">
         {{ item.fullName }}
@@ -300,6 +305,9 @@ const newPatientData = ref({
   sex: '',
   bloodGroup: '',
 });
+
+// Error message for creating a new patient
+const createError = ref('');
 
 // Blood group options for the v-select
 const bloodGroupOptions = [
@@ -516,9 +524,14 @@ const createNewPatient = async () => {
       bloodGroup: '',
     };
 
+    // Clear any previous error message
+    createError.value = '';
+
     console.log('New patient created:', response.data);
   } catch (error) {
     console.error('Failed to create new patient:', error);
+    // Set the error message
+    createError.value = error.response?.data?.message || 'Failed to create patient. Please try again.';
   }
 };
 
@@ -531,10 +544,24 @@ onMounted(() => {
 
 <style scoped>
 .v-container {
-  background-color: white; /* Set a background color */
+  background-color: white;
 }
 
-.v-data-table {
-  background-color: white; /* Set a background color */
+.custom-data-table {
+  background-color: white !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+  width: 100%; /* Ensure the table takes up the full width */
+  min-width: 720px; /* Match your screen width */
+  table-layout: fixed; /* Use fixed layout for better rendering */
+}
+
+.v-data-table__wrapper {
+  background-color: white !important; /* Set the background color */
+}
+.v-data-table{
+	background-color: white !important;
 }
 </style>

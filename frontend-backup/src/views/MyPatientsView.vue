@@ -489,5 +489,4 @@ onMounted(() => {
 .v-data-table {
   background-color: white;
 }
-
 </style>

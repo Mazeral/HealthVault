@@ -40,6 +40,10 @@
                 <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
                 <v-btn @click="newLabResultDialog = false" color="secondary">Cancel</v-btn>
               </v-form>
+              <!-- Error message for creating a new lab result -->
+              <v-alert v-if="createError" type="error" class="mt-4">
+                {{ createError }}
+              </v-alert>
             </v-card-text>
           </v-card>
         </v-dialog>
@@ -158,6 +162,9 @@ const newLabResultData = ref({
   performedAt: '',
 });
 
+// Error message for creating a new lab result
+const createError = ref('');
+
 // Data for editing a lab result
 const editLabResultData = ref({
   id: null,
@@ -206,16 +213,18 @@ onMounted(() => {
   fetchLabResults();
 });
 
-// Fetch all lab results
+// Fetch all lab results and sort by newest
 const fetchLabResults = async () => {
   try {
     loading.value = true;
     const response = await api.get('/lab-results');
-    // Include patient fullName in the response
-    labResults.value = response.data['Lab results'].map((result) => ({
-      ...result,
-      patientFullName: result.patient.fullName, // Add patient fullName to each lab result
-    }));
+    // Include patient fullName in the response and sort by performedAt (newest first)
+    labResults.value = response.data['Lab results']
+      .map((result) => ({
+        ...result,
+        patientFullName: result.patient.fullName, // Add patient fullName to each lab result
+      }))
+      .sort((a, b) => new Date(b.performedAt) - new Date(a.performedAt)); // Sort by newest first
   } catch (error) {
     console.error('Failed to fetch lab results:', error);
   } finally {
@@ -243,8 +252,13 @@ const createNewLabResult = async () => {
       notes: '',
       performedAt: '',
     };
+
+    // Clear any previous error message
+    createError.value = '';
   } catch (error) {
     console.error('Failed to create new lab result:', error);
+    // Set the error message
+    createError.value = error.response?.data?.message || 'Failed to create lab result. Please try again.';
   }
 };
 

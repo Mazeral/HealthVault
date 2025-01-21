@@ -79,4 +79,7 @@ const logout = () => {
 .v-navigation-drawer {
   background-color: #f5f5f5; /* Light gray background */
 }
+.v-main{
+	background-color:white;
+}
 </style>

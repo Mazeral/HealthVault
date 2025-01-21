@@ -40,8 +40,8 @@
               <td>{{ doctor.role }}</td>
               <td>{{ formatDate(doctor.createdAt) }}</td>
               <td>
-                <v-btn @click.stop="editDoctor(doctor)" color="warning">Edit</v-btn>
-                <v-btn @click.stop="confirmDelete(doctor)" color="error">Delete</v-btn>
+                <v-btn @click.stop="editDoctor(doctor)" block class="ma-2" color="primary">Edit</v-btn>
+                <v-btn @click.stop="confirmDelete(doctor)" block class= "ma-2" color="error">Delete</v-btn>
               </td>
             </tr>
           </tbody>
