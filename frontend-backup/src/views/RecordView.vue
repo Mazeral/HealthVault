@@ -3,15 +3,51 @@
     <v-card>
       <v-card-title>Medical Records</v-card-title>
       <v-card-text>
-        <!-- Button to navigate to the new medical record view -->
-        <v-btn @click="navigateToNewMedicalRecord" color="primary" class="mb-4">New Medical Record</v-btn>
+        <!-- Button to open the new medical record dialog -->
+        <v-btn @click="newMedicalRecordDialog = true" color="primary" class="mb-4">New Medical Record</v-btn>
 
-        <!-- Search Bar -->
+        <!-- New Medical Record Dialog -->
+        <v-dialog v-model="newMedicalRecordDialog" max-width="500">
+          <v-card>
+            <v-card-title>Create New Medical Record</v-card-title>
+            <v-card-text>
+              <v-form @submit.prevent="createNewMedicalRecord">
+                <v-text-field
+                  v-model="newMedicalRecordData.patientFullName"
+                  label="Patient Full Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newMedicalRecordData.diagnosis"
+                  label="Diagnosis"
+                  required
+                ></v-text-field>
+                <v-textarea
+                  v-model="newMedicalRecordData.notes"
+                  label="Notes"
+                ></v-textarea>
+                <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
+                <v-btn @click="newMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
+        <!-- Search Bars -->
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="searchQuery"
+              v-model="searchDiagnosis"
               label="Search by Diagnosis"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchPatientName"
+              label="Search by Patient Name"
               outlined
               dense
               @input="handleSearchInput"
@@ -34,8 +70,14 @@
             {{ item.patientFullName }}
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-btn @click="editMedicalRecord(item)" color="warning" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+            <v-row no-gutters>
+              <v-col>
+                <v-btn @click="editMedicalRecord(item)" color="primary" block class="mb-2">Edit</v-btn>
+              </v-col>
+              <v-col>
+                <v-btn @click="confirmDelete(item)" color="error" block class="mb-2">Delete</v-btn>
+              </v-col>
+            </v-row>
           </template>
         </v-data-table>
 
@@ -50,63 +92,49 @@
             ></v-pagination>
           </v-col>
         </v-row>
-      </v-card-text> <!-- Close v-card-text here -->
 
-      <!-- Dialog for editing a medical record -->
-      <v-dialog v-model="editDialog" max-width="500">
-        <v-card>
-          <v-card-title>Edit Medical Record</v-card-title>
-          <v-card-text>
-            <v-form @submit.prevent="updateMedicalRecord">
-              <!-- Patient Full Name Field -->
-              <v-text-field
-                v-model="editRecordData.patientFullName"
-                label="Patient Full Name"
-                required
-              ></v-text-field>
+        <!-- Dialog for editing a medical record -->
+        <v-dialog v-model="editDialog" max-width="500">
+          <v-card>
+            <v-card-title>Edit Medical Record</v-card-title>
+            <v-card-text>
+              <v-form @submit.prevent="updateMedicalRecord">
+                <v-text-field
+                  v-model="editRecordData.patientFullName"
+                  label="Patient Full Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="editRecordData.diagnosis"
+                  label="Diagnosis"
+                  required
+                ></v-text-field>
+                <v-textarea
+                  v-model="editRecordData.notes"
+                  label="Notes"
+                ></v-textarea>
+                <v-btn type="submit" color="primary" class="mr-2">Update</v-btn>
+                <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
 
-              <!-- Patient ID Field -->
-              <v-text-field
-                v-model="editRecordData.patientId"
-                label="Patient ID"
-                required
-              ></v-text-field>
-
-              <!-- Diagnosis Field -->
-              <v-text-field
-                v-model="editRecordData.diagnosis"
-                label="Diagnosis"
-                required
-              ></v-text-field>
-
-              <!-- Notes Field -->
-              <v-textarea
-                v-model="editRecordData.notes"
-                label="Notes"
-              ></v-textarea>
-
-              <!-- Action Buttons -->
-              <v-btn type="submit" color="primary">Update</v-btn>
-              <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <!-- Confirmation Dialog for Deletion -->
-      <v-dialog v-model="deleteDialog" max-width="400">
-        <v-card>
-          <v-card-title class="headline">Are you sure?</v-card-title>
-          <v-card-text>
-            You are about to delete the medical record for patient: <strong>{{ recordToDelete?.patientFullName }}</strong>. This action cannot be undone.
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" @click="deleteDialog = false">Cancel</v-btn>
-            <v-btn color="error" @click="deleteMedicalRecordConfirmed">Delete</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+        <!-- Confirmation Dialog for Deletion -->
+        <v-dialog v-model="deleteDialog" max-width="400">
+          <v-card>
+            <v-card-title class="headline">Are you sure?</v-card-title>
+            <v-card-text>
+              You are about to delete the medical record for patient: <strong>{{ recordToDelete?.patientFullName }}</strong>. This action cannot be undone.
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="secondary" @click="deleteDialog = false">Cancel</v-btn>
+              <v-btn color="error" @click="deleteMedicalRecordConfirmed">Delete</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
@@ -118,11 +146,18 @@ import api from '../utils/api';
 
 const router = useRouter();
 
+// Data for creating a new medical record
+const newMedicalRecordDialog = ref(false);
+const newMedicalRecordData = ref({
+  patientFullName: '',
+  diagnosis: '',
+  notes: '',
+});
+
 // Data for editing a medical record
 const editRecordData = ref({
   id: null,
-  patientId: null,
-  patientFullName: '', // Add patientFullName field
+  patientFullName: '',
   diagnosis: '',
   notes: '',
 });
@@ -137,8 +172,9 @@ const editDialog = ref(false);
 const deleteDialog = ref(false);
 const recordToDelete = ref(null); // Stores the medical record to be deleted
 
-// Search query for filtering medical records
-const searchQuery = ref('');
+// Search queries for filtering medical records
+const searchDiagnosis = ref('');
+const searchPatientName = ref('');
 
 // Pagination state
 const currentPage = ref(1);
@@ -179,14 +215,48 @@ const fetchMedicalRecords = async () => {
   }
 };
 
-// Filter medical records based on search query
-const filteredMedicalRecords = computed(() => {
-  if (!searchQuery.value) {
-    return medicalRecords.value; // Return all medical records if no search query
+// Create a new medical record
+const createNewMedicalRecord = async () => {
+  try {
+    const response = await api.post('/medical-records', newMedicalRecordData.value);
+    console.log('New medical record created:', response.data);
+
+    // Close the dialog
+    newMedicalRecordDialog.value = false;
+
+    // Refresh the medical records list
+    fetchMedicalRecords();
+
+    // Reset the form data
+    newMedicalRecordData.value = {
+      patientFullName: '',
+      diagnosis: '',
+      notes: '',
+    };
+  } catch (error) {
+    console.error('Failed to create new medical record:', error);
   }
-  return medicalRecords.value.filter((record) =>
-    record.diagnosis.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+};
+
+// Filter medical records based on search queries
+const filteredMedicalRecords = computed(() => {
+  let filtered = medicalRecords.value;
+
+  // Filter by diagnosis
+  if (searchDiagnosis.value) {
+    filtered = filtered.filter((record) =>
+      record.diagnosis.toLowerCase().includes(searchDiagnosis.value.toLowerCase())
+    );
+  }
+
+  // Filter by patient name
+  if (searchPatientName.value) {
+    filtered = filtered.filter((record) =>
+      record.patientFullName.toLowerCase().includes(searchPatientName.value.toLowerCase())
+    );
+  }
+
+  return filtered;
 });
 
 // Handle search input
@@ -211,13 +281,7 @@ const editMedicalRecord = (record) => {
 // Update a medical record
 const updateMedicalRecord = async () => {
   try {
-    // Prepare the payload
-    const payload = {
-      ...editRecordData.value,
-      patientFullName: editRecordData.value.patientFullName, // Include patientFullName in the payload
-    };
-
-    const response = await api.put(`/medical-records/${editRecordData.value.id}`, payload);
+    const response = await api.put(`/medical-records/${editRecordData.value.id}`, editRecordData.value);
     const updatedRecord = response.data.updated;
 
     // Find the index of the updated medical record in the medicalRecords array
@@ -254,17 +318,13 @@ const deleteMedicalRecordConfirmed = async () => {
     deleteDialog.value = false; // Close the dialog
   }
 };
-
-// Navigate to the new medical record view
-const navigateToNewMedicalRecord = () => {
-  router.push({ name: 'new-medical-record' });
-};
 </script>
 
 <style scoped>
 .v-table {
   margin-top: 20px;
 }
+
 /* Ensure the container and card have a white background */
 .v-container {
   background-color: white;
