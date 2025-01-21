@@ -25,9 +25,59 @@
     <!-- New Patient Button -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-btn color="primary" @click="navigateToNewPatient">New Patient</v-btn>
+        <v-btn color="primary" @click="newPatientDialog = true">New Patient</v-btn>
       </v-col>
     </v-row>
+
+    <!-- New Patient Dialog -->
+    <v-dialog v-model="newPatientDialog" max-width="500">
+      <v-card>
+        <v-card-title>Create New Patient</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="createNewPatient">
+            <v-text-field
+              v-model="newPatientData.fullName"
+              label="Full Name"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="newPatientData.dateOfBirth"
+              label="Date of Birth"
+              type="date"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="newPatientData.phone"
+              label="Phone"
+            ></v-text-field>
+            <v-text-field
+              v-model="newPatientData.email"
+              label="Email"
+            ></v-text-field>
+            <v-text-field
+              v-model="newPatientData.address"
+              label="Address"
+            ></v-text-field>
+            <v-select
+              v-model="newPatientData.sex"
+              :items="sexOptions"
+              label="Sex"
+              required
+              item-title="text"
+            ></v-select>
+            <v-select
+              v-model="newPatientData.bloodGroup"
+              :items="bloodGroupOptions"
+              label="Blood Group"
+              required
+              item-title="text"
+            ></v-select>
+            <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
+            <v-btn @click="newPatientDialog = false" color="secondary">Cancel</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <!-- Search and Filter Controls -->
     <v-row class="mt-4">
@@ -112,8 +162,28 @@
         {{ item.createdBy || 'N/A' }}
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn @click="editPatient(item)" color="primary" small>Edit</v-btn>
-        <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+        <v-row no-gutters>
+          <v-col>
+            <v-btn 
+              @click="editPatient(item)" 
+              color="primary" 
+              block 
+              class="mb-2"
+            >
+              Edit
+            </v-btn>
+          </v-col>
+          <v-col>
+            <v-btn 
+              @click="confirmDelete(item)" 
+              color="error" 
+              block 
+              class="mb-2"
+            >
+              Delete
+            </v-btn>
+          </v-col>
+        </v-row>
       </template>
     </v-data-table>
 
@@ -169,7 +239,7 @@
               required
               item-title="text"
             ></v-select>
-            <v-btn type="submit" color="primary">Update</v-btn>
+            <v-btn type="submit" color="primary" class="mr-2">Update</v-btn>
             <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
           </v-form>
         </v-card-text>
@@ -208,6 +278,20 @@ const patientToDelete = ref(null); // Stores the patient to be deleted
 const editDialog = ref(false);
 const editPatientData = ref({
   id: null,
+  fullName: '',
+  dateOfBirth: '',
+  phone: '',
+  email: '',
+  address: '',
+  sex: '',
+  bloodGroup: '',
+});
+
+// New Patient Dialog State
+const newPatientDialog = ref(false);
+
+// New Patient Form Data
+const newPatientData = ref({
   fullName: '',
   dateOfBirth: '',
   phone: '',
@@ -406,6 +490,35 @@ const deletePatientConfirmed = async () => {
     console.error('Failed to delete patient:', error);
   } finally {
     deleteDialog.value = false; // Close the dialog
+  }
+};
+
+// Create a New Patient
+const createNewPatient = async () => {
+  try {
+    // Call the backend API to create a new patient
+    const response = await api.post('/patients', newPatientData.value);
+
+    // Close the dialog
+    newPatientDialog.value = false;
+
+    // Refresh the patient list
+    fetchPatients();
+
+    // Reset the form data
+    newPatientData.value = {
+      fullName: '',
+      dateOfBirth: '',
+      phone: '',
+      email: '',
+      address: '',
+      sex: '',
+      bloodGroup: '',
+    };
+
+    console.log('New patient created:', response.data);
+  } catch (error) {
+    console.error('Failed to create new patient:', error);
   }
 };
 

@@ -74,8 +74,15 @@ const handleLogin = async () => {
     // Call the login method from the auth store
     await authStore.login(username.value, password.value);
 
-    // Redirect to the home page (or dashboard) after successful login
-    router.push({ name: 'dashboard' });
+    // Check the user's role and redirect accordingly
+    if (authStore.user?.role === 'ADMIN') {
+      router.push({ name: 'admin' }); // Redirect admins to the dashboard
+    } else if (authStore.user?.role === 'DOCTOR') {
+      router.push({ name: 'dashboard' }); // Redirect doctors to the staff page
+    } else {
+      // Default fallback (e.g., for other roles or unhandled cases)
+      router.push({ name: 'dashboard' });
+    }
   } catch (error) {
     console.error('Login failed:', error);
     errorMessage.value = 'Login failed. Please check your credentials.'; // User-friendly error message
