@@ -74,10 +74,10 @@
           <template v-slot:item.actions="{ item }">
             <v-row no-gutters>
               <v-col>
-                <v-btn @click="editPrescription(item)" color="primary" block class="mr-2">Edit</v-btn>
+                <v-btn @click="editPrescription(item)" color="primary" class="ma-2" block >Edit</v-btn>
               </v-col>
               <v-col>
-                <v-btn @click="confirmDelete(item)" color="error" block class="ml-2">Delete</v-btn>
+                <v-btn @click="confirmDelete(item)" color="error" class="ma-2" block >Delete</v-btn>
               </v-col>
             </v-row>
           </template>

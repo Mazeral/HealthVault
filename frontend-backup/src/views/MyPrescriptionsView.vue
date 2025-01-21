@@ -55,8 +55,8 @@
             {{ item.patient?.fullName || 'N/A' }}
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-btn @click="editPrescription(item)" color="primary" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+            <v-btn @click="editPrescription(item)" color="primary" block class="ma-2">Edit</v-btn>
+            <v-btn @click="confirmDelete(item)" color="error" block class="ma-2">Delete</v-btn>
           </template>
         </v-data-table>
 

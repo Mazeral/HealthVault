@@ -3,13 +3,13 @@
     <v-card>
       <v-card-title>My Health Records</v-card-title>
       <!-- Add a medical record button -->
-      <v-row>
+      <v-card-text>
+        <!-- Search Bar -->
+	  <v-row>
         <v-col cols="12" md="6">
           <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
         </v-col>
-      </v-row>
-      <v-card-text>
-        <!-- Search Bar -->
+	  </v-row>
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
@@ -30,6 +30,8 @@
             ></v-text-field>
           </v-col>
         </v-row>
+      <v-row>
+      </v-row>
 
         <!-- Medical Records Table -->
         <v-data-table
@@ -53,10 +55,16 @@
           <template v-slot:item.createdAt="{ item }">
             {{ formatDate(item.createdAt) }}
           </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn @click="editMedicalRecord(item)" color="primary" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
-          </template>
+			<template v-slot:item.actions="{ item }">
+			  <v-row no-gutters>
+				<v-col cols="auto">
+				  <v-btn @click="editMedicalRecord(item)" color="primary" class="mr-2">Edit</v-btn>
+				</v-col>
+				<v-col cols="auto">
+				  <v-btn @click="confirmDelete(item)" color="error">Delete</v-btn>
+				</v-col>
+			  </v-row>
+			</template>
         </v-data-table>
 
         <!-- Pagination Controls -->
@@ -456,5 +464,9 @@ onMounted(() => {
 /* Ensure the table has a white background */
 .v-data-table {
   background-color: white;
+}
+
+.custom-button {
+  width: 100px; /* Set a custom width */
 }
 </style>

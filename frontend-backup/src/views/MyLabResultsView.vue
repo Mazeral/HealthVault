@@ -3,6 +3,12 @@
     <v-card>
       <v-card-title>My Lab Results</v-card-title>
       <v-card-text>
+
+		  <v-row>
+          <v-col cols="12" md="6">
+            <v-btn color="primary" @click="openNewLabResultDialog">New Lab Result</v-btn>
+          </v-col>
+		  </v-row>
         <!-- Search Bar -->
         <v-row class="mt-4">
           <v-col cols="12" md="6">
@@ -22,10 +28,6 @@
               dense
               @keyup.enter="handleSearch"
             ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-btn color="primary" @click="openNewLabResultDialog">New Lab Result</v-btn>
-            <v-btn color="secondary" @click="handleSearch" class="ml-2">Search</v-btn>
           </v-col>
         </v-row>
 
@@ -54,10 +56,16 @@
           <template v-slot:item.patientFullName="{ item }">
             {{ item.patientFullName }}
           </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn @click="editLabResult(item)" color="primary" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
-          </template>
+			<template v-slot:item.actions="{ item }">
+			  <v-row no-gutters>
+				<v-col>
+				  <v-btn @click="editLabResult(item)" color="primary" block class="ma-2">Edit</v-btn>
+				</v-col>
+				<v-col>
+				  <v-btn @click="confirmDelete(item)" color="error" class="ma-2" block>Delete</v-btn>
+				</v-col>
+			  </v-row>
+			</template>
           <template v-slot:no-data>
             <v-alert type="info">No data available</v-alert>
           </template>

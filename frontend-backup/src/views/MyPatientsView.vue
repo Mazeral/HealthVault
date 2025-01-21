@@ -10,6 +10,12 @@
       </v-col>
     </v-row>
 
+	<v-row>
+      <v-col cols="12" md="3">
+        <v-btn color="primary" @click="openNewPatientDialog">New Patient</v-btn>
+      </v-col>
+	</v-row>
+
     <!-- Search and Filter Controls -->
     <v-row class="mt-4">
       <v-col cols="12" md="6">
@@ -51,9 +57,6 @@
           outlined
           dense
         ></v-select>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-btn color="primary" @click="openNewPatientDialog">New Patient</v-btn>
       </v-col>
     </v-row>
 
