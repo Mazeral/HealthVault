@@ -232,7 +232,6 @@ const fetchPrescriptions = async () => {
     loading.value = true;
     const response = await api.get('/my-prescriptions');
 
-    console.log("API Response:", response.data); // Debugging: Log the API response
 
     // Transform the data to match the table structure
     prescriptions.value = response.data.prescriptions.map((prescription) => ({
@@ -242,7 +241,6 @@ const fetchPrescriptions = async () => {
       },
     }));
 
-    console.log("Fetched and transformed prescriptions:", prescriptions.value); // Debugging
   } catch (error) {
     console.error('Failed to fetch prescriptions:', error);
   } finally {
@@ -347,7 +345,6 @@ const updatePrescription = async () => {
       }
     );
 
-    console.log("Update Prescription Response:", response.data); // Debugging: Log the response
 
     // Update the prescription in the list
     const updatedPrescription = response.data.updated;

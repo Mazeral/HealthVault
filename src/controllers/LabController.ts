@@ -8,16 +8,12 @@ class LabController {
     const { patientFullName, testName, result, notes, performedAt } = req.body;
 
     try {
-      // Log the request body for debugging
-      console.log("Request body:", req.body);
-
       // Validate required fields
       if (!testName) throw new Error("No test name provided");
       if (!result) throw new Error("No result provided");
       if (!patientFullName) throw new Error("No patient full name provided");
 
       // Fetch patient ID based on full name
-      console.log("Searching for patient:", patientFullName);
       const patient = await prisma.patient.findFirst({
         where: {
           fullName: patientFullName,
@@ -27,8 +23,6 @@ class LabController {
       if (!patient) {
         throw new Error("Patient not found");
       }
-
-      console.log("Patient found:", patient);
 
       const patientId = patient.id;
 
@@ -61,11 +55,8 @@ class LabController {
         },
       });
 
-      console.log("Lab result created:", labResult);
-
       res.status(200).json({ "Lab result": labResult });
     } catch (error) {
-      console.error("Error creating lab result:", error);
       if (error instanceof Error) {
         if (
           error.message === "No test name provided" ||
@@ -220,8 +211,6 @@ class LabController {
   // Fetch lab results for the authenticated user (doctor or patient)
   static async getMyLabResults(req: Request, res: Response): Promise<void> {
     try {
-      console.log("Inside the getMyLabResults method");
-
       const session = req.session as CustomSessionData; // Cast session to CustomSessionData
       const userId = Number(session.user?.id); // Get the user ID from the session
 
@@ -245,7 +234,6 @@ class LabController {
 
       res.status(200).json({ labResults });
     } catch (error) {
-      console.error("Error in getMyLabResults:", error);
       if (error instanceof Error) {
         if (error.message === "Unauthorized: No user ID found in session") {
           res.status(401).json({ error: error.message });

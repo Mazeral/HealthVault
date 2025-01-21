@@ -220,8 +220,6 @@ const fetchLabResults = async () => {
     loading.value = true;
     const response = await api.get('/my-lab-results'); // Ensure the URL matches the backend route
     
-    // Log the response for debugging
-    console.log('Backend response:', response.data);
 
     // Ensure the response contains the expected data structure
     if (response.data && response.data.labResults) {

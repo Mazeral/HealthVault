@@ -61,7 +61,6 @@ const handleRegister = async () => {
     role: role.value.toUpperCase(),
   };
 
-  console.log('Data being sent:', data); // Debugging: Check the data
 
   try {
     // Send POST request to register user
@@ -72,7 +71,6 @@ const handleRegister = async () => {
     router.push({ name: 'login' });
   } catch (error) {
     // Handle error
-    console.error('Error details:', error); // Debugging: Log the full error
     alert('Registration failed: ' + (error.response?.data?.error || error.message));
   }
 };

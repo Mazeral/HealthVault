@@ -253,7 +253,6 @@ const fetchMedicalRecords = async () => {
       createdAt: record.createdAt,
     }));
 
-    console.log("Fetched and transformed medicalRecords:", medicalRecords.value); // Debugging
   } catch (error) {
     console.error('Failed to fetch medical records:', error);
     showSnackbar('Failed to fetch medical records', 'error');
@@ -330,7 +329,6 @@ const createMedicalRecord = async () => {
       },
     });
 
-    console.log("API Response:", response.data); // Debugging: Log the response
 
     // Flatten the new record
     const newRecord = {
@@ -341,7 +339,6 @@ const createMedicalRecord = async () => {
       createdAt: response.data.createdAt || new Date().toISOString(),
     };
 
-    console.log("New Record to Add:", newRecord); // Debugging: Log the new record
 
     // Log the medicalRecords array BEFORE insertion
     console.log("medicalRecords BEFORE insertion:", medicalRecords.value);
@@ -361,7 +358,6 @@ const createMedicalRecord = async () => {
       notes: '',
       patientFullName: '',
     };
-    console.log("Form reset"); // Debugging: Log the form reset
 
     // Clear any previous error message
     createMedicalRecordError.value = '';
