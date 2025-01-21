@@ -3,15 +3,56 @@
     <v-card>
       <v-card-title>Prescriptions</v-card-title>
       <v-card-text>
-        <!-- Button to navigate to the new prescription view -->
-        <v-btn @click="navigateToNewPrescription" color="primary" class="mb-4">New Prescription</v-btn>
+        <!-- Button to open the new prescription dialog -->
+        <v-btn @click="newPrescriptionDialog = true" color="primary" class="mb-4">New Prescription</v-btn>
 
-        <!-- Search Bar -->
+        <!-- New Prescription Dialog -->
+        <v-dialog v-model="newPrescriptionDialog" max-width="500">
+          <v-card>
+            <v-card-title>Create New Prescription</v-card-title>
+            <v-card-text>
+              <v-form @submit.prevent="createNewPrescription">
+                <v-text-field
+                  v-model="newPrescriptionData.patientFullName"
+                  label="Patient Full Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newPrescriptionData.medication"
+                  label="Medication"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newPrescriptionData.dosage"
+                  label="Dosage"
+                  required
+                ></v-text-field>
+                <v-textarea
+                  v-model="newPrescriptionData.instructions"
+                  label="Instructions"
+                ></v-textarea>
+                <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
+                <v-btn @click="newPrescriptionDialog = false" color="secondary">Cancel</v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
+        <!-- Search Bars -->
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="searchQuery"
+              v-model="searchPatientName"
               label="Search by Patient Name"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchMedication"
+              label="Search by Medication"
               outlined
               dense
               @input="handleSearchInput"
@@ -31,8 +72,14 @@
           hide-default-footer
         >
           <template v-slot:item.actions="{ item }">
-            <v-btn @click="editPrescription(item)" color="warning" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+            <v-row no-gutters>
+              <v-col>
+                <v-btn @click="editPrescription(item)" color="primary" block class="ma-2">Edit</v-btn>
+              </v-col>
+              <v-col>
+                <v-btn @click="confirmDelete(item)" color="error" block class="ma-2">Delete</v-btn>
+              </v-col>
+            </v-row>
           </template>
         </v-data-table>
 
@@ -48,54 +95,37 @@
           </v-col>
         </v-row>
 
-		<!-- Dialog for editing a prescription -->
-		<v-dialog v-model="editDialog" max-width="500">
-		  <v-card>
-			<v-card-title>Edit Prescription</v-card-title>
-			<v-card-text>
-			  <v-form @submit.prevent="updatePrescription">
-				<!-- Patient Full Name Field -->
-				<v-text-field
-				  v-model="editPrescriptionData.patientFullName"
-				  label="Patient Full Name"
-				  required
-				></v-text-field>
-
-				<!-- Patient ID Field -->
-				<v-text-field
-				  v-model="editPrescriptionData.patientId"
-				  label="Patient ID"
-				  type="number"
-				  required
-				></v-text-field>
-
-				<!-- Medication Field -->
-				<v-text-field
-				  v-model="editPrescriptionData.medication"
-				  label="Medication"
-				  required
-				></v-text-field>
-
-				<!-- Dosage Field -->
-				<v-text-field
-				  v-model="editPrescriptionData.dosage"
-				  label="Dosage"
-				  required
-				></v-text-field>
-
-				<!-- Instructions Field -->
-				<v-textarea
-				  v-model="editPrescriptionData.instructions"
-				  label="Instructions"
-				></v-textarea>
-
-				<!-- Action Buttons -->
-				<v-btn type="submit" color="primary">Update</v-btn>
-				<v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
-			  </v-form>
-			</v-card-text>
-		  </v-card>
-		</v-dialog>
+        <!-- Dialog for editing a prescription -->
+        <v-dialog v-model="editDialog" max-width="500">
+          <v-card>
+            <v-card-title>Edit Prescription</v-card-title>
+            <v-card-text>
+              <v-form @submit.prevent="updatePrescription">
+                <v-text-field
+                  v-model="editPrescriptionData.patientFullName"
+                  label="Patient Full Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="editPrescriptionData.medication"
+                  label="Medication"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="editPrescriptionData.dosage"
+                  label="Dosage"
+                  required
+                ></v-text-field>
+                <v-textarea
+                  v-model="editPrescriptionData.instructions"
+                  label="Instructions"
+                ></v-textarea>
+                <v-btn type="submit" color="primary" class="mr-2">Update</v-btn>
+                <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
 
         <!-- Confirmation Dialog for Deletion -->
         <v-dialog v-model="deleteDialog" max-width="400">
@@ -123,11 +153,19 @@ import api from "../utils/api";
 
 const router = useRouter();
 
+// Data for creating a new prescription
+const newPrescriptionDialog = ref(false);
+const newPrescriptionData = ref({
+  patientFullName: '',
+  medication: '',
+  dosage: '',
+  instructions: '',
+});
+
 // Data for editing a prescription
 const editPrescriptionData = ref({
   id: null,
-  patientId: null,
-  patientFullName: '', // Add patientFullName field
+  patientFullName: '',
   medication: '',
   dosage: '',
   instructions: '',
@@ -143,8 +181,9 @@ const editDialog = ref(false);
 const deleteDialog = ref(false);
 const prescriptionToDelete = ref(null); // Stores the prescription to be deleted
 
-// Search query for filtering prescriptions
-const searchQuery = ref('');
+// Search queries for filtering prescriptions
+const searchPatientName = ref('');
+const searchMedication = ref('');
 
 // Pagination state
 const currentPage = ref(1);
@@ -182,14 +221,49 @@ const fetchPrescriptions = async () => {
   }
 };
 
-// Filter prescriptions based on search query
-const filteredPrescriptions = computed(() => {
-  if (!searchQuery.value) {
-    return prescriptions.value; // Return all prescriptions if no search query
+// Create a new prescription
+const createNewPrescription = async () => {
+  try {
+    const response = await api.post('/prescriptions', newPrescriptionData.value);
+    console.log('New prescription created:', response.data);
+
+    // Close the dialog
+    newPrescriptionDialog.value = false;
+
+    // Refresh the prescriptions list
+    fetchPrescriptions();
+
+    // Reset the form data
+    newPrescriptionData.value = {
+      patientFullName: '',
+      medication: '',
+      dosage: '',
+      instructions: '',
+    };
+  } catch (error) {
+    console.error('Failed to create new prescription:', error);
   }
-  return prescriptions.value.filter((prescription) =>
-    prescription.patient.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+};
+
+// Filter prescriptions based on search queries
+const filteredPrescriptions = computed(() => {
+  let filtered = prescriptions.value;
+
+  // Filter by patient name
+  if (searchPatientName.value) {
+    filtered = filtered.filter((prescription) =>
+      prescription.patient.fullName.toLowerCase().includes(searchPatientName.value.toLowerCase())
+    );
+  }
+
+  // Filter by medication
+  if (searchMedication.value) {
+    filtered = filtered.filter((prescription) =>
+      prescription.medication.toLowerCase().includes(searchMedication.value.toLowerCase())
+    );
+  }
+
+  return filtered;
 });
 
 // Handle search input
@@ -214,13 +288,7 @@ const editPrescription = (prescription) => {
 // Update a prescription
 const updatePrescription = async () => {
   try {
-    // Prepare the payload
-    const payload = {
-      ...editPrescriptionData.value,
-      patientFullName: editPrescriptionData.value.patientFullName, // Include patientFullName in the payload
-    };
-
-    const response = await api.put(`/prescriptions/${editPrescriptionData.value.id}`, payload);
+    const response = await api.put(`/prescriptions/${editPrescriptionData.value.id}`, editPrescriptionData.value);
     const updatedPrescription = response.data.updated;
 
     // Find the index of the updated prescription in the prescriptions array
@@ -257,11 +325,6 @@ const deletePrescriptionConfirmed = async () => {
     deleteDialog.value = false; // Close the dialog
   }
 };
-
-// Navigate to the new prescription view
-const navigateToNewPrescription = () => {
-  router.push({ name: 'new-prescription' });
-};
 </script>
 
 <style scoped>
@@ -282,5 +345,4 @@ const navigateToNewPrescription = () => {
 .v-data-table {
   background-color: white;
 }
-
 </style>

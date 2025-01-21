@@ -3,15 +3,62 @@
     <v-card>
       <v-card-title>Lab Results</v-card-title>
       <v-card-text>
-        <!-- Button to navigate to the new lab result view -->
-        <v-btn @click="navigateToNewLabResult" color="primary" class="mb-4">New Lab Result</v-btn>
+        <!-- Button to open the new lab result dialog -->
+        <v-btn @click="newLabResultDialog = true" color="primary" class="mb-4">New Lab Result</v-btn>
 
-        <!-- Search Bar -->
+        <!-- New Lab Result Dialog -->
+        <v-dialog v-model="newLabResultDialog" max-width="500">
+          <v-card>
+            <v-card-title>Create New Lab Result</v-card-title>
+            <v-card-text>
+              <v-form @submit.prevent="createNewLabResult">
+                <v-text-field
+                  v-model="newLabResultData.patientFullName"
+                  label="Patient Full Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newLabResultData.testName"
+                  label="Test Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newLabResultData.result"
+                  label="Result"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newLabResultData.notes"
+                  label="Notes"
+                ></v-text-field>
+                <v-text-field
+                  v-model="newLabResultData.performedAt"
+                  label="Performed At"
+                  type="date"
+                  required
+                ></v-text-field>
+                <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
+                <v-btn @click="newLabResultDialog = false" color="secondary">Cancel</v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
+        <!-- Search Bars -->
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="searchQuery"
+              v-model="searchTestName"
               label="Search by Test Name"
+              outlined
+              dense
+              @input="handleSearchInput"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchPatientName"
+              label="Search by Patient Name"
               outlined
               dense
               @input="handleSearchInput"
@@ -34,8 +81,14 @@
             {{ item.patientFullName }}
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-btn @click="editLabResult(item)" color="warning" small>Edit</v-btn>
-            <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
+            <v-row no-gutters>
+              <v-col>
+                <v-btn @click="editLabResult(item)" color="primary" block class="ma-2">Edit</v-btn>
+              </v-col>
+              <v-col>
+                <v-btn @click="confirmDelete(item)" color="error" block class="ma-2">Delete</v-btn>
+              </v-col>
+            </v-row>
           </template>
         </v-data-table>
 
@@ -62,7 +115,7 @@
                 <v-text-field v-model="editLabResultData.result" label="Result" required></v-text-field>
                 <v-text-field v-model="editLabResultData.notes" label="Notes"></v-text-field>
                 <v-text-field v-model="editLabResultData.performedAt" label="Performed At" type="date" required></v-text-field>
-                <v-btn type="submit" color="primary">Update</v-btn>
+                <v-btn type="submit" color="primary" class="ma-2">Update</v-btn>
                 <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
               </v-form>
             </v-card-text>
@@ -95,6 +148,16 @@ import api from '../utils/api';
 
 const router = useRouter();
 
+// Data for creating a new lab result
+const newLabResultDialog = ref(false);
+const newLabResultData = ref({
+  patientFullName: '',
+  testName: '',
+  result: '',
+  notes: '',
+  performedAt: '',
+});
+
 // Data for editing a lab result
 const editLabResultData = ref({
   id: null,
@@ -115,8 +178,9 @@ const editDialog = ref(false);
 const deleteDialog = ref(false);
 const labResultToDelete = ref(null); // Stores the lab result to be deleted
 
-// Search query for filtering lab results
-const searchQuery = ref('');
+// Search queries for filtering lab results
+const searchTestName = ref('');
+const searchPatientName = ref('');
 
 // Pagination state
 const currentPage = ref(1);
@@ -159,6 +223,31 @@ const fetchLabResults = async () => {
   }
 };
 
+// Create a new lab result
+const createNewLabResult = async () => {
+  try {
+    const response = await api.post('/lab-results', newLabResultData.value);
+    console.log('New lab result created:', response.data);
+
+    // Close the dialog
+    newLabResultDialog.value = false;
+
+    // Refresh the lab results list
+    fetchLabResults();
+
+    // Reset the form data
+    newLabResultData.value = {
+      patientFullName: '',
+      testName: '',
+      result: '',
+      notes: '',
+      performedAt: '',
+    };
+  } catch (error) {
+    console.error('Failed to create new lab result:', error);
+  }
+};
+
 // Format date to dd/mm/yyyy
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -168,14 +257,25 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-// Filter lab results based on search query
+// Filter lab results based on search queries
 const filteredLabResults = computed(() => {
-  if (!searchQuery.value) {
-    return labResults.value; // Return all lab results if no search query
+  let filtered = labResults.value;
+
+  // Filter by test name
+  if (searchTestName.value) {
+    filtered = filtered.filter((labResult) =>
+      labResult.testName.toLowerCase().includes(searchTestName.value.toLowerCase())
+    );
   }
-  return labResults.value.filter((labResult) =>
-    labResult.testName.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+
+  // Filter by patient name
+  if (searchPatientName.value) {
+    filtered = filtered.filter((labResult) =>
+      labResult.patientFullName.toLowerCase().includes(searchPatientName.value.toLowerCase())
+    );
+  }
+
+  return filtered;
 });
 
 // Handle search input
@@ -240,11 +340,6 @@ const deleteLabResultConfirmed = async () => {
     deleteDialog.value = false; // Close the dialog
   }
 };
-
-// Navigate to the new lab result view
-const navigateToNewLabResult = () => {
-  router.push({ name: 'new-lab-result' });
-};
 </script>
 
 <style scoped>
@@ -265,5 +360,4 @@ const navigateToNewLabResult = () => {
 .v-data-table {
   background-color: white;
 }
-
 </style>
