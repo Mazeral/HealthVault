@@ -1,17 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import PatientView from "../views/PatientView.vue";
 import RegisterView from "../views/RegisterView.vue";
 import LabView from "../views/LabView.vue";
-import NewLabResultView from "../views/NewLabResultView.vue";
 import RecordView from "../views/RecordView.vue";
-import NewMedicalRecordView from "../views/NewMedicalRecordView.vue";
 import PrescriptionView from "../views/PrescriptionView.vue";
-import NewPrescriptionView from "../views/NewPrescriptionView.vue";
 import DashboardView from "../views/DashboardView.vue";
 import EditPatientView from "../views/EditPatientView.vue";
-import NewPatientView from "../views/NewPatientView.vue";
 import AdminView from "../views/AdminView.vue"; // Import the new AdminView
 import MyPatientsView from "../views/MyPatientsView.vue";
 import { useAuthStore } from "../stores/auth";
@@ -50,29 +45,14 @@ const router = createRouter({
       component: LabView,
     },
     {
-      path: "/lab/new",
-      name: "new-lab-result",
-      component: NewLabResultView,
-    },
-    {
       path: "/record",
       name: "record",
       component: RecordView,
     },
     {
-      path: "/record/new",
-      name: "new-medical-record",
-      component: NewMedicalRecordView,
-    },
-    {
       path: "/prescription",
       name: "prescription",
       component: PrescriptionView,
-    },
-    {
-      path: "/prescription/new",
-      name: "new-prescription",
-      component: NewPrescriptionView,
     },
     {
       path: "/dashboard",
@@ -84,11 +64,6 @@ const router = createRouter({
       name: "edit-patient",
       component: EditPatientView,
       props: true, // Pass route params as props
-    },
-    {
-      path: "/patients/new-patient",
-      name: "new-patient",
-      component: NewPatientView,
     },
     {
       path: "/staff",
