@@ -86,10 +86,16 @@
       <template v-slot:item.createdAt="{ item }">
         {{ formatDate(item.createdAt) }}
       </template>
-      <template v-slot:item.actions="{ item }">
-        <v-btn @click="editPatient(item)" color="primary" small>Edit</v-btn>
-        <v-btn @click="confirmDelete(item)" color="error" small>Delete</v-btn>
-      </template>
+		<template v-slot:item.actions="{ item }">
+		  <v-row no-gutters>
+			<v-col>
+			  <v-btn @click="editPatient(item)" color="primary" block class="mr-2">Edit</v-btn>
+			</v-col>
+			<v-col>
+			  <v-btn @click="confirmDelete(item)" color="error" block class="ml-2">Delete</v-btn>
+			</v-col>
+		  </v-row>
+		</template>
     </v-data-table>
 
     <!-- Pagination Controls -->

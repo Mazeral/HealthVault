@@ -42,8 +42,8 @@
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="searchPatientName"
-              label="Search by Patient Name"
+              v-model="searchMedication"
+              label="Search by Medication"
               outlined
               dense
               @input="handleSearchInput"
@@ -51,8 +51,8 @@
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="searchMedication"
-              label="Search by Medication"
+              v-model="searchPatientName"
+              label="Search by Patient Name"
               outlined
               dense
               @input="handleSearchInput"
@@ -74,10 +74,10 @@
           <template v-slot:item.actions="{ item }">
             <v-row no-gutters>
               <v-col>
-                <v-btn @click="editPrescription(item)" color="primary" block class="ma-2">Edit</v-btn>
+                <v-btn @click="editPrescription(item)" color="primary" block class="mr-2">Edit</v-btn>
               </v-col>
               <v-col>
-                <v-btn @click="confirmDelete(item)" color="error" block class="ma-2">Delete</v-btn>
+                <v-btn @click="confirmDelete(item)" color="error" block class="ml-2">Delete</v-btn>
               </v-col>
             </v-row>
           </template>

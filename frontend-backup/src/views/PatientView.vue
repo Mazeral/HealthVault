@@ -168,7 +168,7 @@
               @click="editPatient(item)" 
               color="primary" 
               block 
-              class="ma-2"
+              class="mr-2"
             >
               Edit
             </v-btn>
@@ -178,7 +178,7 @@
               @click="confirmDelete(item)" 
               color="error" 
               block 
-              class="ma-2"
+              class="ml-2"
             >
               Delete
             </v-btn>
