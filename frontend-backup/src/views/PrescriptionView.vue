@@ -34,6 +34,10 @@
                 <v-btn type="submit" color="primary" class="mr-2">Create</v-btn>
                 <v-btn @click="newPrescriptionDialog = false" color="secondary">Cancel</v-btn>
               </v-form>
+              <!-- Error message for creating a new prescription -->
+              <v-alert v-if="createError" type="error" class="mt-4">
+                {{ createError }}
+              </v-alert>
             </v-card-text>
           </v-card>
         </v-dialog>
@@ -162,6 +166,9 @@ const newPrescriptionData = ref({
   instructions: '',
 });
 
+// Error message for creating a new prescription
+const createError = ref('');
+
 // Data for editing a prescription
 const editPrescriptionData = ref({
   id: null,
@@ -240,8 +247,13 @@ const createNewPrescription = async () => {
       dosage: '',
       instructions: '',
     };
+
+    // Clear any previous error message
+    createError.value = '';
   } catch (error) {
     console.error('Failed to create new prescription:', error);
+    // Set the error message
+    createError.value = error.response?.data?.message || 'Failed to create prescription. Please try again.';
   }
 };
 

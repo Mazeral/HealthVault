@@ -80,8 +80,8 @@
               <v-form @submit.prevent="updateDoctor">
                 <v-text-field v-model="editDoctorData.name" label="Name" required></v-text-field>
                 <v-text-field v-model="editDoctorData.email" label="Email" required></v-text-field>
-                <v-btn type="submit" color="primary">Update</v-btn>
-                <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
+                <v-btn type="submit" color="primary" class="ma-2">Update</v-btn>
+                <v-btn @click="editDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
               </v-form>
             </v-card-text>
           </v-card>

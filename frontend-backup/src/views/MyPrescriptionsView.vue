@@ -75,45 +75,50 @@
     </v-card>
 
     <!-- New Prescription Dialog -->
-	<v-dialog v-model="newPrescriptionDialog" max-width="500">
-	  <v-card>
-		<v-card-title>New Prescription</v-card-title>
-		<v-card-text>
-		  <v-form @submit.prevent="createPrescription">
-			<!-- Patient Full Name Field -->
-			<v-text-field
-			  v-model="newPrescriptionData.patientFullName"
-			  label="Patient Full Name"
-			  required
-			></v-text-field>
+  <v-dialog v-model="newPrescriptionDialog" max-width="500">
+    <v-card>
+      <v-card-title>New Prescription</v-card-title>
+      <v-card-text>
+        <v-form @submit.prevent="createPrescription">
+          <!-- Patient Full Name Field -->
+          <v-text-field
+            v-model="newPrescriptionData.patientFullName"
+            label="Patient Full Name"
+            required
+          ></v-text-field>
 
-			<!-- Medication Field -->
-			<v-text-field
-			  v-model="newPrescriptionData.medication"
-			  label="Medication"
-			  required
-			></v-text-field>
+          <!-- Medication Field -->
+          <v-text-field
+            v-model="newPrescriptionData.medication"
+            label="Medication"
+            required
+          ></v-text-field>
 
-			<!-- Dosage Field -->
-			<v-text-field
-			  v-model="newPrescriptionData.dosage"
-			  label="Dosage"
-			  required
-			></v-text-field>
+          <!-- Dosage Field -->
+          <v-text-field
+            v-model="newPrescriptionData.dosage"
+            label="Dosage"
+            required
+          ></v-text-field>
 
-			<!-- Instructions Field -->
-			<v-text-field
-			  v-model="newPrescriptionData.instructions"
-			  label="Instructions"
-			></v-text-field>
+          <!-- Instructions Field -->
+          <v-text-field
+            v-model="newPrescriptionData.instructions"
+            label="Instructions"
+          ></v-text-field>
 
-			<!-- Action Buttons -->
-			<v-btn type="submit" color="primary">Create</v-btn>
-			<v-btn @click="newPrescriptionDialog = false" color="secondary">Cancel</v-btn>
-		  </v-form>
-		</v-card-text>
-	  </v-card>
-	</v-dialog>
+          <!-- Action Buttons -->
+          <v-btn type="submit" color="primary" class="ma-2">Create</v-btn>
+          <v-btn @click="newPrescriptionDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
+
+          <!-- Error message for creating a new prescription -->
+          <v-alert v-if="createPrescriptionError" type="error" class="mt-4">
+            {{ createPrescriptionError }}
+          </v-alert>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 
     <!-- Edit Prescription Dialog -->
 	<v-dialog v-model="editPrescriptionDialog" max-width="500">
@@ -149,8 +154,8 @@
 			></v-text-field>
 
 			<!-- Action Buttons -->
-			<v-btn type="submit" color="primary">Update</v-btn>
-			<v-btn @click="editPrescriptionDialog = false" color="secondary">Cancel</v-btn>
+			<v-btn type="submit" color="primary" class="ma-2">Update</v-btn>
+			<v-btn @click="editPrescriptionDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
 		  </v-form>
 		</v-card-text>
 	  </v-card>
@@ -182,6 +187,7 @@ const searchQuery = ref(''); // Search query for medication
 const patientSearchQuery = ref(''); // Search query for patient name
 const loading = ref(false); // Loading state for fetching records
 const loadingUpdate = ref(false); // Loading state for updating a record
+const createPrescriptionError = ref('');
 
 // Pagination state
 const currentPage = ref(1);
@@ -309,8 +315,12 @@ const createPrescription = async () => {
       dosage: '',
       instructions: '',
     };
+
+    // Clear any previous error message
+    createPrescriptionError.value = '';
   } catch (error) {
     console.error('Failed to create prescription:', error);
+    createPrescriptionError.value = error.response?.data?.message || 'Failed to create prescription. Please try again.';
   }
 };
 

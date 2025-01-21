@@ -3,12 +3,12 @@
     <v-card>
       <v-card-title>My Lab Results</v-card-title>
       <v-card-text>
-
-		  <v-row>
+        <v-row>
           <v-col cols="12" md="6">
             <v-btn color="primary" @click="openNewLabResultDialog">New Lab Result</v-btn>
           </v-col>
-		  </v-row>
+        </v-row>
+
         <!-- Search Bar -->
         <v-row class="mt-4">
           <v-col cols="12" md="6">
@@ -56,16 +56,16 @@
           <template v-slot:item.patientFullName="{ item }">
             {{ item.patientFullName }}
           </template>
-			<template v-slot:item.actions="{ item }">
-			  <v-row no-gutters>
-				<v-col>
-				  <v-btn @click="editLabResult(item)" color="primary" block class="ma-2">Edit</v-btn>
-				</v-col>
-				<v-col>
-				  <v-btn @click="confirmDelete(item)" color="error" class="ma-2" block>Delete</v-btn>
-				</v-col>
-			  </v-row>
-			</template>
+          <template v-slot:item.actions="{ item }">
+            <v-row no-gutters>
+              <v-col>
+                <v-btn @click="editLabResult(item)" color="primary" block class="ma-2">Edit</v-btn>
+              </v-col>
+              <v-col>
+                <v-btn @click="confirmDelete(item)" color="error" class="ma-2" block>Delete</v-btn>
+              </v-col>
+            </v-row>
+          </template>
           <template v-slot:no-data>
             <v-alert type="info">No data available</v-alert>
           </template>
@@ -100,9 +100,13 @@
             <v-text-field v-model="newLabResultData.result" label="Result" required></v-text-field>
             <v-text-field v-model="newLabResultData.notes" label="Notes"></v-text-field>
             <v-text-field v-model="newLabResultData.performedAt" label="Performed At" type="date" required></v-text-field>
-            <v-btn type="submit" color="primary">Create</v-btn>
-            <v-btn @click="newLabResultDialog = false" color="secondary">Cancel</v-btn>
+            <v-btn type="submit" color="primary" class="ma-2">Create</v-btn>
+            <v-btn @click="newLabResultDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
           </v-form>
+          <!-- Error message for creating a new lab result -->
+          <v-alert v-if="createError" type="error" class="mt-4">
+            {{ createError }}
+          </v-alert>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -122,8 +126,8 @@
             <v-text-field v-model="editLabResultData.result" label="Result" required></v-text-field>
             <v-text-field v-model="editLabResultData.notes" label="Notes"></v-text-field>
             <v-text-field v-model="editLabResultData.performedAt" label="Performed At" type="date" required></v-text-field>
-            <v-btn type="submit" color="primary">Update</v-btn>
-            <v-btn @click="editLabResultDialog = false" color="secondary">Cancel</v-btn>
+            <v-btn type="submit" color="primary" class="ma-2">Update</v-btn>
+            <v-btn @click="editLabResultDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
           </v-form>
         </v-card-text>
       </v-card>
@@ -184,6 +188,9 @@ const newLabResultData = ref({
   notes: '',
   performedAt: '',
 });
+
+// Error message for creating a new lab result
+const createError = ref('');
 
 // Edit lab result dialog state
 const editLabResultDialog = ref(false);
@@ -277,6 +284,7 @@ const formatDate = (dateString) => {
 // Open new lab result dialog
 const openNewLabResultDialog = () => {
   newLabResultDialog.value = true;
+  createError.value = ''; // Clear any previous error message
 };
 
 // Create a new lab result
@@ -312,6 +320,7 @@ const createLabResult = async () => {
     showSnackbar('Lab result created successfully!', 'success');
   } catch (error) {
     console.error('Failed to create lab result:', error);
+    createError.value = error.response?.data?.message || 'Failed to create lab result. Please try again.';
     showSnackbar(`Failed to create lab result: ${error.message}`, 'error');
   }
 };
@@ -390,5 +399,4 @@ onMounted(() => {
 .v-data-table {
   background-color: white;
 }
-
 </style>

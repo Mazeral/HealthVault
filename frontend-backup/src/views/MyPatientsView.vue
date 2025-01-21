@@ -10,11 +10,11 @@
       </v-col>
     </v-row>
 
-	<v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <v-btn color="primary" @click="openNewPatientDialog">New Patient</v-btn>
       </v-col>
-	</v-row>
+    </v-row>
 
     <!-- Search and Filter Controls -->
     <v-row class="mt-4">
@@ -89,16 +89,16 @@
       <template v-slot:item.createdAt="{ item }">
         {{ formatDate(item.createdAt) }}
       </template>
-		<template v-slot:item.actions="{ item }">
-		  <v-row no-gutters>
-			<v-col>
-			  <v-btn @click="editPatient(item)" color="primary" block class="mr-2">Edit</v-btn>
-			</v-col>
-			<v-col>
-			  <v-btn @click="confirmDelete(item)" color="error" block class="ml-2">Delete</v-btn>
-			</v-col>
-		  </v-row>
-		</template>
+      <template v-slot:item.actions="{ item }">
+        <v-row no-gutters>
+          <v-col>
+            <v-btn @click="editPatient(item)" color="primary" block class="mr-2">Edit</v-btn>
+          </v-col>
+          <v-col>
+            <v-btn @click="confirmDelete(item)" color="error" block class="ml-2">Delete</v-btn>
+          </v-col>
+        </v-row>
+      </template>
     </v-data-table>
 
     <!-- Pagination Controls -->
@@ -153,8 +153,8 @@
               required
               item-title="text"
             ></v-select>
-            <v-btn type="submit" color="primary">Update</v-btn>
-            <v-btn @click="editDialog = false" color="secondary">Cancel</v-btn>
+            <v-btn type="submit" color="primary" class="ma-2">Update</v-btn>
+            <v-btn @click="editDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
           </v-form>
         </v-card-text>
       </v-card>
@@ -185,9 +185,13 @@
               required
               item-title="text"
             ></v-select>
-            <v-btn type="submit" color="primary">Create</v-btn>
-            <v-btn @click="newPatientDialog = false" color="secondary">Cancel</v-btn>
+            <v-btn type="submit" color="primary" class="ma-2">Create</v-btn>
+            <v-btn @click="newPatientDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
           </v-form>
+          <!-- Error message for creating a new patient -->
+          <v-alert v-if="createError" type="error" class="mt-4">
+            {{ createError }}
+          </v-alert>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -200,8 +204,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth'; // Import the auth store
 import api from '../utils/api';
 
-const authStore = useAuthStore(); // Initialize the auth storemport api from "../utils/api";
-
+const authStore = useAuthStore(); // Initialize the auth store
 const router = useRouter();
 const patients = ref([]); // Original list of patients
 const statistics = ref({ total: 0, active: 0, inactive: 0 });
@@ -248,6 +251,9 @@ const newPatientData = ref({
   bloodGroup: '',
 });
 
+// Error message for creating a new patient
+const createError = ref('');
+
 // Blood group options for the v-select
 const bloodGroupOptions = [
   { text: 'A+', value: 'A_PLUS' },
@@ -292,6 +298,9 @@ const fetchPatients = async () => {
 
     // Update the patients list
     patients.value = response.data.patients;
+
+    // Update the total patients count in statistics
+    statistics.value.total = patients.value.length;
   } catch (error) {
     console.error('Failed to fetch patients:', error);
     alert('Failed to fetch patients. Please try again later.');
@@ -449,6 +458,7 @@ const createPatient = async () => {
   try {
     const response = await api.post('/patients', newPatientData.value);
     patients.value.push(response.data); // Add the new patient to the list
+    statistics.value.total = patients.value.length; // Update the total patients count
     newPatientDialog.value = false; // Close the dialog
     newPatientData.value = { // Reset the form
       fullName: '',
@@ -459,8 +469,10 @@ const createPatient = async () => {
       sex: '',
       bloodGroup: '',
     };
+    createError.value = ''; // Clear any previous error message
   } catch (error) {
     console.error('Failed to create patient:', error);
+    createError.value = error.response?.data?.message || 'Failed to create patient. Please try again.';
   }
 };
 

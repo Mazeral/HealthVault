@@ -64,7 +64,7 @@ const logout = () => {
     <!-- App Bar -->
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-toolbar-title>My Application</v-toolbar-title>
+		  <v-toolbar-title><strong>HealthVault</strong></v-toolbar-title>
     </v-app-bar>
 
     <!-- Main Content -->

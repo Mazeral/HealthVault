@@ -5,11 +5,11 @@
       <!-- Add a medical record button -->
       <v-card-text>
         <!-- Search Bar -->
-	  <v-row>
-        <v-col cols="12" md="6">
-          <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
-        </v-col>
-	  </v-row>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-btn color="primary" @click="openNewMedicalRecordDialog">New Medical Record</v-btn>
+          </v-col>
+        </v-row>
         <v-row class="mt-4">
           <v-col cols="12" md="6">
             <v-text-field
@@ -30,8 +30,8 @@
             ></v-text-field>
           </v-col>
         </v-row>
-      <v-row>
-      </v-row>
+        <v-row>
+        </v-row>
 
         <!-- Medical Records Table -->
         <v-data-table
@@ -55,16 +55,16 @@
           <template v-slot:item.createdAt="{ item }">
             {{ formatDate(item.createdAt) }}
           </template>
-			<template v-slot:item.actions="{ item }">
-			  <v-row no-gutters>
-				<v-col cols="auto">
-				  <v-btn @click="editMedicalRecord(item)" color="primary" class="mr-2">Edit</v-btn>
-				</v-col>
-				<v-col cols="auto">
-				  <v-btn @click="confirmDelete(item)" color="error">Delete</v-btn>
-				</v-col>
-			  </v-row>
-			</template>
+          <template v-slot:item.actions="{ item }">
+            <v-row no-gutters>
+              <v-col cols="auto">
+                <v-btn @click="editMedicalRecord(item)" color="primary" class="mr-2">Edit</v-btn>
+              </v-col>
+              <v-col cols="auto">
+                <v-btn @click="confirmDelete(item)" color="error">Delete</v-btn>
+              </v-col>
+            </v-row>
+          </template>
         </v-data-table>
 
         <!-- Pagination Controls -->
@@ -82,37 +82,42 @@
     </v-card>
 
     <!-- New Medical Record Dialog -->
-    <v-dialog v-model="newMedicalRecordDialog" max-width="500">
-      <v-card>
-        <v-card-title>New Medical Record</v-card-title>
-        <v-card-text>
-          <v-form @submit.prevent="createMedicalRecord">
-            <!-- Patient Full Name Field (Optional) -->
-            <v-text-field
-              v-model="newMedicalRecordData.patientFullName"
-              label="Patient Full Name"
-            ></v-text-field>
+  <v-dialog v-model="newMedicalRecordDialog" max-width="500">
+    <v-card>
+      <v-card-title>New Medical Record</v-card-title>
+      <v-card-text>
+        <v-form @submit.prevent="createMedicalRecord">
+          <!-- Patient Full Name Field (Optional) -->
+          <v-text-field
+            v-model="newMedicalRecordData.patientFullName"
+            label="Patient Full Name"
+          ></v-text-field>
 
-            <!-- Diagnosis Field -->
-            <v-text-field
-              v-model="newMedicalRecordData.diagnosis"
-              label="Diagnosis"
-              required
-            ></v-text-field>
+          <!-- Diagnosis Field -->
+          <v-text-field
+            v-model="newMedicalRecordData.diagnosis"
+            label="Diagnosis"
+            required
+          ></v-text-field>
 
-            <!-- Notes Field -->
-            <v-text-field
-              v-model="newMedicalRecordData.notes"
-              label="Notes"
-            ></v-text-field>
+          <!-- Notes Field -->
+          <v-text-field
+            v-model="newMedicalRecordData.notes"
+            label="Notes"
+          ></v-text-field>
 
-            <!-- Action Buttons -->
-            <v-btn type="submit" color="primary">Create</v-btn>
-            <v-btn @click="newMedicalRecordDialog = false" color="secondary">Cancel</v-btn>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+          <!-- Action Buttons -->
+          <v-btn type="submit" color="primary" class="ma-2">Create</v-btn>
+          <v-btn @click="newMedicalRecordDialog = false" color="secondary" class="ma-2">Cancel</v-btn>
+
+          <!-- Error message for creating a new medical record -->
+          <v-alert v-if="createMedicalRecordError" type="error" class="mt-4">
+            {{ createMedicalRecordError }}
+          </v-alert>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 
     <!-- Edit Medical Record Dialog -->
     <v-dialog v-model="editMedicalRecordDialog" max-width="500">
@@ -162,6 +167,14 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Snackbar for error messages -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000">
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false">Close</v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -193,6 +206,7 @@ const showSnackbar = (message, color = 'success') => {
 const currentPage = ref(1);
 const itemsPerPage = ref(10); // Number of items per page
 const totalPages = computed(() => Math.ceil(filteredMedicalRecords.value.length / itemsPerPage.value));
+const createMedicalRecordError = ref('');
 
 // Table headers
 const headers = [
@@ -349,12 +363,15 @@ const createMedicalRecord = async () => {
     };
     console.log("Form reset"); // Debugging: Log the form reset
 
+    // Clear any previous error message
+    createMedicalRecordError.value = '';
+
     // Show success message
     showSnackbar('Medical record created successfully!', 'success');
     console.log("Snackbar shown");
   } catch (error) {
     console.error('Failed to create medical record:', error);
-    showSnackbar('Failed to create medical record', 'error');
+    createMedicalRecordError.value = error.response?.data?.message || 'Failed to create medical record. Please try again.';
   }
 };
 
