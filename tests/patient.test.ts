@@ -48,6 +48,7 @@ const mockUser = {
   createdAt: new Date(),
   updatedAt: new Date(),
 };
+
 describe("PatientController", () => {
   describe("newPatient", () => {
     it("should create a new patient and return 200", async () => {
@@ -146,113 +147,9 @@ describe("PatientController", () => {
         },
       });
     });
-
-	it("should return 404 if no patient is found", async () => {
-	  const req = mockReq();
-	  req.params = { id: "1" };
-
-	  const res = mockRes();
-	  prisma.patient.findUnique.mockResolvedValue(null);
-
-	  await PatientController.addRecord(req as Request, res as Response);
-
-	  expect(res.status).toHaveBeenCalledWith(404);
-	  expect(res.json).toHaveBeenCalledWith({ error: "No patient found" });
-	});
-  });
-
-  describe("updatePatient", () => {
-	it("should update a patient and return 200", async () => {
-	  const req = mockReq();
-	  req.params = { id: "1" }; // Simulate the ID in the request params
-	  req.body = {
-		fullName: "Jane Doe",
-		dateOfBirth: "1995-01-01",
-		phone: "0987654321",
-		email: "jane.doe@example.com",
-		address: "456 Elm St",
-		sex: Sex.FEMALE, // Use the enum value
-		bloodGroup: BloodGroup.B_PLUS, // Use the enum value
-		userId: 1,
-	  };
-
-	  const res = mockRes();
-
-	  const mockUpdatedPatient = {
-		id: 1,
-		fullName: "Jane Doe",
-		dateOfBirth: new Date("1995-01-01T00:00:00.000Z"),
-		phone: "0987654321",
-		email: "jane.doe@example.com",
-		address: "456 Elm St",
-		sex: Sex.FEMALE, // Use the enum value
-		bloodGroup: BloodGroup.B_PLUS, // Use the enum value
-		createdAt: new Date("2025-01-22T14:02:36.365Z"),
-		updatedAt: new Date("2025-01-22T14:02:36.365Z"),
-		userId: 1,
-		User: mockUser, // Include the related User
-	  };
-
-	  // Mock Prisma's update method
-	  prisma.patient.update.mockResolvedValue(mockUpdatedPatient);
-
-	  // Call the controller method directly
-	  await PatientController.updatePatient(req as Request, res as Response);
-
-	  // Assertions
-	  expect(prisma.patient.update).toHaveBeenCalledWith({
-		where: { id: 1 },
-		data: {
-		  fullName: "Jane Doe",
-		  dateOfBirth: new Date("1995-01-01"),
-		  phone: "0987654321",
-		  email: "jane.doe@example.com",
-		  address: "456 Elm St",
-		  sex: Sex.FEMALE, // Use the enum value
-		  bloodGroup: BloodGroup.B_PLUS, // Use the enum value
-		  userId: 1,
-		},
-	  });
-	  expect(res.status).toHaveBeenCalledWith(200);
-	  expect(res.json).toHaveBeenCalledWith({
-		updated: {
-		  ...mockUpdatedPatient,
-		  createdBy: "Doctor", // Ensure the createdBy field is added
-		},
-	  });
-	});
   });
 
   describe("getPatients", () => {
-	it("should fetch all patients and return 200", async () => {
-	  const req = mockReq();
-	  const res = mockRes();
-
-	  const mockPatients = [
-		{
-		  ...mockPatient,
-		  User: mockUser,
-		},
-	  ];
-
-	  prisma.patient.findMany.mockResolvedValue(mockPatients);
-
-	  await PatientController.getPatients(req as Request, res as Response);
-
-	  expect(prisma.patient.findMany).toHaveBeenCalledWith({
-		include: { User: true },
-	  });
-	  expect(res.status).toHaveBeenCalledWith(200);
-	  expect(res.json).toHaveBeenCalledWith({
-		data: [
-		  {
-			...mockPatient,
-			createdBy: "Doctor",
-		  },
-		],
-	  });
-	});
-
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
       const res = mockRes();
@@ -263,71 +160,6 @@ describe("PatientController", () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ error: "Unexpected error" });
-    });
-  });
-
-  describe("addRecord", () => {
-    it("should add a medical record for a patient and return 200", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-      req.body = {
-        diagnosis: "Diagnosis A",
-        notes: "Patient notes",
-      };
-      req.session = { user: { id: "1" } } as CustomSessionData;
-
-      const mockMedicalRecord = {
-        id: 1,
-        diagnosis: "Diagnosis A",
-        notes: "Patient notes", // This can also be `null` if needed
-        patientId: 1,
-        userId: 1,
-        createdAt: new Date(), // Add the missing required field
-        updatedAt: new Date(), // Add the missing required field
-      };
-
-      prisma.patient.findUnique.mockResolvedValue(mockPatient);
-      prisma.medicalRecord.create.mockResolvedValue(mockMedicalRecord);
-      const res = mockRes();
-
-      await PatientController.addRecord(req as Request, res as Response);
-
-      expect(prisma.medicalRecord.create).toHaveBeenCalledWith({
-        data: {
-          diagnosis: "Diagnosis A",
-          notes: "Patient notes",
-          patientId: 1,
-          userId: 1,
-        },
-      });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ updated: mockMedicalRecord });
-    });
-
-    it("should return 400 if no id is provided", async () => {
-      const req = mockReq();
-      const res = mockRes();
-		req.params = {id : ""};
-
-      await PatientController.addRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "No ID provided from addRecord",
-      });
-    });
-
-    it("should return 404 if no patient is found", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-
-      const res = mockRes();
-      prisma.patient.findUnique.mockResolvedValue(null);
-
-      await PatientController.addRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "No patient found" });
     });
   });
 

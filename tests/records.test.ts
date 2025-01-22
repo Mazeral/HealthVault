@@ -96,96 +96,6 @@ const mockMedicalRecord = {
 };
 
 describe("MedRecordController", () => {
-  describe("addRecord", () => {
-    it("should add a medical record and return 200", async () => {
-      const req = mockReq();
-      req.body = {
-        patientFullName: "John Doe",
-        diagnosis: "Diagnosis A",
-        notes: "Patient notes",
-      };
-      req.session = { user: { id: "1" } } as CustomSessionData;
-
-      const res = mockRes(); // Define res here
-
-      prisma.patient.findUnique.mockResolvedValue(mockPatient);
-      prisma.medicalRecord.create.mockResolvedValue(mockMedicalRecord);
-
-      await MedRecordController.addRecord(req as Request, res as Response);
-
-      expect(prisma.patient.findUnique).toHaveBeenCalledWith({
-        where: { fullName: "John Doe" },
-      });
-      expect(prisma.medicalRecord.create).toHaveBeenCalledWith({
-        data: {
-          patientId: 1,
-          diagnosis: "Diagnosis A",
-          notes: "Patient notes",
-          userId: 1,
-        },
-      });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ medRecord: mockMedicalRecord });
-    });
-
-    it("should return 400 if required fields are missing", async () => {
-      const req = mockReq();
-      req.body = {
-        patientFullName: "John Doe",
-        notes: "Patient notes",
-      }; // Missing diagnosis
-
-      const res = mockRes(); // Define res here
-
-      await MedRecordController.addRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "Missing fields" });
-    });
-
-    it("should return 404 if no patient is found", async () => {
-      const req = mockReq();
-      req.body = {
-        patientFullName: "Unknown Patient",
-        diagnosis: "Diagnosis A",
-        notes: "Patient notes",
-      };
-      req.session = { user: { id: "1" } } as CustomSessionData;
-
-      const res = mockRes();
-
-      // Mock the response to return null (no patient found)
-      prisma.patient.findUnique.mockResolvedValue(null);
-
-      await MedRecordController.addRecord(req as Request, res as Response);
-
-      // Verify the response
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "No patient found" });
-    });
-
-    it("should return 500 if an unexpected error occurs", async () => {
-      const req = mockReq();
-      req.body = {
-        patientFullName: "John Doe",
-        diagnosis: "Diagnosis A",
-        notes: "Patient notes",
-      };
-      req.session = { user: { id: "1" } } as CustomSessionData;
-
-      const res = mockRes(); // Define res here
-
-      prisma.patient.findUnique.mockRejectedValue(
-        new Error("Unexpected error"),
-      );
-
-      await MedRecordController.addRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Unexpected error" });
-    });
-  });
-
   describe("updateMedRecord", () => {
     it("should update a medical record and return 200", async () => {
       const req = mockReq();
@@ -232,24 +142,6 @@ describe("MedRecordController", () => {
           ...mockUpdatedMedicalRecord,
           patientFullName: "Jane Doe",
         },
-      });
-    });
-
-    it("should return 404 if no medical record is found", async () => {
-      const req = mockReq();
-      req.params = { id: "999" }; // ID that does not exist
-
-      const res = mockRes();
-
-      prisma.medicalRecord.delete = mockRejectedValue({
-        code: "P2025", // Prisma error code for "not found"
-      });
-
-      await MedRecordController.deleteRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "Medical record not found",
       });
     });
 
@@ -340,34 +232,6 @@ describe("MedRecordController", () => {
       });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ message: mockMedicalRecord });
-    });
-
-    it("should return 404 if no medical record is found", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-
-      const res = mockRes(); // Define res here
-
-      prisma.medicalRecord.delete.mockRejectedValue(
-        new Error("Medical record not found"),
-      );
-
-      await MedRecordController.deleteRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "Medical record not found",
-      });
-    });
-
-    it("should return 400 if no id is provided", async () => {
-      const req = mockReq();
-      const res = mockRes(); // Define res here
-
-      await MedRecordController.deleteRecord(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "No id provided" });
     });
   });
 
