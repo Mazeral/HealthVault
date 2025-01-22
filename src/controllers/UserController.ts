@@ -128,6 +128,7 @@ class UserController {
       const result = await prisma.user.update({
         where: { id: Number(id) },
         data,
+        include: { patients: true }, // Include the `patients` relation
       });
 
       res.status(200).json({ updated: result });
@@ -244,7 +245,13 @@ class UserController {
 
       res.status(200).json({ updated: updatedDoctor });
     } catch (error) {
-      res.status(500).json({ error: "Failed to update doctor" });
+      if (error instanceof Error) {
+        if (error.message === "Missing required fields") {
+          res.status(400).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: "Failed to update doctor" }); // Update the error message
+        }
+      }
     }
   }
 
@@ -263,6 +270,9 @@ class UserController {
 
       res.status(200).json({ message: "Doctor deleted successfully" });
     } catch (error) {
+      if (error instanceof Error)
+        if (error.message === "Missing user ID")
+          res.status(400).json({ error: error.message });
       res.status(500).json({ error: "Failed to delete doctor" });
     }
   }

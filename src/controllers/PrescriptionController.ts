@@ -46,7 +46,9 @@ class PrescriptionController {
       res.status(200).json({ prescription });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Missing required fields") {
+        if (error.message === "No patient found")
+          res.status(404).json({ error: error.message });
+        else if (error.message === "Missing required fields") {
           res.status(400).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
@@ -74,10 +76,9 @@ class PrescriptionController {
       res.status(200).json({ prescription });
     } catch (error) {
       if (error instanceof Error) {
-        if (
-          error.message === "No ID provided" ||
-          error.message === "Prescription not found"
-        ) {
+        if (error.message === "No ID provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "Prescription not found") {
           res.status(404).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });
@@ -155,10 +156,9 @@ class PrescriptionController {
       res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
-        if (
-          error.message === "No ID provided" ||
-          error.message === "Prescription not found"
-        ) {
+        if (error.message === "No ID provided")
+          res.status(400).json({ error: error.message });
+        else if (error.message === "Prescription not found") {
           res.status(404).json({ error: error.message });
         } else {
           res.status(500).json({ error: error.message });

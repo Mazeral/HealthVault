@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import createObject from "../utils/utilFunctions";
 import { CustomSessionData } from "../types";
+import { Prisma } from "@prisma/client";
 
 class MedRecordController {
   // Add a medical record for a patient
@@ -11,39 +12,50 @@ class MedRecordController {
       const diagnosis = req.body.diagnosis;
       const notes = req.body.notes;
 
-      if (!patientFullName || !diagnosis || diagnosis === "")
-        throw Error("Missing fields");
+      // Validate required fields
+      if (!patientFullName || !diagnosis || diagnosis === "") {
+        throw new Error("Missing fields");
+      }
 
       // Get the user ID from the session
       const session = req.session as CustomSessionData;
       const userId = Number(session.user?.id);
 
-      if (!userId || userId === undefined) {
+      if (!userId) {
         throw new Error("Unauthorized: No user ID found in session");
       }
+
+      // Find the patient by full name
       const patient = await prisma.patient.findUnique({
         where: {
           fullName: patientFullName,
         },
       });
 
-      if (patient)
-        if (userId !== undefined) {
-          const medRecord = await prisma.medicalRecord.create({
-            data: {
-              patientId: Number(patient.id),
-              diagnosis: diagnosis,
-              notes: notes,
-              userId: userId,
-            },
-          });
-          res.status(200).json({ medRecord });
-        }
+      if (!patient) {
+        throw new Error("No patient found");
+      }
+
+      // Create the medical record
+      const medRecord = await prisma.medicalRecord.create({
+        data: {
+          patientId: patient.id,
+          diagnosis: diagnosis,
+          notes: notes,
+          userId: userId,
+        },
+      });
+
+      res.status(200).json({ medRecord });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Missing fields")
+        if (error.message === "Missing fields") {
           res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else if (error.message === "No patient found") {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
@@ -107,7 +119,13 @@ class MedRecordController {
       res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
+        // Handle Prisma "not found" error
         if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2025"
+        ) {
+          res.status(404).json({ error: "No medical record found" });
+        } else if (
           error.message === "No medical record ID provided" ||
           error.message === "No fields provided for update" ||
           error.message === "Invalid patient full name provided" ||
@@ -156,18 +174,26 @@ class MedRecordController {
     try {
       const id = Number(req.params.id) || null;
 
-      if (!id) throw Error("No id provided");
+      if (!id) throw new Error("No id provided");
+
       const deleteRecord = await prisma.medicalRecord.delete({
         where: {
           id: id,
         },
       });
+
       res.status(200).json({ message: deleteRecord });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No id provided")
-          res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        if (error.message === "No id provided") {
+          res.status(404).json({ error: error.message });
+        } else if (
+          (error as any).code === "P2025" // Specific error code for not found
+        ) {
+          res.status(404).json({ error: "Medical record not found" });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }

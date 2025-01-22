@@ -18,19 +18,23 @@ class PatientController {
     const session = req.session as CustomSessionData;
     const userId = Number(session.user?.id);
 
-    if (!userId) {
-      throw Error("Not authenticated");
-    }
-
     try {
+      // Check for missing fullName first
       if (!fullName || fullName.trim() === "") {
         throw new Error("Full name is required");
       }
 
+      // Check for missing sex
       if (!sex) {
         throw new Error("Sex is required");
       }
 
+      // Check for authentication
+      if (!userId) {
+        throw new Error("Not authenticated");
+      }
+
+      // Create the patient
       const result = await prisma.patient.create({
         data: {
           fullName: fullName,
@@ -49,7 +53,7 @@ class PatientController {
       if (error instanceof Error) {
         if (
           error.message === "Full name is required" ||
-          error.message === "Sex and age are required"
+          error.message === "Sex is required"
         ) {
           res.status(400).json({ error: error.message });
         } else {
@@ -219,10 +223,12 @@ class PatientController {
       const userId = Number(session.user?.id);
 
       if (!userId) {
-        throw Error("Not authenticated");
+        throw new Error("Not authenticated");
       }
 
-      if (!patientId) throw new Error("No ID provided from addRecord");
+      if (!patientId) {
+        throw new Error("No ID provided from addRecord");
+      }
 
       const patient = await prisma.patient.findUnique({
         where: {
@@ -230,7 +236,9 @@ class PatientController {
         },
       });
 
-      if (!patient) throw new Error("No patient found");
+      if (!patient) {
+        throw new Error("No patient found");
+      }
 
       const record = await prisma.medicalRecord.create({
         data: {

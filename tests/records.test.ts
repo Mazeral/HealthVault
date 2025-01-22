@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import prisma from "./singleton";
 import MedRecordController from "../src/controllers/MedRecordController";
 import { CustomSessionData } from "../src/types";
-import { Role, Sex, BloodGroup } from '@prisma/client';
+import { Role, Sex, BloodGroup } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 // Mocking the req object
 const mockReq = (): Partial<Request> => ({
@@ -23,7 +24,6 @@ beforeEach(() => {
   jest.clearAllMocks(); // Clear all mocks before each test
 });
 
-
 // Mock data for Patient
 const mockPatient = {
   id: 1,
@@ -37,7 +37,8 @@ const mockPatient = {
   userId: 1,
   createdAt: new Date(),
   updatedAt: new Date(),
-  User: { // Optional: Mock the related user
+  User: {
+    // Optional: Mock the related user
     id: 1,
     name: "Doctor",
     email: "doctor@example.com",
@@ -68,7 +69,8 @@ const mockMedicalRecord = {
   userId: 1,
   createdAt: new Date(),
   updatedAt: new Date(),
-  patient: { // Optional: Mock the related patient
+  patient: {
+    // Optional: Mock the related patient
     id: 1,
     fullName: "John Doe",
     dateOfBirth: new Date("1990-01-01"),
@@ -81,7 +83,8 @@ const mockMedicalRecord = {
     createdAt: new Date(),
     updatedAt: new Date(),
   },
-  User: { // Optional: Mock the related user
+  User: {
+    // Optional: Mock the related user
     id: 1,
     name: "Doctor",
     email: "doctor@example.com",
@@ -102,6 +105,8 @@ describe("MedRecordController", () => {
         notes: "Patient notes",
       };
       req.session = { user: { id: "1" } } as CustomSessionData;
+
+      const res = mockRes(); // Define res here
 
       prisma.patient.findUnique.mockResolvedValue(mockPatient);
       prisma.medicalRecord.create.mockResolvedValue(mockMedicalRecord);
@@ -130,7 +135,7 @@ describe("MedRecordController", () => {
         notes: "Patient notes",
       }; // Missing diagnosis
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await MedRecordController.addRecord(req as Request, res as Response);
 
@@ -147,10 +152,14 @@ describe("MedRecordController", () => {
       };
       req.session = { user: { id: "1" } } as CustomSessionData;
 
+      const res = mockRes();
+
+      // Mock the response to return null (no patient found)
       prisma.patient.findUnique.mockResolvedValue(null);
 
       await MedRecordController.addRecord(req as Request, res as Response);
 
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ error: "No patient found" });
     });
@@ -164,7 +173,11 @@ describe("MedRecordController", () => {
       };
       req.session = { user: { id: "1" } } as CustomSessionData;
 
-      prisma.patient.findUnique.mockRejectedValue(new Error("Unexpected error"));
+      const res = mockRes(); // Define res here
+
+      prisma.patient.findUnique.mockRejectedValue(
+        new Error("Unexpected error"),
+      );
 
       await MedRecordController.addRecord(req as Request, res as Response);
 
@@ -182,6 +195,8 @@ describe("MedRecordController", () => {
         notes: "Updated Notes",
         patientFullName: "Jane Doe",
       };
+
+      const res = mockRes(); // Define res here
 
       const mockUpdatedMedicalRecord = {
         ...mockMedicalRecord,
@@ -222,25 +237,25 @@ describe("MedRecordController", () => {
 
     it("should return 404 if no medical record is found", async () => {
       const req = mockReq();
-      req.params = { id: "1" };
+      req.params = { id: "999" }; // ID that does not exist
 
       const res = mockRes();
-      prisma.medicalRecord.findUnique.mockResolvedValue(null);
 
-      await MedRecordController.updateMedRecord(
-        req as Request,
-        res as Response,
-      );
+      prisma.medicalRecord.delete = mockRejectedValue({
+        code: "P2025", // Prisma error code for "not found"
+      });
+
+      await MedRecordController.deleteRecord(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
-        error: "No medical record ID provided",
+        error: "Medical record not found",
       });
     });
 
     it("should return 400 if no id is provided", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await MedRecordController.updateMedRecord(
         req as Request,
@@ -259,12 +274,16 @@ describe("MedRecordController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
+      const res = mockRes(); // Define res here
+
       const mockMedicalRecordWithUser = {
         ...mockMedicalRecord,
         User: mockUser,
       };
 
-      prisma.medicalRecord.findUnique.mockResolvedValue(mockMedicalRecordWithUser);
+      prisma.medicalRecord.findUnique.mockResolvedValue(
+        mockMedicalRecordWithUser,
+      );
 
       await MedRecordController.getMedRecord(req as Request, res as Response);
 
@@ -282,7 +301,8 @@ describe("MedRecordController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.medicalRecord.findUnique.mockResolvedValue(null);
 
       await MedRecordController.getMedRecord(req as Request, res as Response);
@@ -295,7 +315,7 @@ describe("MedRecordController", () => {
 
     it("should return 400 if no id is provided", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await MedRecordController.getMedRecord(req as Request, res as Response);
 
@@ -309,7 +329,8 @@ describe("MedRecordController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.medicalRecord.delete.mockResolvedValue(mockMedicalRecord);
 
       await MedRecordController.deleteRecord(req as Request, res as Response);
@@ -325,7 +346,8 @@ describe("MedRecordController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.medicalRecord.delete.mockRejectedValue(
         new Error("Medical record not found"),
       );
@@ -340,7 +362,7 @@ describe("MedRecordController", () => {
 
     it("should return 400 if no id is provided", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await MedRecordController.deleteRecord(req as Request, res as Response);
 
@@ -352,7 +374,8 @@ describe("MedRecordController", () => {
   describe("getLabResults", () => {
     it("should fetch lab results and return 200", async () => {
       const req = mockReq();
-		const res = mockRes();
+      const res = mockRes(); // Define res here
+
       req.body = {
         patientId: 1,
         testName: "Test A",
@@ -360,41 +383,43 @@ describe("MedRecordController", () => {
         notes: "Lab notes",
       };
 
-		const mockLabResults = [
-		  {
-			id: 1,
-			patientId: 1,
-			testName: "Test A",
-			result: "Positive",
-			notes: "Lab notes",
-			performedAt: new Date(), // Add the missing required field
-			userId: 1, // Add the missing required field
-			createdAt: new Date(), // Add the missing required field
-			updatedAt: new Date(), // Optional: Include if your schema has this field
-			patient: { // Optional: Mock the related patient
-			  id: 1,
-			  fullName: "Jane Doe",
-			  dateOfBirth: new Date("1990-01-01"),
-			  phone: "1234567890",
-			  email: "jane.doe@example.com",
-			  address: "123 Main St",
-			  sex: Sex.FEMALE, // Use the enum value
-			  bloodGroup: BloodGroup.A_PLUS, // Use the enum value
-			  userId: 1,
-			  createdAt: new Date(),
-			  updatedAt: new Date(),
-			},
-			User: { // Optional: Mock the related user
-			  id: 1,
-			  name: "John Doe",
-			  email: "john.doe@example.com",
-			  password: "hashedPassword123",
-			  role: Role.DOCTOR, // Use the enum value
-			  createdAt: new Date(),
-			  updatedAt: new Date(),
-			},
-		  },
-		];
+      const mockLabResults = [
+        {
+          id: 1,
+          patientId: 1,
+          testName: "Test A",
+          result: "Positive",
+          notes: "Lab notes",
+          performedAt: new Date(), // Add the missing required field
+          userId: 1, // Add the missing required field
+          createdAt: new Date(), // Add the missing required field
+          updatedAt: new Date(), // Optional: Include if your schema has this field
+          patient: {
+            // Optional: Mock the related patient
+            id: 1,
+            fullName: "Jane Doe",
+            dateOfBirth: new Date("1990-01-01"),
+            phone: "1234567890",
+            email: "jane.doe@example.com",
+            address: "123 Main St",
+            sex: Sex.FEMALE, // Use the enum value
+            bloodGroup: BloodGroup.A_PLUS, // Use the enum value
+            userId: 1,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          User: {
+            // Optional: Mock the related user
+            id: 1,
+            name: "John Doe",
+            email: "john.doe@example.com",
+            password: "hashedPassword123",
+            role: Role.DOCTOR, // Use the enum value
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        },
+      ];
 
       prisma.labResult.findMany.mockResolvedValue(mockLabResults);
 
@@ -423,7 +448,11 @@ describe("MedRecordController", () => {
         notes: "Lab notes",
       };
 
-      prisma.labResult.findMany.mockRejectedValue(new Error("Unexpected error"));
+      const res = mockRes(); // Define res here
+
+      prisma.labResult.findMany.mockRejectedValue(
+        new Error("Unexpected error"),
+      );
 
       await MedRecordController.getLabResults(req as Request, res as Response);
 
@@ -435,7 +464,7 @@ describe("MedRecordController", () => {
   describe("allLabResults", () => {
     it("should fetch all lab results and return 200", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       const mockLabResults = [
         {
@@ -444,6 +473,10 @@ describe("MedRecordController", () => {
           testName: "Test A",
           result: "Positive",
           notes: "Lab notes",
+          performedAt: new Date(), // Add the missing required field
+          userId: 1, // Add the missing required field
+          createdAt: new Date(), // Add the missing required field
+          updatedAt: new Date(), // Optional: Include if your schema has this field
         },
       ];
 
@@ -460,9 +493,11 @@ describe("MedRecordController", () => {
 
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
-      prisma.labResult.findMany.mockRejectedValue(new Error("Unexpected error"));
+      prisma.labResult.findMany.mockRejectedValue(
+        new Error("Unexpected error"),
+      );
 
       await MedRecordController.allLabResults(req as Request, res as Response);
 
@@ -474,7 +509,7 @@ describe("MedRecordController", () => {
   describe("allMedicalRecords", () => {
     it("should fetch all medical records and return 200", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       const mockMedicalRecords = [
         {
@@ -502,7 +537,7 @@ describe("MedRecordController", () => {
 
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       prisma.medicalRecord.findMany.mockRejectedValue(
         new Error("Unexpected error"),
@@ -522,6 +557,8 @@ describe("MedRecordController", () => {
     it("should fetch medical records for the authenticated user and return 200", async () => {
       const req = mockReq();
       req.session = { user: { id: "1" } } as CustomSessionData;
+
+      const res = mockRes(); // Define res here
 
       const mockMedicalRecords = [
         {
@@ -551,7 +588,7 @@ describe("MedRecordController", () => {
       const req = mockReq();
       req.session = {} as CustomSessionData; // No user ID
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await MedRecordController.getMyMedicalRecords(
         req as Request,
@@ -567,6 +604,8 @@ describe("MedRecordController", () => {
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
       req.session = { user: { id: "1" } } as CustomSessionData;
+
+      const res = mockRes(); // Define res here
 
       prisma.medicalRecord.findMany.mockRejectedValue(
         new Error("Unexpected error"),

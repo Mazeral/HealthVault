@@ -22,7 +22,7 @@ beforeEach(() => {
   jest.clearAllMocks(); // Clear all mocks before each test
 });
 
-import { Role, Sex, BloodGroup } from '@prisma/client';
+import { Role, Sex, BloodGroup } from "@prisma/client";
 
 const mockPatient = {
   id: 1,
@@ -48,7 +48,8 @@ const mockPrescription = {
   userId: 1,
   createdAt: new Date(),
   updatedAt: new Date(),
-  patient: { // Optional: Mock the related patient
+  patient: {
+    // Optional: Mock the related patient
     id: 1,
     fullName: "John Doe",
     dateOfBirth: new Date("1990-01-01"),
@@ -61,7 +62,8 @@ const mockPrescription = {
     createdAt: new Date(),
     updatedAt: new Date(),
   },
-  User: { // Optional: Mock the related user
+  User: {
+    // Optional: Mock the related user
     id: 1,
     name: "Doctor",
     email: "doctor@example.com",
@@ -70,6 +72,16 @@ const mockPrescription = {
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+};
+
+const mockUser = {
+  id: 1,
+  name: "Doctor",
+  email: "doctor@example.com",
+  password: "hashedpassword",
+  role: Role.DOCTOR, // Use the enum value
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 describe("PrescriptionController", () => {
   describe("newPrescription", () => {
@@ -82,6 +94,8 @@ describe("PrescriptionController", () => {
         instructions: "Take once daily",
       };
       req.session = { user: { id: "1" } } as CustomSessionData;
+
+      const res = mockRes(); // Define res here
 
       prisma.patient.findFirst.mockResolvedValue(mockPatient);
       prisma.prescription.create.mockResolvedValue(mockPrescription);
@@ -115,7 +129,7 @@ describe("PrescriptionController", () => {
         medication: "Medication A",
       }; // Missing dosage
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await PrescriptionController.newPrescription(
         req as Request,
@@ -137,6 +151,8 @@ describe("PrescriptionController", () => {
       };
       req.session = { user: { id: "1" } } as CustomSessionData;
 
+      const res = mockRes(); // Define res here
+
       prisma.patient.findFirst.mockResolvedValue(null);
 
       await PrescriptionController.newPrescription(
@@ -157,6 +173,8 @@ describe("PrescriptionController", () => {
       };
       req.session = { user: { id: "1" } } as CustomSessionData;
 
+      const res = mockRes(); // Define res here
+
       prisma.patient.findFirst.mockRejectedValue(new Error("Unexpected error"));
 
       await PrescriptionController.newPrescription(
@@ -174,12 +192,16 @@ describe("PrescriptionController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
+      const res = mockRes(); // Define res here
+
       const mockPrescriptionWithUser = {
         ...mockPrescription,
         User: mockUser,
       };
 
-      prisma.prescription.findUnique.mockResolvedValue(mockPrescriptionWithUser);
+      prisma.prescription.findUnique.mockResolvedValue(
+        mockPrescriptionWithUser,
+      );
 
       await PrescriptionController.getPrescription(
         req as Request,
@@ -200,7 +222,8 @@ describe("PrescriptionController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.prescription.findUnique.mockResolvedValue(null);
 
       await PrescriptionController.getPrescription(
@@ -209,12 +232,14 @@ describe("PrescriptionController", () => {
       );
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "Prescription not found" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Prescription not found",
+      });
     });
 
     it("should return 400 if no id is provided", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await PrescriptionController.getPrescription(
         req as Request,
@@ -229,7 +254,7 @@ describe("PrescriptionController", () => {
   describe("allPrescriptions", () => {
     it("should fetch all prescriptions and return 200", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       const mockPrescriptions = [
         {
@@ -257,7 +282,7 @@ describe("PrescriptionController", () => {
 
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       prisma.prescription.findMany.mockRejectedValue(
         new Error("Unexpected error"),
@@ -283,6 +308,8 @@ describe("PrescriptionController", () => {
         dosage: "1000mg",
         instructions: "Take twice daily",
       };
+
+      const res = mockRes(); // Define res here
 
       const mockUpdatedPrescription = {
         ...mockPrescription,
@@ -324,7 +351,8 @@ describe("PrescriptionController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.prescription.findUnique.mockResolvedValue(null);
 
       await PrescriptionController.updatePrescription(
@@ -333,12 +361,14 @@ describe("PrescriptionController", () => {
       );
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "Prescription not found" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Prescription not found",
+      });
     });
 
     it("should return 400 if no id is provided", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await PrescriptionController.updatePrescription(
         req as Request,
@@ -355,7 +385,8 @@ describe("PrescriptionController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.prescription.delete.mockResolvedValue(mockPrescription);
 
       await PrescriptionController.deletePrescription(
@@ -376,7 +407,8 @@ describe("PrescriptionController", () => {
       const req = mockReq();
       req.params = { id: "1" };
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
+
       prisma.prescription.delete.mockRejectedValue(
         new Error("Prescription not found"),
       );
@@ -387,12 +419,14 @@ describe("PrescriptionController", () => {
       );
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "Prescription not found" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Prescription not found",
+      });
     });
 
     it("should return 400 if no id is provided", async () => {
       const req = mockReq();
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await PrescriptionController.deletePrescription(
         req as Request,
@@ -408,6 +442,8 @@ describe("PrescriptionController", () => {
     it("should fetch prescriptions for the authenticated user and return 200", async () => {
       const req = mockReq();
       req.session = { user: { id: "1" } } as CustomSessionData;
+
+      const res = mockRes(); // Define res here
 
       const mockPrescriptions = [
         {
@@ -428,14 +464,16 @@ describe("PrescriptionController", () => {
         include: { patient: { select: { fullName: true } } },
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ prescriptions: mockPrescriptions });
+      expect(res.json).toHaveBeenCalledWith({
+        prescriptions: mockPrescriptions,
+      });
     });
 
     it("should return 401 if user ID is missing in session", async () => {
       const req = mockReq();
       req.session = {} as CustomSessionData; // No user ID
 
-      const res = mockRes();
+      const res = mockRes(); // Define res here
 
       await PrescriptionController.getMyPrescriptions(
         req as Request,
@@ -451,6 +489,8 @@ describe("PrescriptionController", () => {
     it("should return 500 if an unexpected error occurs", async () => {
       const req = mockReq();
       req.session = { user: { id: "1" } } as CustomSessionData;
+
+      const res = mockRes(); // Define res here
 
       prisma.prescription.findMany.mockRejectedValue(
         new Error("Unexpected error"),

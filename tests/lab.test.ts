@@ -23,19 +23,17 @@ beforeEach(() => {
   mockReset(prisma);
 });
 
-enum Sex{
-	MALE,
-	FEMALE
-}
 // Mock data
+import { Sex, BloodGroup } from "@prisma/client"; // Import the correct enums
+
 const mockPatient = {
   id: 1,
   fullName: "John Doe",
   userId: 1,
   createdAt: new Date(),
   updatedAt: new Date(),
-  sex: Sex.MALE,
-  bloodGroup: "A_PLUS",
+  sex: Sex.MALE, // Use the correct enum value
+  bloodGroup: BloodGroup.A_PLUS, // Use the correct enum value
   dateOfBirth: null,
   phone: null,
   email: null,
@@ -167,7 +165,9 @@ describe("LabController", () => {
         include: { User: true },
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ "Lab result": mockLabResultWithUser });
+      expect(res.json).toHaveBeenCalledWith({
+        "Lab result": mockLabResultWithUser,
+      });
     });
 
     it("should return 400 if lab result ID is missing", async () => {
@@ -188,7 +188,9 @@ describe("LabController", () => {
       const res = mockRes();
       req.params = { id: "1" };
 
-      prisma.labResult.findUnique.mockRejectedValue(new Error("Unexpected error"));
+      prisma.labResult.findUnique.mockRejectedValue(
+        new Error("Unexpected error"),
+      );
 
       await LabController.getLabResult(req as Request, res as Response);
 
@@ -225,7 +227,9 @@ describe("LabController", () => {
       const req = mockReq();
       const res = mockRes();
 
-      prisma.labResult.findMany.mockRejectedValue(new Error("Unexpected error"));
+      prisma.labResult.findMany.mockRejectedValue(
+        new Error("Unexpected error"),
+      );
 
       await LabController.allLabResults(req as Request, res as Response);
 
@@ -376,7 +380,9 @@ describe("LabController", () => {
       const res = mockRes();
       req.session = { user: { id: "1" } } as CustomSessionData;
 
-      prisma.labResult.findMany.mockRejectedValue(new Error("Unexpected error"));
+      prisma.labResult.findMany.mockRejectedValue(
+        new Error("Unexpected error"),
+      );
 
       await LabController.getMyLabResults(req as Request, res as Response);
 

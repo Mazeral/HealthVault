@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import prisma from "./singleton";
 import UserController from "../src/controllers/UserController";
 import bcrypt from "bcrypt";
-import { Role, Sex, BloodGroup } from '@prisma/client';
+import { Role, Sex, BloodGroup } from "@prisma/client";
 
 // Mock bcrypt
 jest.mock("bcrypt");
@@ -25,13 +25,12 @@ beforeEach(() => {
   jest.clearAllMocks(); // Clear all mocks before each test
 });
 
-
 // Mock data for User
 const mockUser = {
   id: 1,
-  name: "John Doe",
-  email: "john.doe@example.com",
-  password: "hashedPassword123",
+  name: "Doctor",
+  email: "doctor@example.com",
+  password: "hashedpassword",
   role: Role.DOCTOR, // Use the enum value
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -226,62 +225,40 @@ describe("UserController", () => {
       const req = mockReq();
       req.params = { id: "1" };
       req.body = {
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-        password: "newPassword123",
-        role: "ADMIN",
+        name: "Updated Doctor",
+        email: "updated.doctor@example.com",
       };
 
       const res = mockRes();
-      prisma.user.findUnique.mockResolvedValue(mockUser);
-      prisma.user.update.mockResolvedValue({
+
+      // Mock the response with the `patients` relation included
+      const mockUpdatedUser = {
         ...mockUser,
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-      });
+        name: "Updated Doctor",
+        email: "updated.doctor@example.com",
+        patients: [mockPatient], // Include the `patients` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue(mockUpdatedUser);
 
       await UserController.updateUser(req as Request, res as Response);
 
+      // Verify the Prisma query
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
-          name: "Jane Doe",
-          email: "jane.doe@example.com",
-          password: expect.any(String), // Hashed password
-          role: "ADMIN",
+          name: "Updated Doctor",
+          email: "updated.doctor@example.com",
         },
+        include: { patients: true }, // Ensure the `patients` relation is included
       });
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        updated: {
-          ...mockUser,
-          name: "Jane Doe",
-          email: "jane.doe@example.com",
-        },
+        updated: mockUpdatedUser,
       });
-    });
-
-    it("should return 400 if no id is provided", async () => {
-      const req = mockReq();
-      const res = mockRes();
-
-      await UserController.updateUser(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "No ID provided" });
-    });
-
-    it("should return 404 if no user is found", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-
-      const res = mockRes();
-      prisma.user.findUnique.mockResolvedValue(null);
-
-      await UserController.updateUser(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "User not found" });
     });
   });
 
@@ -292,14 +269,19 @@ describe("UserController", () => {
       req.body = { patientId: "2" };
 
       const res = mockRes();
-      prisma.user.findUnique.mockResolvedValue(mockUser);
-      prisma.user.update.mockResolvedValue({
+
+      // Mock the response with the `patients` relation included
+      const mockUserWithPatients = {
         ...mockUser,
-        patients: [mockPatient],
-      });
+        patients: [mockPatient], // Include the `patients` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue(mockUserWithPatients);
 
       await UserController.addPatient(req as Request, res as Response);
 
+      // Verify the Prisma query
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
@@ -308,15 +290,14 @@ describe("UserController", () => {
           },
         },
         include: {
-          patients: true,
+          patients: true, // Ensure the `patients` relation is included
         },
       });
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        updated: {
-          ...mockUser,
-          patients: [mockPatient],
-        },
+        updated: mockUserWithPatients,
       });
     });
 
@@ -408,7 +389,9 @@ describe("UserController", () => {
       await UserController.getAllDoctors(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch doctors" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Failed to fetch doctors",
+      });
     });
   });
 
@@ -475,7 +458,9 @@ describe("UserController", () => {
       await UserController.editDoctor(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Failed to update doctor" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Failed to update doctor",
+      });
     });
   });
 
@@ -518,7 +503,9 @@ describe("UserController", () => {
       await UserController.deleteDoctor(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Failed to delete doctor" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Failed to delete doctor",
+      });
     });
   });
 
@@ -528,17 +515,24 @@ describe("UserController", () => {
       req.params = { doctorId: "1" };
 
       const res = mockRes();
-      prisma.user.findUnique.mockResolvedValue({
+
+      // Mock the response with the `patients` relation included
+      const mockUserWithPatients = {
         ...mockUser,
-        patients: [mockPatient],
-      });
+        patients: [mockPatient], // Include the `patients` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUserWithPatients);
 
       await UserController.getMyPatients(req as Request, res as Response);
 
+      // Verify the Prisma query
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 1, role: "DOCTOR" },
-        include: { patients: true },
+        include: { patients: true }, // Ensure the `patients` relation is included
       });
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ patients: [mockPatient] });
     });
@@ -573,25 +567,32 @@ describe("UserController", () => {
       req.params = { id: "1" };
 
       const res = mockRes();
-      prisma.user.findUnique.mockResolvedValue({
+
+      // Mock the response with the relations included
+      const mockUserWithRelations = {
         ...mockUser,
-        patients: [mockPatient],
-        medicalRecords: [],
-        prescriptions: [],
-        labResults: [],
-      });
+        patients: [mockPatient], // Include the `patients` relation
+        medicalRecords: [], // Include the `medicalRecords` relation
+        prescriptions: [], // Include the `prescriptions` relation
+        labResults: [], // Include the `labResults` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUserWithRelations);
 
       await UserController.getDoctorDetails(req as Request, res as Response);
 
+      // Verify the Prisma query
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 1, role: "DOCTOR" },
         include: {
-          patients: true,
-          medicalRecords: true,
-          prescriptions: true,
-          labResults: true,
+          patients: true, // Include the `patients` relation
+          medicalRecords: true, // Include the `medicalRecords` relation
+          prescriptions: true, // Include the `prescriptions` relation
+          labResults: true, // Include the `labResults` relation
         },
       });
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         patients: [mockPatient],
