@@ -1,13 +1,15 @@
-import request from "supertest";
 import { Request, Response } from "express";
 import AuthController from "../src/controllers/AuthController";
 import bcrypt from "bcrypt";
 import prisma from "./singleton";
-import { Session, SessionData } from "express-session";
+import { Session } from "express-session";
 import { CustomSession } from "../src/types/index";
 import { authMiddleware } from "../src/middlewares/AuthMiddleware";
 
-jest.mock("bcrypt");
+// Mock bcrypt
+jest.mock("bcrypt", () => ({
+  compare: jest.fn(),
+}));
 
 // Extend the SessionData interface to include custom properties
 declare module "express-session" {
@@ -74,7 +76,13 @@ describe("AuthController", () => {
 
     it("should return 401 if credentials are invalid", async () => {
       req.body = { user: "testuser", password: "wrongpassword" };
-      (prisma.user.findFirst as jest.Mock).mockResolvedValue(null);
+      const mockUser = { id: 1, role: "user", password: "hashedpassword" };
+
+      // Mock Prisma to return a user
+      (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
+
+      // Mock bcrypt.compare to return false (invalid password)
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await AuthController.login(req as Request, res as Response);
 
@@ -84,9 +92,13 @@ describe("AuthController", () => {
 
     it("should return 200 and set session if credentials are valid", async () => {
       req.body = { user: "testuser", password: "correctpassword" };
-      const mockUser = { id: 1, role: "user" };
+      const mockUser = { id: 1, role: "user", password: "hashedpassword" };
+
+      // Mock Prisma to return a user
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
-      (bcrypt.hash as jest.Mock).mockResolvedValue("hashedpassword");
+
+      // Mock bcrypt.compare to return true (valid password)
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Mock the session
       req.session = {
@@ -109,8 +121,11 @@ describe("AuthController", () => {
 
       await AuthController.login(req as Request, res as Response);
 
+      // Verify the session was set correctly
       expect(req.session?.user?.id).toBe("1"); // Check `req.session.user.id`
       expect(req.session?.user?.role).toBe("user"); // Check `req.session.user.role`
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ login: "success" });
     });
@@ -165,8 +180,7 @@ describe("AuthController", () => {
         resetMaxAge: jest.fn(),
         save: jest.fn((callback: (err?: Error) => void) => callback()),
         touch: jest.fn(),
-        userId: undefined,
-        role: undefined,
+        user: undefined, // Ensure `user` is undefined
       } as unknown as Session;
 
       AuthController.checkAuth(req as Request, res as Response);

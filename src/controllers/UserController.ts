@@ -2,192 +2,347 @@ import prisma from "../utils/prisma";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import createObject from "../utils/utilFunctions";
+
 class UserController {
-  // encrypts the password
-  private async hashPassword(pwd: string) {
+  // Encrypts the password
+  private async hashPassword(pwd: string): Promise<string> {
     try {
       const salt = await bcrypt.genSalt(Number(process.env.SALT));
       const hash = await bcrypt.hash(pwd, salt);
       return hash;
     } catch (error) {
-      if (error instanceof Error) throw error;
+      throw new Error("Failed to hash password");
     }
   }
-  // creates a new user
+
+  // Creates a new user
   static async newUser(req: Request, res: Response) {
     try {
-      const name = req.body.name || null;
-      const email = req.body.email || null;
-      let password = req.body.password || null;
-      const role = req.body.role || null;
-      const patients = req.body.patients || null;
-      let result = null;
+      const { name, email, password, role } = req.body;
+
       if (!email || !password || !role) {
-        throw Error(`Missing field`);
+        throw new Error("Missing required fields");
       }
-      if (await prisma.user.findUnique({ where: { email: email } }))
-        throw Error("Email exists");
-      const hash = new UserController();
-      password = await hash.hashPassword(password);
-      if (patients !== null) {
-        result = await prisma.user.create({
-          data: {
-            name: name,
-            email: email,
-            password: password,
-            role: role,
-            patients: {
-              connect: patients.map((id: number) => ({ id })),
-            },
-          },
-        });
-      } else {
-        result = await prisma.user.create({
-          data: {
-            name: name,
-            email: email,
-            password: password,
-            role: role,
-          },
-        });
+
+      if (await prisma.user.findUnique({ where: { email } })) {
+        throw new Error("Email already exists");
       }
-      res.status(200).json({ "new user:": result });
+
+      const hashedPassword = await new UserController().hashPassword(password);
+
+      const result = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          role,
+        },
+      });
+
+      res.status(200).json({ newUser: result });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "Missing field")
+        if (error.message === "Missing required fields") {
           res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else if (error.message === "Email already exists") {
+          res.status(409).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
 
-  // Gets a user with id
+  // Gets a user by ID
   static async getUser(req: Request, res: Response) {
-    const id = req.params.id || null;
+    const { id } = req.params;
 
     try {
-      if (!id) throw Error("No id provided");
+      if (!id) throw new Error("No ID provided");
 
       const user = await prisma.user.findUnique({
-        where: {
-          id: Number(id),
+        where: { id: Number(id) },
+        include: {
+          patients: true,
+          medicalRecords: true,
+          prescriptions: true,
+          labResults: true,
         },
       });
-      if (!user) throw Error("No user found");
-      res.status(200).json({ user: user });
+
+      if (!user) throw new Error("User not found");
+
+      res.status(200).json({ user });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No id provided")
+        if (error.message === "No ID provided") {
           res.status(400).json({ error: error.message });
-        else if (error.message === "No user found")
+        } else if (error.message === "User not found") {
           res.status(404).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
 
   // Get all users
   static async allUsers(req: Request, res: Response) {
-    const users = await prisma.user.findMany();
-    res.status(200).json({ users: users });
+    try {
+      const users = await prisma.user.findMany({
+        include: {
+          patients: true,
+          medicalRecords: true,
+          prescriptions: true,
+          labResults: true,
+        },
+      });
+      res.status(200).json({ users });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
   }
 
-  // Updates a user by id
+  // Updates a user by ID
   static async updateUser(req: Request, res: Response) {
-    const id = req.params.id || null;
+    const { id } = req.params;
 
     try {
-      if (!id) throw Error("No id provided");
+      if (!id) throw new Error("No ID provided");
 
       const user = await prisma.user.findUnique({
-        where: {
-          id: Number(id),
-        },
+        where: { id: Number(id) },
       });
-      if (!user) throw Error("No user found");
+
+      if (!user) throw new Error("User not found");
 
       const data = createObject({
-        name: String(req.body.name),
-        email: String(req.body.email),
-        password: String(req.body.password),
-        role: String(req.body.role),
-        patients: req.body.patients,
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password
+          ? await new UserController().hashPassword(req.body.password)
+          : undefined,
+        role: req.body.role,
       });
 
-      const result = await prisma.user.updateMany({
-        where: {
-          id: Number(id),
-        },
-        data: data,
+      const result = await prisma.user.update({
+        where: { id: Number(id) },
+        data,
+        include: { patients: true }, // Include the `patients` relation
       });
+
       res.status(200).json({ updated: result });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No id provided")
+        if (error.message === "No ID provided") {
           res.status(400).json({ error: error.message });
-        else if (error.message === "No user found")
+        } else if (error.message === "User not found") {
           res.status(404).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
 
   // Add a patient to the user
   static async addPatient(req: Request, res: Response) {
-    // Adds a patient to the user
+    const { id } = req.params;
+    const { patientId } = req.body;
+
     try {
-      const userId = req.params.id || null;
-      const patientId = req.body.id || null;
+      if (!id || !patientId) throw new Error("Missing required fields");
 
-      if (!patientId) throw Error("No patient id provided");
       const user = await prisma.user.findUnique({
-        where: {
-          id: Number(userId),
-        },
+        where: { id: Number(id) },
       });
-      if (!user) throw Error("No user found");
 
-      const record = await prisma.user.update({
-        where: {
-          id: Number(userId),
-        },
+      if (!user) throw new Error("User not found");
+
+      const updatedUser = await prisma.user.update({
+        where: { id: Number(id) },
         data: {
           patients: {
-            connect: {
-              id: Number(patientId),
-            },
+            connect: { id: Number(patientId) },
           },
         },
+        include: {
+          patients: true,
+        },
       });
-      res.status(200).json({ updated: record });
+
+      res.status(200).json({ updated: updatedUser });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No patient id provided")
+        if (error.message === "Missing required fields") {
           res.status(400).json({ error: error.message });
-        else if (error.message === "No user found")
+        } else if (error.message === "User not found") {
           res.status(404).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }
 
   // Delete a user
   static async deleteUser(req: Request, res: Response) {
-    try {
-      const userId = req.params.id || null;
+    const { id } = req.params;
 
-      if (!userId) throw Error("No user ID");
+    try {
+      if (!id) throw new Error("No ID provided");
+
       const result = await prisma.user.delete({
-        where: {
-          id: Number(userId),
-        },
+        where: { id: Number(id) },
       });
-      res.status(200).json({ result: result });
+
+      res.status(200).json({ result });
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "No user ID")
+        if (error.message === "No ID provided") {
           res.status(400).json({ error: error.message });
-        else res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    }
+  }
+
+  // Fetch all users with the DOCTOR role
+  static async getAllDoctors(req: Request, res: Response) {
+    try {
+      const doctors = await prisma.user.findMany({
+        where: { role: "DOCTOR" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      res.status(200).json({ doctors });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch doctors" });
+    }
+  }
+
+  // Edit a DOCTOR user
+  static async editDoctor(req: Request, res: Response) {
+    const { id } = req.params;
+    const { name, email } = req.body;
+
+    try {
+      if (!id || !name || !email) {
+        throw new Error("Missing required fields");
+      }
+
+      const updatedDoctor = await prisma.user.update({
+        where: { id: Number(id), role: "DOCTOR" },
+        data: { name, email },
+      });
+
+      res.status(200).json({ updated: updatedDoctor });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Missing required fields") {
+          res.status(400).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: "Failed to update doctor" }); // Update the error message
+        }
+      }
+    }
+  }
+
+  // Delete a DOCTOR user
+  static async deleteDoctor(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      if (!id) {
+        throw new Error("Missing user ID");
+      }
+
+      await prisma.user.delete({
+        where: { id: Number(id), role: "DOCTOR" },
+      });
+
+      res.status(200).json({ message: "Doctor deleted successfully" });
+    } catch (error) {
+      if (error instanceof Error)
+        if (error.message === "Missing user ID")
+          res.status(400).json({ error: error.message });
+      res.status(500).json({ error: "Failed to delete doctor" });
+    }
+  }
+
+  // Fetch all patients for a specific doctor
+  static async getMyPatients(req: Request, res: Response) {
+    const { doctorId } = req.params;
+
+    try {
+      if (!doctorId) throw new Error("No doctor ID provided");
+
+      const doctor = await prisma.user.findUnique({
+        where: {
+          id: Number(doctorId),
+          role: "DOCTOR",
+        },
+        include: {
+          patients: true,
+        },
+      });
+
+      if (!doctor) throw new Error("Doctor not found");
+
+      res.status(200).json({ patients: doctor.patients });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "No doctor ID provided") {
+          res.status(400).json({ error: error.message });
+        } else if (error.message === "Doctor not found") {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    }
+  }
+  // Fetch detailed data for a specific doctor
+  static async getDoctorDetails(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      if (!id) throw new Error("No ID provided");
+
+      const doctor = await prisma.user.findUnique({
+        where: { id: Number(id), role: "DOCTOR" },
+        include: {
+          patients: true,
+          medicalRecords: true,
+          prescriptions: true,
+          labResults: true,
+        },
+      });
+
+      if (!doctor) throw new Error("Doctor not found");
+
+      res.status(200).json({
+        patients: doctor.patients,
+        medicalRecords: doctor.medicalRecords,
+        prescriptions: doctor.prescriptions,
+        labResults: doctor.labResults,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "No ID provided") {
+          res.status(400).json({ error: error.message });
+        } else if (error.message === "Doctor not found") {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }

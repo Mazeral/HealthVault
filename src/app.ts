@@ -61,10 +61,10 @@ app.use(
   }),
 );
 
+app.use(patientRouter);
 app.use(userRouter);
 app.use(medRecordRouter);
 app.use(labRouter);
-app.use(patientRouter);
 app.use(prescriptionRouter);
 app.use("/auth", authRouter);
 app.use("/dashboard", dashboardRouter);

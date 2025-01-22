@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,jsx,,json,css,ts}\"",
-    "dev": "nodemon --exec ts-node --exitcrash ./src/app.ts"
+    "dev": "nodemon --exec ts-node --exitcrash ./src/app.ts && cd frontend && npm run dev"
   },
   "author": "Mohammad Omar Siddiq, Joshua Emmanuela and Mac Millian Zungene",
   "license": "MIT",
@@ -28,6 +28,7 @@
     "jest": "^29.7.0",
     "jest-mock-extended": "^4.0.0-beta1",
     "nodemon": "^3.1.9",
+    "prettier": "^3.4.2",
     "prisma": "^6.0.1",
     "sinon": "^19.0.2",
     "supertest": "^7.0.0",

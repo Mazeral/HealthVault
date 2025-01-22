@@ -37,4 +37,10 @@ prescriptionRouter.delete(
   PrescriptionController.deletePrescription,
 );
 
+// New route for fetching prescriptions for the authenticated user
+prescriptionRouter.get(
+  "/my-prescriptions",
+  authMiddleware as express.RequestHandler,
+  PrescriptionController.getMyPrescriptions,
+);
 export default prescriptionRouter;

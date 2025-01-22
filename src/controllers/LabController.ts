@@ -1,27 +1,43 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { LabResult } from "@prisma/client";
 import createObject from "../utils/utilFunctions";
+import { CustomSessionData } from "../types";
 class LabController {
   // Create a lab result for a patient
   static async newLabResult(req: Request, res: Response) {
-    const patientId = Number(req.body.patientId) || null;
-    const testName = String(req.body.testName) || null;
-    const result = String(req.body.result) || null;
-    const notes = String(req.body.notes) || null;
-    const performedAt = String(req.body.performedAt) || null;
-    let performedAtDate = null;
+    const { patientFullName, testName, result, notes, performedAt } = req.body;
 
     try {
       // Validate required fields
       if (!testName) throw new Error("No test name provided");
       if (!result) throw new Error("No result provided");
-      if (!patientId) throw new Error("No patient ID provided");
+      if (!patientFullName) throw new Error("No patient full name provided");
+
+      // Fetch patient ID based on full name
+      const patient = await prisma.patient.findFirst({
+        where: {
+          fullName: patientFullName,
+        },
+      });
+
+      if (!patient) {
+        throw new Error("Patient not found");
+      }
+
+      const patientId = patient.id;
+
+      // Get the user ID from the session
+      const session = req.session as CustomSessionData;
+      const userId = Number(session.user?.id);
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
 
       // Convert performedAt to a valid DateTime object
-      if (performedAt !== null)
-        performedAtDate = new Date(performedAt).toISOString();
-      else performedAtDate = new Date(Date.now()).toISOString();
+      const performedAtDate = performedAt
+        ? new Date(performedAt).toISOString()
+        : new Date(Date.now()).toISOString();
 
       // Create the lab result
       const labResult = await prisma.labResult.create({
@@ -29,9 +45,12 @@ class LabController {
           testName,
           result,
           notes,
-          performedAt: performedAtDate, // Use the formatted DateTime
+          performedAt: performedAtDate,
           patient: {
             connect: { id: patientId },
+          },
+          User: {
+            connect: { id: userId }, // Associate with the user who created the lab result
           },
         },
       });
@@ -41,9 +60,9 @@ class LabController {
       if (error instanceof Error) {
         if (
           error.message === "No test name provided" ||
-          error.message === "No patient ID provided" ||
+          error.message === "No patient full name provided" ||
           error.message === "No result provided" ||
-          error.message === "No performed At provided"
+          error.message === "Patient not found"
         ) {
           res.status(400).json({ error: error.message });
         } else {
@@ -75,6 +94,9 @@ class LabController {
         where: {
           id: id,
         },
+        include: {
+          User: true, // Include the user who created the lab result
+        },
       });
 
       res.status(200).json({ "Lab result": labResult });
@@ -94,11 +116,21 @@ class LabController {
   // gets all the lab results from the database
   static async allLabResults(req: Request, res: Response) {
     try {
-      const labResults: LabResult[] = await prisma.labResult.findMany();
+      const labResults = await prisma.labResult.findMany({
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include the patient's full name
+            },
+          },
+          User: true, // Include the user who created the lab result
+        },
+      });
       res.status(200).json({ "Lab results": labResults });
     } catch (error) {
-      if (error instanceof Error)
+      if (error instanceof Error) {
         res.status(500).json({ error: error.message });
+      }
     }
   }
 
@@ -123,15 +155,24 @@ class LabController {
         performedAt: performedAt ? new Date(performedAt) : undefined, // Convert to Date object
       });
 
-      // Update the lab result
+      // Update the lab result and include the patient relation
       const updatedResult = await prisma.labResult.update({
         where: {
           id: labResultId, // Use the lab result ID
         },
         data,
+        include: {
+          patient: true, // Include the patient relation
+        },
       });
 
-      res.status(200).json({ updated: updatedResult });
+      // Add the patientFullName field to the response
+      const response = {
+        ...updatedResult,
+        patientFullName: updatedResult.patient?.fullName || "Unknown",
+      };
+
+      res.status(200).json({ updated: response });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "Lab test ID not provided") {
@@ -164,6 +205,41 @@ class LabController {
         if (error.message === "Bad request")
           res.status(400).json({ error: error.message });
         res.status(500).json({ error: error.message });
+      }
+    }
+  }
+  // Fetch lab results for the authenticated user (doctor or patient)
+  static async getMyLabResults(req: Request, res: Response): Promise<void> {
+    try {
+      const session = req.session as CustomSessionData; // Cast session to CustomSessionData
+      const userId = Number(session.user?.id); // Get the user ID from the session
+
+      if (!userId) {
+        throw new Error("Unauthorized: No user ID found in session");
+      }
+
+      // Fetch lab results for the user
+      const labResults = await prisma.labResult.findMany({
+        where: {
+          userId: userId, // Filter by the user's ID
+        },
+        include: {
+          patient: {
+            select: {
+              fullName: true, // Include the patient's full name
+            },
+          },
+        },
+      });
+
+      res.status(200).json({ labResults });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Unauthorized: No user ID found in session") {
+          res.status(401).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: error.message });
+        }
       }
     }
   }

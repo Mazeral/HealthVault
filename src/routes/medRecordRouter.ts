@@ -28,5 +28,11 @@ medRecordRouter.delete(
   authMiddleware as express.RequestHandler,
   MedRecordController.deleteRecord,
 );
+// New route for fetching medical records for the authenticated user
+medRecordRouter.get(
+  "/my-medical-records",
+  authMiddleware as express.RequestHandler,
+  MedRecordController.getMyMedicalRecords,
+);
 
 export default medRecordRouter;

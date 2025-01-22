@@ -8,30 +8,35 @@ datasource db {
 }
 
 model User {
-  name	    String	  @unique
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String // Encrypted password
-  role      Role
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  patients  Patient[] // Relationship to patients (if required)
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
+  email          String          @unique
+  password       String          // Encrypted password
+  role           Role
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  patients       Patient[]       // Patients created by this user
+  medicalRecords MedicalRecord[] // Medical records created by this user
+  prescriptions  Prescription[]  // Prescriptions created by this user
+  labResults     LabResult[]     // Lab results created by this user
 }
 
 model Patient {
   id             Int             @id @default(autoincrement())
-  fullName		 String			 @unique	
+  fullName       String          @unique
   dateOfBirth    DateTime?
   phone          String?         @unique
   email          String?         @unique
   address        String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  medicalRecords MedicalRecord[]
-  prescriptions  Prescription[]
-  labResults     LabResult[]
-  User           User?           @relation(fields: [userId], references: [id])
-  userId         Int?
+  sex            Sex
+  bloodGroup     BloodGroup
+  medicalRecords MedicalRecord[] // Medical records for this patient
+  prescriptions  Prescription[]  // Prescriptions for this patient
+  labResults     LabResult[]     // Lab results for this patient
+  User           User            @relation(fields: [userId], references: [id], onDelete: Cascade) // User who created this patient
+  userId         Int             // Required field
 }
 
 model MedicalRecord {
@@ -42,7 +47,9 @@ model MedicalRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  patient Patient @relation(fields: [patientId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this medical record
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this medical record
+  userId  Int     // Required field
 }
 
 model Prescription {
@@ -53,7 +60,9 @@ model Prescription {
   instructions String?
   prescribedAt DateTime @default(now())
 
-  patient Patient @relation(fields: [patientId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this prescription
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this prescription
+  userId  Int     // Required field
 }
 
 model LabResult {
@@ -65,11 +74,28 @@ model LabResult {
   performedAt DateTime
   createdAt   DateTime @default(now())
 
-  patient Patient @relation(fields: [patientId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade) // Patient associated with this lab result
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)    // User who created this lab result
+  userId  Int     // Required field
 }
 
 enum Role {
   ADMIN
   DOCTOR
-  NURSE
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+enum BloodGroup {
+  A_PLUS   @map("A+")
+  A_MINUS  @map("A-")
+  B_PLUS   @map("B+")
+  B_MINUS  @map("B-")
+  AB_PLUS  @map("AB+")
+  AB_MINUS @map("AB-")
+  O_PLUS   @map("O+")
+  O_MINUS  @map("O-")
 }

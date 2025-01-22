@@ -2,16 +2,18 @@ import { Request, Response } from "express";
 import prisma from "./singleton";
 import UserController from "../src/controllers/UserController";
 import bcrypt from "bcrypt";
+import { Role, Sex, BloodGroup } from "@prisma/client";
 
 // Mock bcrypt
 jest.mock("bcrypt");
 
-// Mock the request and response objects
+// Mocking the req object
 const mockReq = (): Partial<Request> => ({
   params: {},
   body: {},
 });
 
+// Mocking the res object
 const mockRes = (): Partial<Response> => {
   const res: Partial<Response> = {};
   res.status = jest.fn().mockReturnValue(res);
@@ -19,97 +21,145 @@ const mockRes = (): Partial<Response> => {
   return res;
 };
 
-describe("UserController", () => {
-  beforeEach(() => {
-    jest.clearAllMocks(); // Clear all mocks before each test
-  });
+beforeEach(() => {
+  jest.clearAllMocks(); // Clear all mocks before each test
+});
 
+// Mock data for User
+const mockUser = {
+  id: 1,
+  name: "Doctor",
+  email: "doctor@example.com",
+  password: "hashedpassword",
+  role: Role.DOCTOR, // Use the enum value
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+// Mock data for Patient
+const mockPatient = {
+  id: 1,
+  fullName: "Jane Doe",
+  dateOfBirth: new Date("1990-01-01"),
+  phone: "1234567890",
+  email: "jane.doe@example.com",
+  address: "123 Main St",
+  sex: Sex.FEMALE, // Use the enum value
+  bloodGroup: BloodGroup.A_PLUS, // Use the enum value
+  userId: 1,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+describe("UserController", () => {
   describe("newUser", () => {
     it("should create a new user and return 200", async () => {
       const req = mockReq();
       req.body = {
-        name: "Foo",
-        email: "test@example.com",
+        name: "John Doe",
+        email: "john.doe@example.com",
         password: "password123",
-        role: "admin",
-        patients: [1, 2],
+        role: "DOCTOR",
       };
 
       const res = mockRes();
       const hashedPassword = "hashedPassword123";
       (bcrypt.genSalt as jest.Mock).mockResolvedValue("salt");
       (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      (prisma.user.create as jest.Mock).mockResolvedValue({
-        id: 1,
-        name: "Foo",
-        email: "test@example.com",
-        password: hashedPassword,
-        role: "admin",
-      });
+      prisma.user.create.mockResolvedValue(mockUser);
 
       await UserController.newUser(req as Request, res as Response);
 
       expect(bcrypt.hash).toHaveBeenCalledWith("password123", "salt");
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
-          email: "test@example.com",
-          name: "Foo",
+          name: "John Doe",
+          email: "john.doe@example.com",
           password: hashedPassword,
-          role: "admin",
-          patients: {
-            connect: [{ id: 1 }, { id: 2 }],
-          },
+          role: "DOCTOR",
         },
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        "new user:": {
-          id: 1,
-          name: "Foo",
-          email: "test@example.com",
-          password: hashedPassword,
-          role: "admin",
-        },
-      });
+      expect(res.json).toHaveBeenCalledWith({ newUser: mockUser });
     });
 
-    it("should return 400 if a required field is missing", async () => {
+    it("should return 400 if required fields are missing", async () => {
       const req = mockReq();
       req.body = {
-        email: "test@example.com",
+        email: "john.doe@example.com",
         password: "password123",
-      }; // Missing role and name
+      }; // Missing name and role
 
       const res = mockRes();
 
       await UserController.newUser(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "Missing field" });
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Missing required fields",
+      });
+    });
+
+    it("should return 409 if email already exists", async () => {
+      const req = mockReq();
+      req.body = {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "password123",
+        role: "DOCTOR",
+      };
+
+      const res = mockRes();
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+
+      await UserController.newUser(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Email already exists",
+      });
+    });
+
+    it("should return 500 if an unexpected error occurs", async () => {
+      const req = mockReq();
+      req.body = {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "password123",
+        role: "DOCTOR",
+      };
+
+      const res = mockRes();
+      prisma.user.findUnique.mockRejectedValue(new Error("Unexpected error"));
+
+      await UserController.newUser(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: "Unexpected error" });
     });
   });
 
   describe("getUser", () => {
-    it("should return a user by id and return 200", async () => {
+    it("should fetch a user by id and return 200", async () => {
       const req = mockReq();
       req.params = { id: "1" };
 
       const res = mockRes();
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
-        id: 1,
-        email: "test@example.com",
-        name: "Joe",
-      });
+      prisma.user.findUnique.mockResolvedValue(mockUser);
 
       await UserController.getUser(req as Request, res as Response);
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
+        include: {
+          patients: true,
+          medicalRecords: true,
+          prescriptions: true,
+          labResults: true,
+        },
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        user: { id: 1, name: "Joe", email: "test@example.com" },
-      });
+      expect(res.json).toHaveBeenCalledWith({ user: mockUser });
     });
 
     it("should return 400 if no id is provided", async () => {
@@ -119,7 +169,7 @@ describe("UserController", () => {
       await UserController.getUser(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "No id provided" });
+      expect(res.json).toHaveBeenCalledWith({ error: "No ID provided" });
     });
 
     it("should return 404 if no user is found", async () => {
@@ -127,30 +177,46 @@ describe("UserController", () => {
       req.params = { id: "1" };
 
       const res = mockRes();
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      prisma.user.findUnique.mockResolvedValue(null);
 
       await UserController.getUser(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "No user found" });
+      expect(res.json).toHaveBeenCalledWith({ error: "User not found" });
     });
   });
 
   describe("allUsers", () => {
-    it("should return all users and return 200", async () => {
+    it("should fetch all users and return 200", async () => {
       const req = mockReq();
       const res = mockRes();
-      (prisma.user.findMany as jest.Mock).mockResolvedValue([
-        { id: 1, name: "Joe", email: "test@example.com" },
-      ]);
+
+      prisma.user.findMany.mockResolvedValue([mockUser]);
 
       await UserController.allUsers(req as Request, res as Response);
 
-      expect(prisma.user.findMany).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        users: [{ id: 1, name: "Joe", email: "test@example.com" }],
+      expect(prisma.user.findMany).toHaveBeenCalledWith({
+        include: {
+          patients: true,
+          medicalRecords: true,
+          prescriptions: true,
+          labResults: true,
+        },
       });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ users: [mockUser] });
+    });
+
+    it("should return 500 if an unexpected error occurs", async () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      prisma.user.findMany.mockRejectedValue(new Error("Unexpected error"));
+
+      await UserController.allUsers(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch users" });
     });
   });
 
@@ -159,52 +225,40 @@ describe("UserController", () => {
       const req = mockReq();
       req.params = { id: "1" };
       req.body = {
-        name: "Joe",
-        email: "updated@example.com",
-        password: "newPassword123",
-        role: "user",
+        name: "Updated Doctor",
+        email: "updated.doctor@example.com",
       };
 
       const res = mockRes();
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
-      (prisma.user.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+
+      // Mock the response with the `patients` relation included
+      const mockUpdatedUser = {
+        ...mockUser,
+        name: "Updated Doctor",
+        email: "updated.doctor@example.com",
+        patients: [mockPatient], // Include the `patients` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue(mockUpdatedUser);
 
       await UserController.updateUser(req as Request, res as Response);
 
-      expect(prisma.user.updateMany).toHaveBeenCalledWith({
+      // Verify the Prisma query
+      expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
-          name: "Joe",
-          email: "updated@example.com",
-          password: "newPassword123",
-          role: "user",
+          name: "Updated Doctor",
+          email: "updated.doctor@example.com",
         },
+        include: { patients: true }, // Ensure the `patients` relation is included
       });
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ updated: { count: 1 } });
-    });
-
-    it("should return 400 if no id is provided", async () => {
-      const req = mockReq();
-      const res = mockRes();
-
-      await UserController.updateUser(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "No id provided" });
-    });
-
-    it("should return 404 if no user is found", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-
-      const res = mockRes();
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-
-      await UserController.updateUser(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "No user found" });
+      expect(res.json).toHaveBeenCalledWith({
+        updated: mockUpdatedUser,
+      });
     });
   });
 
@@ -212,14 +266,22 @@ describe("UserController", () => {
     it("should add a patient to the user and return 200", async () => {
       const req = mockReq();
       req.params = { id: "1" };
-      req.body = { id: "2" };
+      req.body = { patientId: "2" };
 
       const res = mockRes();
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
-      (prisma.user.update as jest.Mock).mockResolvedValue({ id: 1 });
+
+      // Mock the response with the `patients` relation included
+      const mockUserWithPatients = {
+        ...mockUser,
+        patients: [mockPatient], // Include the `patients` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue(mockUserWithPatients);
 
       await UserController.addPatient(req as Request, res as Response);
 
+      // Verify the Prisma query
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
@@ -227,9 +289,16 @@ describe("UserController", () => {
             connect: { id: 2 },
           },
         },
+        include: {
+          patients: true, // Ensure the `patients` relation is included
+        },
       });
+
+      // Verify the response
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ updated: { id: 1 } });
+      expect(res.json).toHaveBeenCalledWith({
+        updated: mockUserWithPatients,
+      });
     });
 
     it("should return 400 if no patient id is provided", async () => {
@@ -240,22 +309,22 @@ describe("UserController", () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: "No patient id provided",
+        error: "Missing required fields",
       });
     });
 
     it("should return 404 if no user is found", async () => {
       const req = mockReq();
       req.params = { id: "1" };
-      req.body = { id: "2" };
+      req.body = { patientId: "2" };
 
       const res = mockRes();
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      prisma.user.findUnique.mockResolvedValue(null);
 
       await UserController.addPatient(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "No user found" });
+      expect(res.json).toHaveBeenCalledWith({ error: "User not found" });
     });
   });
 
@@ -265,7 +334,7 @@ describe("UserController", () => {
       req.params = { id: "1" };
 
       const res = mockRes();
-      (prisma.user.delete as jest.Mock).mockResolvedValue({ id: 1 });
+      prisma.user.delete.mockResolvedValue(mockUser);
 
       await UserController.deleteUser(req as Request, res as Response);
 
@@ -273,17 +342,287 @@ describe("UserController", () => {
         where: { id: 1 },
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ result: { id: 1 } });
+      expect(res.json).toHaveBeenCalledWith({ result: mockUser });
     });
 
-    it("should return 400 if no user id is provided", async () => {
+    it("should return 400 if no id is provided", async () => {
       const req = mockReq();
       const res = mockRes();
 
       await UserController.deleteUser(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "No user ID" });
+      expect(res.json).toHaveBeenCalledWith({ error: "No ID provided" });
     });
   });
-}); // <-- Missing bracket added here
+
+  describe("getAllDoctors", () => {
+    it("should fetch all doctors and return 200", async () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      prisma.user.findMany.mockResolvedValue([mockUser]);
+
+      await UserController.getAllDoctors(req as Request, res as Response);
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith({
+        where: { role: "DOCTOR" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ doctors: [mockUser] });
+    });
+
+    it("should return 500 if an unexpected error occurs", async () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      prisma.user.findMany.mockRejectedValue(new Error("Unexpected error"));
+
+      await UserController.getAllDoctors(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Failed to fetch doctors",
+      });
+    });
+  });
+
+  describe("editDoctor", () => {
+    it("should update a doctor and return 200", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+      req.body = {
+        name: "Jane Doe",
+        email: "jane.doe@example.com",
+      };
+
+      const res = mockRes();
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        name: "Jane Doe",
+        email: "jane.doe@example.com",
+      });
+
+      await UserController.editDoctor(req as Request, res as Response);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 1, role: "DOCTOR" },
+        data: { name: "Jane Doe", email: "jane.doe@example.com" },
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        updated: {
+          ...mockUser,
+          name: "Jane Doe",
+          email: "jane.doe@example.com",
+        },
+      });
+    });
+
+    it("should return 400 if required fields are missing", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+      req.body = {
+        name: "Jane Doe",
+      }; // Missing email
+
+      const res = mockRes();
+
+      await UserController.editDoctor(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Missing required fields",
+      });
+    });
+
+    it("should return 500 if an unexpected error occurs", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+      req.body = {
+        name: "Jane Doe",
+        email: "jane.doe@example.com",
+      };
+
+      const res = mockRes();
+      prisma.user.update.mockRejectedValue(new Error("Unexpected error"));
+
+      await UserController.editDoctor(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Failed to update doctor",
+      });
+    });
+  });
+
+  describe("deleteDoctor", () => {
+    it("should delete a doctor and return 200", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+
+      const res = mockRes();
+      prisma.user.delete.mockResolvedValue(mockUser);
+
+      await UserController.deleteDoctor(req as Request, res as Response);
+
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 1, role: "DOCTOR" },
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Doctor deleted successfully",
+      });
+    });
+
+    it("should return 400 if no id is provided", async () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      await UserController.deleteDoctor(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: "Missing user ID" });
+    });
+
+    it("should return 500 if an unexpected error occurs", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+
+      const res = mockRes();
+      prisma.user.delete.mockRejectedValue(new Error("Unexpected error"));
+
+      await UserController.deleteDoctor(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Failed to delete doctor",
+      });
+    });
+  });
+
+  describe("getMyPatients", () => {
+    it("should fetch patients for a doctor and return 200", async () => {
+      const req = mockReq();
+      req.params = { doctorId: "1" };
+
+      const res = mockRes();
+
+      // Mock the response with the `patients` relation included
+      const mockUserWithPatients = {
+        ...mockUser,
+        patients: [mockPatient], // Include the `patients` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUserWithPatients);
+
+      await UserController.getMyPatients(req as Request, res as Response);
+
+      // Verify the Prisma query
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 1, role: "DOCTOR" },
+        include: { patients: true }, // Ensure the `patients` relation is included
+      });
+
+      // Verify the response
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ patients: [mockPatient] });
+    });
+
+    it("should return 400 if no doctor id is provided", async () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      await UserController.getMyPatients(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: "No doctor ID provided" });
+    });
+
+    it("should return 404 if no doctor is found", async () => {
+      const req = mockReq();
+      req.params = { doctorId: "1" };
+
+      const res = mockRes();
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await UserController.getMyPatients(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: "Doctor not found" });
+    });
+  });
+
+  describe("getDoctorDetails", () => {
+    it("should fetch detailed data for a doctor and return 200", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+
+      const res = mockRes();
+
+      // Mock the response with the relations included
+      const mockUserWithRelations = {
+        ...mockUser,
+        patients: [mockPatient], // Include the `patients` relation
+        medicalRecords: [], // Include the `medicalRecords` relation
+        prescriptions: [], // Include the `prescriptions` relation
+        labResults: [], // Include the `labResults` relation
+      };
+
+      prisma.user.findUnique.mockResolvedValue(mockUserWithRelations);
+
+      await UserController.getDoctorDetails(req as Request, res as Response);
+
+      // Verify the Prisma query
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 1, role: "DOCTOR" },
+        include: {
+          patients: true, // Include the `patients` relation
+          medicalRecords: true, // Include the `medicalRecords` relation
+          prescriptions: true, // Include the `prescriptions` relation
+          labResults: true, // Include the `labResults` relation
+        },
+      });
+
+      // Verify the response
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        patients: [mockPatient],
+        medicalRecords: [],
+        prescriptions: [],
+        labResults: [],
+      });
+    });
+
+    it("should return 400 if no id is provided", async () => {
+      const req = mockReq();
+      const res = mockRes();
+
+      await UserController.getDoctorDetails(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: "No ID provided" });
+    });
+
+    it("should return 404 if no doctor is found", async () => {
+      const req = mockReq();
+      req.params = { id: "1" };
+
+      const res = mockRes();
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await UserController.getDoctorDetails(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: "Doctor not found" });
+    });
+  });
+});
