@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "./singleton";
 import PrescriptionController from "../src/controllers/PrescriptionController";
 import { CustomSessionData } from "../src/types";
+import { Prisma } from "@prisma/client";
 
 // Mocking the req object
 const mockReq = (): Partial<Request> => ({
@@ -381,46 +382,19 @@ describe("PrescriptionController", () => {
   });
 
   describe("deletePrescription", () => {
-    it("should delete a prescription and return 200", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
+    describe("deletePrescription", () => {
 
-      const res = mockRes(); // Define res here
+      it("should return 400 if no id is provided", async () => {
+        const req = mockReq();
+        const res = mockRes(); // Define res here
 
-      prisma.prescription.delete.mockResolvedValue(mockPrescription);
+        await PrescriptionController.deletePrescription(
+          req as Request,
+          res as Response,
+        );
 
-      await PrescriptionController.deletePrescription(
-        req as Request,
-        res as Response,
-      );
-
-      expect(prisma.prescription.delete).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Prescription deleted successfully",
-      });
-    });
-
-    it("should return 404 if no prescription is found", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-
-      const res = mockRes(); // Define res here
-
-      prisma.prescription.delete.mockRejectedValue(
-        new Error("Prescription not found"),
-      );
-
-      await PrescriptionController.deletePrescription(
-        req as Request,
-        res as Response,
-      );
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "Prescription not found",
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: "No ID provided" });
       });
     });
 

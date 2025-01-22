@@ -1,37 +1,35 @@
-# Project Name
+# frontend-backup
 
-Health Vault - Streamlining healthcare operations
+This template should help get you started developing with Vue 3 in Vite.
 
-## Authors
+## Recommended IDE Setup
 
-- Joshua Emmanuel
--
--
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-## Description
+## Customize configuration
 
-HealthVault is a comprehensive Electronic Health Records (EHRs) system designed to streamline healthcare operations, improve patient care, and enhance the overall efficiency of healthcare providers.
+See [Vite Configuration Reference](https://vite.dev/config/).
 
-## Installation
+## Project Setup
 
-1. Open folder in code editor
-
-2. Install project dependencies:
-
-```shell
+```sh
 npm install
 ```
 
-## Usage
+### Compile and Hot-Reload for Development
 
-1. Start the development server:
-
-```shell
-npm start
+```sh
+npm run dev
 ```
 
+### Compile and Minify for Production
 
-## Technologies Used
+```sh
+npm run build
+```
 
-- React
-- Tailwind Css
+### Run Unit Tests with [Vitest](https://vitest.dev/)
+
+```sh
+npm run test:unit
+```

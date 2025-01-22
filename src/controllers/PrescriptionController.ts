@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import { CustomSessionData } from "../types";
+import { Prisma } from "@prisma/client";
 
 class PrescriptionController {
   // Create a new prescription
@@ -172,8 +173,10 @@ class PrescriptionController {
     try {
       const id = Number(req.params.id);
 
+      // Check if the ID is provided
       if (!id) throw new Error("No ID provided");
 
+      // Attempt to delete the prescription
       await prisma.prescription.delete({
         where: { id },
       });
@@ -182,9 +185,14 @@ class PrescriptionController {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "No ID provided") {
-          res.status(404).json({ error: error.message });
+          res.status(400).json({ error: error.message }); // Map to 400 for missing ID
+        } else if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2025" // Prisma "not found" error code
+        ) {
+          res.status(404).json({ error: "Prescription not found" }); // Map to 404 for not found
         } else {
-          res.status(500).json({ error: error.message });
+          res.status(500).json({ error: error.message }); // Map to 500 for other errors
         }
       }
     }

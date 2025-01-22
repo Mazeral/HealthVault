@@ -68,8 +68,10 @@ class PatientController {
     const id = req.params.id ? Number(req.params.id) : null;
 
     try {
-      if (!id) throw new Error("No ID provided from getPatient");
+      // Check if the ID is provided
+      if (!id || id === null || id === undefined) throw new Error("No ID provided from getPatient");
 
+      // Find the patient by ID
       const patient = await prisma.patient.findUnique({
         where: {
           id: id,
@@ -79,6 +81,7 @@ class PatientController {
         },
       });
 
+      // Check if the patient exists
       if (!patient) throw new Error("No patient found");
 
       // Add the creator's name to the response
@@ -91,11 +94,11 @@ class PatientController {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "No ID provided from getPatient") {
-          res.status(400).json({ error: error.message });
+          res.status(400).json({ error: error.message }); // Map to 400 for missing ID
         } else if (error.message === "No patient found") {
-          res.status(404).json({ error: error.message });
+          res.status(404).json({ error: error.message }); // Map to 404 for not found
         } else {
-          res.status(500).json({ error: error.message });
+          res.status(500).json({ error: error.message }); // Map to 500 for other errors
         }
       }
     }

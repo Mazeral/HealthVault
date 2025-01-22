@@ -6,59 +6,54 @@ import { Prisma } from "@prisma/client";
 
 class MedRecordController {
   // Add a medical record for a patient
-  static async addRecord(req: Request, res: Response) {
-    try {
-      const patientFullName = req.body.patientFullName;
-      const diagnosis = req.body.diagnosis;
-      const notes = req.body.notes;
+	static async addRecord(req: Request, res: Response) {
+	  try {
+		const patientId = Number(req.params.id) || null;
+		const diagnosis = String(req.body.diagnosis);
+		const notes = String(req.body.notes) || null;
+		const session = req.session as CustomSessionData;
+		const userId = Number(session.user?.id);
 
-      // Validate required fields
-      if (!patientFullName || !diagnosis || diagnosis === "") {
-        throw new Error("Missing fields");
-      }
+		if (!userId) {
+		  throw new Error("Not authenticated");
+		}
 
-      // Get the user ID from the session
-      const session = req.session as CustomSessionData;
-      const userId = Number(session.user?.id);
+		if (!patientId) {
+		  throw new Error("No ID provided from addRecord");
+		}
 
-      if (!userId) {
-        throw new Error("Unauthorized: No user ID found in session");
-      }
+		const patient = await prisma.patient.findUnique({
+		  where: {
+			id: patientId,
+		  },
+		});
 
-      // Find the patient by full name
-      const patient = await prisma.patient.findUnique({
-        where: {
-          fullName: patientFullName,
-        },
-      });
+		if (!patient) {
+		  throw new Error("No patient found");
+		}
 
-      if (!patient) {
-        throw new Error("No patient found");
-      }
+		const record = await prisma.medicalRecord.create({
+		  data: {
+			notes: notes,
+			diagnosis: diagnosis,
+			userId: userId,
+			patientId: patientId,
+		  },
+		});
 
-      // Create the medical record
-      const medRecord = await prisma.medicalRecord.create({
-        data: {
-          patientId: patient.id,
-          diagnosis: diagnosis,
-          notes: notes,
-          userId: userId,
-        },
-      });
-
-      res.status(200).json({ medRecord });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Missing fields") {
-          res.status(400).json({ error: error.message });
-        } else if (error.message === "No patient found") {
-          res.status(404).json({ error: error.message });
-        } else {
-          res.status(500).json({ error: error.message });
-        }
-      }
-    }
-  }
+		res.status(200).json({ updated: record });
+	  } catch (error) {
+		if (error instanceof Error) {
+		  if (error.message === "No ID provided from addRecord") {
+			res.status(400).json({ error: error.message });
+		  } else if (error.message === "No patient found") {
+			res.status(404).json({ error: error.message });
+		  } else {
+			res.status(500).json({ error: error.message });
+		  }
+		}
+	  }
+	}
 
   static async updateMedRecord(req: Request, res: Response) {
     try {
