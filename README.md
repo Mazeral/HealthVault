@@ -25,24 +25,24 @@ tests/              # Test cases for the project
 ### Frontend
 
 - **Vue 3**: A progressive JavaScript framework for building user interfaces.
-  ![Vue 3](https://vuejs.org/images/logo.png)
+  <img src="https://vuejs.org/images/logo.png" alt="Vue 3 Logo" width="100" height="100">
 
 - **Vuetify**: A Material Design component framework for Vue.js.
-  ![Vuetify](https://cdn.freelogovectors.net/wp-content/uploads/2023/01/vuetify-logo-freelogovectors.net_.png)
+  <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/01/vuetify-logo-freelogovectors.net_.png" alt="Vuetify Logo" width="100" height="100">
 
 - **Pinia**: A state management library for Vue.js.
-  ![Pinia](https://pinia.vuejs.org/logo.svg)
+  <img src="https://pinia.vuejs.org/logo.svg" alt="Pinia Logo" width="100" height="100">
 
 ### Backend
 
 - **Express.js**: A fast, unopinionated, minimalist web framework for Node.js.
-  ![Express.js](https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png)
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png" alt="Express.js Logo" width="100" height="100">
 
 - **Redis**: An in-memory data structure store, used as a database, cache, and message broker.
-  ![Redis](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png)
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png" alt="Redis Logo" width="100" height="100">
 
 - **Prisma ORM**: A next-generation ORM for Node.js and TypeScript.
-[![Made with Prisma](http://made-with.prisma.io/dark.svg)](https://prisma.io)
+  <img src="https://prisma.io/images/prisma-logo.svg" alt="Prisma Logo" width="100" height="100">
 
 ## Getting Started
 
