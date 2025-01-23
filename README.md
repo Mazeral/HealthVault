@@ -1,420 +1,130 @@
-# Backend Documentation for Frontend Developers
+# HealthVault
 
-## Overview
+HealthVault is a comprehensive health management platform designed to help users track and manage their health data efficiently. The project leverages modern web technologies to provide a seamless user experience and robust backend functionality.
 
-This README provides a guide for frontend developers to understand and interact with the backend API. The backend is built using Express.js, Prisma, and MySQL, and it exposes various endpoints for managing users, patients, medical records, prescriptions, lab results, and more.
+## Project Structure
 
-## Table of Contents
+The project is structured as follows:
 
-1. **Setup and Installation**
-2. **Environment Variables**
-3. **API Endpoints**
-   - Authentication
-   - Users
-   - Patients
-   - Medical Records
-   - Prescriptions
-   - Lab Results
-   - Dashboard
-4. **Authentication**
-5. **Error Handling**
-6. **Data Models**
-7. **Testing the API**
-8. **Troubleshooting**
-9. **Contributing**
+```
+node_modules/       # Node.js modules
+package.json        # Node.js project dependencies and scripts
+prisma/             # Prisma ORM schema and migrations
+src/                # Backend source code
+tsconfig.json       # TypeScript configuration
+frontend/           # Frontend source code (Vue 3, Vuetify, Pinia)
+LICENSE             # Project license
+nodemon.json        # Nodemon configuration for backend development
+package-lock.json   # Locked versions of Node.js dependencies
+README.md           # Project documentation
+tests/              # Test cases for the project
+```
 
-## 1. Setup and Installation
+## Technologies Used
+
+### Frontend
+
+- **Vue 3**: A progressive JavaScript framework for building user interfaces.
+  ![Vue 3](https://vuejs.org/images/logo.png)
+
+- **Vuetify**: A Material Design component framework for Vue.js.
+  ![Vuetify](https://cdn.freelogovectors.net/wp-content/uploads/2023/01/vuetify-logo-freelogovectors.net_.png)
+
+- **Pinia**: A state management library for Vue.js.
+  ![Pinia](https://pinia.vuejs.org/logo.svg)
+
+### Backend
+
+- **Express.js**: A fast, unopinionated, minimalist web framework for Node.js.
+  ![Express.js](https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png)
+
+- **Redis**: An in-memory data structure store, used as a database, cache, and message broker.
+  ![Redis](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png)
+
+- **Prisma ORM**: A next-generation ORM for Node.js and TypeScript.
+[![Made with Prisma](http://made-with.prisma.io/dark.svg)](https://prisma.io)
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js installed on your machine.
-- MySQL database installed and running.
-- Redis installed and running for session storage (optional but recommended).
+- Node.js (v20 or higher)
+- npm (v9 or higher)
+- Redis server
+- PostgreSQL (or any other database supported by Prisma)
 
-### Installation Steps
+### Installation
 
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/your-repo.git
-   cd your-repo
+   git clone https://github.com/yourusername/HealthVault.git
+   cd HealthVault
    ```
 
 2. **Install dependencies:**
 
    ```bash
    npm install
+   cd frontend
+   npm install
    ```
 
-3. **Setup Environment Variables:**
+3. **Set up the database:**
 
-   Create a `.env` file in the root directory with the required environment variables (see the next section).
+   - Ensure your PostgreSQL server is running.
+   - Update the `DATABASE_URL` in the `.env` file with your database credentials.
 
-4. **Run the backend server:**
+4. **Run Prisma migrations:**
 
    ```bash
-   npm start
+   npx prisma migrate dev --name init
    ```
 
-## 2. Environment Variables
+5. **Start the backend development server:**
 
-Create a `.env` file in the root directory with the following variables:
+   ```bash
+   npm run dev
+   ```
 
-```env
-PORT=5000
-DATABASE_URL=mysql://username:password@localhost:3306/database_name
-SALT=10
-SESSION_SECRET=your-secret-key
+6. **Start the frontend development server:**
+
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+7. **Access the application:**
+
+   Open your browser and navigate to `http://localhost:5173`.
+
+## Running Tests
+
+To run the tests, use the following command:
+
+```bash
+npm test
 ```
 
-- **PORT:** The port on which the server will run.
-- **DATABASE_URL:** The connection URL for your MySQL database.
-- **SALT:** The number of rounds for bcrypt password hashing.
-- **SESSION_SECRET:** A secret string used to sign session cookies.
+## License
 
-## 3. API Endpoints
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Authentication
+## Acknowledgments
 
-#### POST /auth/login
+- Vue.js, Vuetify, and Pinia for providing a robust frontend ecosystem.
+- Express.js for a lightweight and flexible backend framework.
+- Redis for efficient caching and session management.
+- Prisma ORM for simplifying database interactions.
 
-- **Description:** Logs in a user and sets a session cookie.
-- **Request Body:**
-  ```json
-  {
-    "user": "username",
-    "password": "password"
-  }
-  ```
-- **Response:**
-  ```json
-  {
-    "login": "success"
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing username or password
-  - 401: Invalid credentials
-  - 500: Server error
+## Contributing
 
-#### GET /auth/logout
+Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to get started.
 
-- **Description:** Logs out the user and clears the session cookie.
-- **Response:**
-  ```json
-  {
-    "logout": "success"
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 500: Server error
+## Support
 
-#### POST /auth/check-auth
-
-- **Description:** Checks if the user is authenticated.
-- **Response:**
-  ```json
-  {
-    "userId": "user-id",
-    "role": "user-role"
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 401: Unauthorized
-  - 500: Server error
-
-### Users
-
-#### POST /users
-
-- **Description:** Creates a new user.
-- **Request Body:**
-  ```json
-  {
-    "name": "User Name",
-    "email": "user@example.com",
-    "password": "password",
-    "role": "ADMIN"
-  }
-  ```
-- **Response:**
-  ```json
-  {
-    "new user:": {
-      // User data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing fields
-  - 500: Server error
-
-#### GET /user/:id
-
-- **Description:** Gets a user by ID.
-- **Params:**
-  - `id`: User ID
-- **Response:**
-  ```json
-  {
-    "user": {
-      // User data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing ID
-  - 404: User not found
-  - 500: Server error
-
-### Patients
-
-#### POST /patients
-
-- **Description:** Creates a new patient.
-- **Request Body:**
-  ```json
-  {
-    "fullName": "Patient Name",
-    "dateOfBirth": "2000-01-01",
-    "phone": "1234567890",
-    "email": "patient@example.com",
-    "address": "Patient Address"
-  }
-  ```
-- **Response:**
-  ```json
-  {
-    "Patient data:": {
-      // Patient data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing fullName
-  - 500: Server error
-
-#### GET /patients/:id
-
-- **Description:** Gets a patient by ID.
-- **Params:**
-  - `id`: Patient ID
-- **Response:**
-  ```json
-  {
-    "patient": {
-      // Patient data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing ID
-  - 404: Patient not found
-  - 500: Server error
-
-### Medical Records
-
-#### POST /medical-record/
-
-- **Description:** Adds a medical record for a patient.
-- **Request Body:**
-  ```json
-  {
-    "patientId": 1,
-    "diagnosis": "Diagnosis",
-    "notes": "Notes"
-  }
-  ```
-- **Response:**
-  ```json
-  {
-    "success": {
-      // Medical record data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing fields
-  - 500: Server error
-
-### Prescriptions
-
-#### POST /prescriptions
-
-- **Description:** Creates a new prescription.
-- **Request Body:**
-  ```json
-  {
-    "patientId": 1,
-    "medication": "Medication",
-    "dosage": "Dosage",
-    "instructions": "Instructions"
-  }
-  ```
-- **Response:**
-  ```json
-  {
-    "prescription": {
-      // Prescription data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing fields
-  - 500: Server error
-
-### Lab Results
-
-#### POST /lab-results
-
-- **Description:** Creates a new lab result.
-- **Request Body:**
-  ```json
-  {
-    "patientId": 1,
-    "testName": "Test Name",
-    "result": "Result",
-    "notes": "Notes",
-    "performedAt": "2023-10-01T12:00:00Z"
-  }
-  ```
-- **Response:**
-  ```json
-  {
-    "Lab result": {
-      // Lab result data
-    }
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 400: Missing fields
-  - 500: Server error
-
-### Dashboard
-
-#### GET /dashboard
-
-- **Description:** Fetches dashboard metrics.
-- **Response:**
-  ```json
-  {
-    "metrics": [
-      { "title": "Total Patients", "value": 10 },
-      { "title": "Total Medical Records", "value": 20 },
-      { "title": "Total Prescriptions", "value": 15 },
-      { "title": "Total Lab Results", "value": 25 }
-    ],
-    "recentPatients": [/* Array of recent patients */],
-    "recentLabResults": [/* Array of recent lab results */]
-  }
-  ```
-- **Status Codes:**
-  - 200: Success
-  - 500: Server error
-
-## 4. Authentication
-
-- **Session-Based Authentication:** The backend uses session cookies to manage user sessions.
-- **Middleware:** Certain routes are protected and require an active session.
-- **Logout:** Clearing the session cookie logs the user out.
-
-## 5. Error Handling
-
-- **HTTP Status Codes:** The backend uses standard HTTP status codes to indicate the result of operations.
-- **Error Messages:** Error responses include a JSON object with an `error` field describing the issue.
-
-## 6. Data Models
-
-### User
-
-- **Fields:**
-  - `id`: Unique identifier
-  - `name`: User's name
-  - `email`: User's email
-  - `password`: Hashed password
-  - `role`: User role (ADMIN, DOCTOR, NURSE)
-  - `createdAt`: Creation timestamp
-  - `updatedAt`: Last update timestamp
-  - `patients`: Related patients (array of Patient objects)
-
-### Patient
-
-- **Fields:**
-  - `id`: Unique identifier
-  - `fullName`: Patient's full name
-  - `dateOfBirth`: Date of birth
-  - `phone`: Phone number
-  - `email`: Email address
-  - `address`: Address
-  - `createdAt`: Creation timestamp
-  - `updatedAt`: Last update timestamp
-  - `medicalRecords`: Related medical records
-  - `prescriptions`: Related prescriptions
-  - `labResults`: Related lab results
-  - `User`: Associated user (nullable)
-
-### MedicalRecord
-
-- **Fields:**
-  - `id`: Unique identifier
-  - `patientId`: Foreign key to Patient
-  - `diagnosis`: Diagnosis
-  - `notes`: Additional notes
-  - `createdAt`: Creation timestamp
-  - `updatedAt`: Last update timestamp
-
-### Prescription
-
-- **Fields:**
-  - `id`: Unique identifier
-  - `patientId`: Foreign key to Patient
-  - `medication`: Medication name
-  - `dosage`: Dosage instructions
-  - `instructions`: Prescription instructions
-  - `prescribedAt`: Prescription date
-
-### LabResult
-
-- **Fields:**
-  - `id`: Unique identifier
-  - `patientId`: Foreign key to Patient
-  - `testName`: Name of the test
-  - `result`: Test result
-  - `notes`: Additional notes
-  - `performedAt`: Date the test was performed
-  - `createdAt`: Creation timestamp
-
-## 7. Testing the API
-
-- **Tools:** Use tools like Postman, Insomnia, or curl to test the API endpoints.
-- **Sample Request:**
-
-  ```bash
-  curl -X POST http://localhost:5000/auth/login -H "Content-Type: application/json" -d '{"user": "username", "password": "password"}'
-  ```
-
-## 8. Troubleshooting
-
-- **Environment Variables:** Ensure all required environment variables are set correctly.
-- **Database Connection:** Verify that the MySQL database is running and accessible.
-- **Session Issues:** Clear cookies or try incognito mode if session-related problems occur.
-
-## 9. Contributing
-
-- **Code Style:** Follow the existing code style and formatting.
-- **Testing:** Add tests for new features or bug fixes.
-- **Documentation:** Update documentation accordingly for any changes.
+If you encounter any issues or have questions, please open an issue on the [GitHub repository](https://github.com/yourusername/HealthVault/issues).
 
 ---
 
-This README provides a comprehensive guide for frontend developers to interact with the backend API effectively.
+Thank you for using HealthVault! We hope it helps you manage your health data effectively.
