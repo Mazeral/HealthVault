@@ -25,24 +25,24 @@ tests/              # Test cases for the project
 ### Frontend
 
 - **Vue 3**: A progressive JavaScript framework for building user interfaces.
-  <img src="https://vuejs.org/images/logo.png" alt="Vue 3 Logo" width="100" height="100">
+  <img src="https://vuejs.org/images/logo.png" alt="Vue 3 Logo" width="150" height="150">
 
 - **Vuetify**: A Material Design component framework for Vue.js.
-  <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/01/vuetify-logo-freelogovectors.net_.png" alt="Vuetify Logo" width="100" height="100">
+  <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/01/vuetify-logo-freelogovectors.net_.png" alt="Vuetify Logo" width="150" height="150">
 
 - **Pinia**: A state management library for Vue.js.
-  <img src="https://pinia.vuejs.org/logo.svg" alt="Pinia Logo" width="100" height="100">
+  <img src="https://pinia.vuejs.org/logo.svg" alt="Pinia Logo" width="150" height="150">
 
 ### Backend
 
 - **Express.js**: A fast, unopinionated, minimalist web framework for Node.js.
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png" alt="Express.js Logo" width="100" height="100">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png" alt="Express.js Logo" width="150" height="150">
 
 - **Redis**: An in-memory data structure store, used as a database, cache, and message broker.
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png" alt="Redis Logo" width="100" height="100">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png" alt="Redis Logo" width="150" height="150">
 
 - **Prisma ORM**: A next-generation ORM for Node.js and TypeScript.
-  <img src="https://prisma.io/images/prisma-logo.svg" alt="Prisma Logo" width="100" height="100">
+  <img src="https://raw.githubusercontent.com/prisma/presskit/main/Assets/Preview-Prisma-DarkLogo.png" alt="Prisma Logo" width="150" height="150">
 
 ## Getting Started
 
