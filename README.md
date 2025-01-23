@@ -48,7 +48,7 @@ tests/              # Test cases for the project
 
 - **Prisma ORM**: A next-generation ORM for Node.js and TypeScript.
 
-  <img src="https://raw.githubusercontent.com/prisma/presskit/main/Assets/Preview-Prisma-DarkLogo.png" alt="Prisma Logo" width="150" height="250">
+  <img src="https://raw.githubusercontent.com/prisma/presskit/main/Assets/Preview-Prisma-DarkLogo.png" alt="Prisma Logo" width="250" height="150">
 
 ## Getting Started
 
