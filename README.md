@@ -40,15 +40,15 @@ tests/              # Test cases for the project
 
 - **Express.js**: A fast, unopinionated, minimalist web framework for Node.js.
 
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png" alt="Express.js Logo" width="200" height="150">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/64/Expressjs.png" alt="Express.js Logo" width="250" height="150">
 
 - **Redis**: An in-memory data structure store, used as a database, cache, and message broker.
 
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png" alt="Redis Logo" width="200" height="150">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Redis_logo.svg/320px-Redis_logo.svg.png" alt="Redis Logo" width="250" height="150">
 
 - **Prisma ORM**: A next-generation ORM for Node.js and TypeScript.
 
-  <img src="https://raw.githubusercontent.com/prisma/presskit/main/Assets/Preview-Prisma-DarkLogo.png" alt="Prisma Logo" width="150" height="150">
+  <img src="https://raw.githubusercontent.com/prisma/presskit/main/Assets/Preview-Prisma-DarkLogo.png" alt="Prisma Logo" width="150" height="250">
 
 ## Getting Started
 
