@@ -57,11 +57,11 @@
           </template>
           <template v-slot:item.actions="{ item }">
             <v-row no-gutters>
-              <v-col cols="auto">
-                <v-btn @click="editMedicalRecord(item)" color="primary" class="mr-2">Edit</v-btn>
+              <v-col>
+                <v-btn @click="editMedicalRecord(item)" color="primary" block class="ma-2">Edit</v-btn>
               </v-col>
-              <v-col cols="auto">
-                <v-btn @click="confirmDelete(item)" color="error">Delete</v-btn>
+              <v-col>
+                <v-btn @click="confirmDelete(item)" block color="error" class="ma-2">Delete</v-btn>
               </v-col>
             </v-row>
           </template>
