@@ -123,10 +123,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Redis for efficient caching and session management.
 - Prisma ORM for simplifying database interactions.
 
-## Contributing
-
-Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to get started.
-
 ## Support
 
 If you encounter any issues or have questions, please open an issue on the [GitHub repository](https://github.com/yourusername/HealthVault/issues).
