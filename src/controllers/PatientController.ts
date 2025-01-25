@@ -69,7 +69,8 @@ class PatientController {
 
     try {
       // Check if the ID is provided
-      if (!id || id === null || id === undefined) throw new Error("No ID provided from getPatient");
+      if (!id || id === null || id === undefined)
+        throw new Error("No ID provided from getPatient");
 
       // Find the patient by ID
       const patient = await prisma.patient.findUnique({
@@ -123,16 +124,18 @@ class PatientController {
       if (!patient) throw new Error("No patient found");
 
       const data = createObject({
-        fullName: String(req.body.fullName),
+        fullName: req.body.fullName ? String(req.body.fullName) : undefined,
         dateOfBirth: req.body.dateOfBirth
           ? new Date(req.body.dateOfBirth)
           : undefined,
-        phone: String(req.body.phone),
-        email: String(req.body.email),
-        address: String(req.body.address),
-        sex: String(req.body.sex), // Include sex
-        bloodGroup: String(req.body.bloodGroup),
-        userId: Number(req.body.userId),
+        phone: req.body.phone ? String(req.body.phone) : undefined,
+        email: req.body.email ? String(req.body.email) : undefined,
+        address: req.body.address ? String(req.body.address) : undefined,
+        sex: req.body.sex ? String(req.body.sex) : undefined,
+        bloodGroup: req.body.bloodGroup
+          ? String(req.body.bloodGroup)
+          : undefined,
+        userId: req.body.userId ? Number(req.body.userId) : undefined,
       });
 
       const updatedPatient = await prisma.patient.update({

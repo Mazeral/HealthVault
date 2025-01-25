@@ -6,54 +6,63 @@ import { Prisma } from "@prisma/client";
 
 class MedRecordController {
   // Add a medical record for a patient
-	static async addRecord(req: Request, res: Response) {
-	  try {
-		const patientId = Number(req.params.id) || null;
-		const diagnosis = String(req.body.diagnosis);
-		const notes = String(req.body.notes) || null;
-		const session = req.session as CustomSessionData;
-		const userId = Number(session.user?.id);
+static async addRecord(req: Request, res: Response) {
+  try {
+    const patientId = Number(req.params.id) || null;
+    const session = req.session as CustomSessionData;
+    const userId = Number(session.user?.id);
 
-		if (!userId) {
-		  throw new Error("Not authenticated");
-		}
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
 
-		if (!patientId) {
-		  throw new Error("No ID provided from addRecord");
-		}
+    if (!patientId) {
+      throw new Error("No ID provided from addRecord");
+    }
 
-		const patient = await prisma.patient.findUnique({
-		  where: {
-			id: patientId,
-		  },
-		});
+    // Check if diagnosis exists in request body
+    if (typeof req.body.diagnosis === 'undefined') {
+      throw new Error("Diagnosis is required");
+    }
 
-		if (!patient) {
-		  throw new Error("No patient found");
-		}
+    const diagnosis = String(req.body.diagnosis);
+    const notes = req.body.notes ? String(req.body.notes) : null;
 
-		const record = await prisma.medicalRecord.create({
-		  data: {
-			notes: notes,
-			diagnosis: diagnosis,
-			userId: userId,
-			patientId: patientId,
-		  },
-		});
+    // Check if diagnosis is empty after trimming
+    if (diagnosis.trim() === "") {
+      throw new Error("Diagnosis cannot be empty");
+    }
 
-		res.status(200).json({ updated: record });
-	  } catch (error) {
-		if (error instanceof Error) {
-		  if (error.message === "No ID provided from addRecord") {
-			res.status(400).json({ error: error.message });
-		  } else if (error.message === "No patient found") {
-			res.status(404).json({ error: error.message });
-		  } else {
-			res.status(500).json({ error: error.message });
-		  }
-		}
-	  }
-	}
+    const patient = await prisma.patient.findUnique({
+      where: { id: patientId },
+    });
+
+    if (!patient) {
+      throw new Error("No patient found");
+    }
+
+    const record = await prisma.medicalRecord.create({
+      data: {
+        notes: notes,
+        diagnosis: diagnosis,
+        userId: userId,
+        patientId: patientId,
+      },
+    });
+
+    res.status(200).json({ updated: record });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Diagnosis is required" || error.message === "Diagnosis cannot be empty") {
+        res.status(400).json({ error: error.message });
+      } else if (error.message === "No patient found") {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: error.message });
+      }
+    }
+  }
+}
 
   static async updateMedRecord(req: Request, res: Response) {
     try {

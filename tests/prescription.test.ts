@@ -383,7 +383,6 @@ describe("PrescriptionController", () => {
 
   describe("deletePrescription", () => {
     describe("deletePrescription", () => {
-
       it("should return 400 if no id is provided", async () => {
         const req = mockReq();
         const res = mockRes(); // Define res here

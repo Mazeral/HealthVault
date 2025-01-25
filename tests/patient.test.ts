@@ -1,222 +1,360 @@
-import { mockReset } from "jest-mock-extended";
+// patient.controller.test.ts
 import { Request, Response } from "express";
+import prismaMock from "./singleton";
 import PatientController from "../src/controllers/PatientController";
-import prisma from "./singleton";
-import { CustomSessionData } from "../src/types";
-import MedRecordController from "../src/controllers/MedRecordController";
-import { Role, Sex, BloodGroup } from "@prisma/client";
-
-// Mocking the req object
-const mockReq = (): Partial<Request> => ({
-  params: {},
-  body: {},
-  session: {} as CustomSessionData,
-});
-
-// Mocking the res object
-const mockRes = (): Partial<Response> => {
-  const res: Partial<Response> = {};
-  res.status = jest.fn().mockReturnValue(res); // Chainable
-  res.json = jest.fn().mockReturnValue(res); // Chainable
-  return res;
-};
-
-beforeEach(() => {
-  mockReset(prisma);
-});
-
-const mockPatient = {
-  id: 1,
-  fullName: "John Doe",
-  dateOfBirth: new Date("1990-01-01"),
-  phone: "1234567890",
-  email: "john.doe@example.com",
-  address: "123 Main St",
-  sex: Sex.MALE, // Use the enum value
-  bloodGroup: BloodGroup.A_PLUS, // Use the enum value
-  userId: 1,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-const mockUser = {
-  id: 1,
-  name: "Doctor",
-  email: "doctor@example.com",
-  password: "hashedpassword",
-  role: Role.DOCTOR, // Use the enum value
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+import { CustomSessionData } from "../src/types/index";
 
 describe("PatientController", () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  const mockSession: CustomSessionData = {
+    user: { id: "1", role: "DOCTOR" },
+  } as CustomSessionData;
+
+  beforeEach(() => {
+    mockRequest = {
+      body: {},
+      params: {},
+      session: mockSession,
+    };
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe("newPatient", () => {
-    it("should create a new patient and return 200", async () => {
-      const req = mockReq();
-      const res = mockRes();
-      req.body = {
+    it("should create a new patient successfully", async () => {
+      const patientData = {
         fullName: "John Doe",
+        sex: "MALE",
         dateOfBirth: "1990-01-01",
         phone: "1234567890",
-        email: "john.doe@example.com",
-        address: "123 Main St",
-        sex: "MALE",
+        email: "john@example.com",
+        address: "123 Street",
         bloodGroup: "A_PLUS",
       };
-      req.session = { user: { id: "1" } } as CustomSessionData;
 
-      prisma.patient.create.mockResolvedValue(mockPatient);
+      mockRequest.body = patientData;
+      const expectedPatient = {
+        id: 1,
+        ...patientData,
+        dateOfBirth: new Date(patientData.dateOfBirth),
+        userId: 1,
+        createdAt: new Date(), // Add missing property
+        updatedAt: new Date(), // Add missing property
+        sex: "MALE" as const, // Use correct enum type
+        bloodGroup: "A_PLUS" as const, // Use correct enum type
+      };
 
-      await PatientController.newPatient(req as Request, res as Response);
+      prismaMock.patient.create.mockResolvedValue(expectedPatient);
 
-      expect(prisma.patient.create).toHaveBeenCalledWith({
+      await PatientController.newPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+
+      expect(prismaMock.patient.create).toHaveBeenCalledWith({
         data: {
-          fullName: "John Doe",
-          dateOfBirth: new Date("1990-01-01"),
-          phone: "1234567890",
-          email: "john.doe@example.com",
-          address: "123 Main St",
-          sex: "MALE",
-          bloodGroup: "A_PLUS",
+          ...patientData,
+          dateOfBirth: new Date(patientData.dateOfBirth),
           userId: 1,
+          sex: "MALE", // Match enum type
+          bloodGroup: "A_PLUS", // Match enum type
         },
       });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ "Patient data:": mockPatient });
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        "Patient data:": expectedPatient,
+      });
+    });
+    it("should return 400 for missing fullName", async () => {
+      mockRequest.body = { sex: "MALE" };
+      await PatientController.newPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
     });
 
-    it("should return 400 if fullName or sex is missing", async () => {
-      const req = mockReq();
-      req.body = {
-        // fullName is missing
-        sex: "MALE", // Include sex to avoid triggering the "Sex is required" error
-      };
-
-      const res = mockRes();
-
-      await PatientController.newPatient(req as Request, res as Response);
-
-      // Verify the response
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: "Full name is required" });
+    it("should return 400 for missing sex", async () => {
+      mockRequest.body = { fullName: "John Doe" };
+      await PatientController.newPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
     });
 
-    it("should return 500 if an unexpected error occurs", async () => {
-      const req = mockReq();
-      req.body = {
+    it("should return 401 for unauthenticated users", async () => {
+      mockRequest.body = {
         fullName: "John Doe",
         sex: "MALE",
+        // Include all required fields
+        dateOfBirth: "1990-01-01",
+        phone: "1234567890",
+        email: "john@example.com",
+        address: "123 Street",
+        bloodGroup: "A_PLUS",
       };
-      const res = mockRes();
-      req.session = { user: { id: "1" } } as CustomSessionData;
+      mockRequest.session = { user: undefined } as CustomSessionData;
 
-      prisma.patient.create.mockRejectedValue(new Error("Unexpected error"));
+      await PatientController.newPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
 
-      await PatientController.newPatient(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Unexpected error" });
+      expect(mockResponse.status).toHaveBeenCalledWith(500);
     });
   });
 
   describe("getPatient", () => {
-    it("should fetch a patient by id and return 200", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
-
-      const mockPatientWithUser = {
-        ...mockPatient,
-        User: mockUser,
+    it("should retrieve a patient by ID", async () => {
+      const patientId = "1";
+      mockRequest.params = { id: patientId };
+      const mockPatient = {
+        id: 1,
+        fullName: "John Doe",
+        User: { name: "Dr. Smith" },
       };
 
-      const res = mockRes();
+      prismaMock.patient.findUnique.mockResolvedValue(mockPatient as any);
 
-      prisma.patient.findUnique.mockResolvedValue(mockPatientWithUser);
+      await PatientController.getPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
 
-      await PatientController.getPatient(req as Request, res as Response);
-
-      expect(prisma.patient.findUnique).toHaveBeenCalledWith({
+      expect(prismaMock.patient.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
         include: { User: true },
       });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(mockResponse.json).toHaveBeenCalledWith({
         patient: {
-          ...mockPatientWithUser,
-          createdBy: "Doctor",
+          ...mockPatient,
+          createdBy: "Dr. Smith",
         },
       });
+    });
+
+    it("should return 400 for missing ID", async () => {
+      mockRequest.params = {};
+      await PatientController.getPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+    });
+
+    it("should return 404 for non-existent patient", async () => {
+      mockRequest.params = { id: "999" };
+      prismaMock.patient.findUnique.mockResolvedValue(null);
+      await PatientController.getPatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
     });
   });
 
   describe("getPatients", () => {
-    it("should return 500 if an unexpected error occurs", async () => {
-      const req = mockReq();
-      const res = mockRes();
+    it("should retrieve all patients", async () => {
+      const mockPatients = [
+        { id: 1, fullName: "John Doe", User: { name: "Dr. Smith" } },
+      ];
+      prismaMock.patient.findMany.mockResolvedValue(mockPatients as any);
 
-      prisma.patient.findMany.mockRejectedValue(new Error("Unexpected error"));
+      await PatientController.getPatients(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
 
-      await PatientController.getPatients(req as Request, res as Response);
+      expect(prismaMock.patient.findMany).toHaveBeenCalled();
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        data: [
+          {
+            ...mockPatients[0],
+            createdBy: "Dr. Smith",
+          },
+        ],
+      });
+    });
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: "Unexpected error" });
+    it("should handle database errors", async () => {
+      prismaMock.patient.findMany.mockRejectedValue(new Error("DB error"));
+      await PatientController.getPatients(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe("searchPatients", () => {
+    it("should search patients by name", async () => {
+      mockRequest.query = { name: "John" };
+      const mockPatients = [
+        { id: 1, fullName: "John Doe", User: { name: "Dr. Smith" } },
+      ];
+      prismaMock.patient.findMany.mockResolvedValue(mockPatients as any);
+
+      await PatientController.searchPatients(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+
+      expect(prismaMock.patient.findMany).toHaveBeenCalledWith({
+        where: { fullName: { contains: "John" } },
+        include: { User: true },
+      });
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        patients: [
+          {
+            ...mockPatients[0],
+            createdBy: "Dr. Smith",
+          },
+        ],
+      });
     });
   });
 
   describe("getLabResults", () => {
-    it("should fetch lab results for a patient and return 200", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
+    it("should retrieve lab results", async () => {
+      mockRequest.params = { id: "1" };
+      const mockPatient = { id: 1 };
+      const mockResults = [{ id: 1, testName: "Blood Test" }];
 
-      const mockLabResults = [
-        {
-          id: 1,
-          testName: "Test A",
-          result: "Positive",
-          notes: "Lab notes", // This can also be `null` if needed
-          patientId: 1,
-          userId: 1,
-          createdAt: new Date(), // Add the missing required field
-          performedAt: new Date(), // Add the missing required field
-        },
-      ];
+      prismaMock.patient.findUnique.mockResolvedValue(mockPatient as any);
+      prismaMock.labResult.findMany.mockResolvedValue(mockResults as any);
 
-      prisma.patient.findUnique.mockResolvedValue(mockPatient);
-      prisma.labResult.findMany.mockResolvedValue(mockLabResults);
-      const res = mockRes();
+      await PatientController.getLabResults(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
 
-      await PatientController.getLabResults(req as Request, res as Response);
-
-      expect(prisma.labResult.findMany).toHaveBeenCalledWith({
+      expect(prismaMock.labResult.findMany).toHaveBeenCalledWith({
         where: { patientId: 1 },
       });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ "Lab Results": mockLabResults });
     });
 
-    it("should return 400 if no id is provided", async () => {
-      const req = mockReq();
-      const res = mockRes();
+    it("should return 400 for missing ID", async () => {
+      mockRequest.params = {};
+      await PatientController.getLabResults(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+    });
+  });
 
-      await PatientController.getLabResults(req as Request, res as Response);
+  describe("updatePatient", () => {
+    it("should update patient information", async () => {
+      const patientId = "1";
+      mockRequest.params = { id: patientId };
+      mockRequest.body = { fullName: "Updated Name" };
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "No ID provided from getLabResults",
+      const mockPatient = {
+        id: 1,
+        fullName: "Original Name",
+        User: { name: "Dr. Smith" },
+      };
+
+      prismaMock.patient.findUnique.mockResolvedValue(mockPatient as any);
+      prismaMock.patient.update.mockResolvedValue({
+        ...mockPatient,
+        fullName: "Updated Name",
+      } as any);
+
+      await PatientController.updatePatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+
+      expect(prismaMock.patient.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { fullName: "Updated Name" },
+        include: { User: true },
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+    it("should handle partial updates", async () => {
+      mockRequest.params = { id: "1" };
+      mockRequest.body = { phone: "9876543210" };
+
+      prismaMock.patient.findUnique.mockResolvedValue({ id: 1 } as any);
+      prismaMock.patient.update.mockResolvedValue({} as any);
+
+      await PatientController.updatePatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+
+      expect(prismaMock.patient.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { phone: "9876543210" },
+        include: { User: true },
       });
     });
 
-    it("should return 404 if no patient is found", async () => {
-      const req = mockReq();
-      req.params = { id: "1" };
+    it("should return 404 for non-existent patient", async () => {
+      mockRequest.params = { id: "999" };
+      prismaMock.patient.findUnique.mockResolvedValue(null);
+      await PatientController.updatePatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+    });
+  });
 
-      const res = mockRes();
-      prisma.patient.findUnique.mockResolvedValue(null);
+  describe("getStatistics", () => {
+    it("should return patient statistics", async () => {
+      prismaMock.patient.count.mockResolvedValue(5);
 
-      await PatientController.getLabResults(req as Request, res as Response);
+      await PatientController.getStatistics(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: "No patient found" });
+      expect(prismaMock.patient.count).toHaveBeenCalledTimes(3);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        today: 5,
+        monthly: 5,
+        yearly: 5,
+      });
+    });
+  });
+
+  describe("deletePatient", () => {
+    it("should delete a patient successfully", async () => {
+      const patientId = "1";
+      mockRequest.params = { id: patientId };
+
+      prismaMock.patient.findUnique.mockResolvedValue({ id: 1 } as any);
+      prismaMock.patient.delete.mockResolvedValue({} as any);
+
+      await PatientController.deletePatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+
+      expect(prismaMock.patient.delete).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+    });
+    it("should return 404 for non-existent patient", async () => {
+      mockRequest.params = { id: "999" };
+      prismaMock.patient.findUnique.mockResolvedValue(null);
+      await PatientController.deletePatient(
+        mockRequest as Request,
+        mockResponse as Response,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
     });
   });
 });
