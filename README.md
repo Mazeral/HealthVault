@@ -3,7 +3,7 @@
 HealthVault is a comprehensive health management platform designed to help users track and manage their health data efficiently. The project leverages modern web technologies to provide a seamless user experience and robust backend functionality.
 
 ## Porject Demo
-You can watch the demo [here:](https://youtu.be/eSqRVwj0Lcg)
+You can watch the demo [![here:](https://img.youtube.com/vi/eSqRVwj0Lcg/0.jpg)](https://www.youtube.com/watch?v=eSqRVwj0Lcg)
 
 ## Project Structure
 
